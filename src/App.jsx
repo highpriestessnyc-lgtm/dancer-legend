@@ -173,7 +173,8 @@ const MOVES={
     {id:"rw", name:"リーンウィズイット", cost:14, g:{charisma:2,style:2},          exp:28},
     {id:"sm", name:"スネークムーブ",     cost:18, g:{style:3,rhythm:2},            exp:38},
   ],
-  lock:[           cost:8,  g:{charisma:2,rhythm:1},      exp:14},
+  lock:[
+    {id:"lk", name:"ロック",           cost:8,  g:{charisma:2,rhythm:1},      exp:14},
     {id:"pt", name:"ポイント",         cost:9,  g:{charisma:2,style:1},        exp:17},
     {id:"tw", name:"トゥエル",         cost:9,  g:{style:2,technique:1},       exp:18},
     {id:"sg", name:"ストップアンドゴー",cost:18, g:{rhythm:2,stamina:2},       exp:36},
@@ -555,108 +556,6 @@ const Sound={
   playRegion(cityId){
     const region=getCityBGM(cityId);
     this[region]();
-  }
-};
-
-
-  ctx:null, master:null, loopId:null, muted:false,
-
-  init(){
-    if(this.ctx)return;
-    try{
-      this.ctx=new(window.AudioContext||window.webkitAudioContext)();
-      this.master=this.ctx.createGain();
-      this.master.gain.value=0.22;
-      this.master.connect(this.ctx.destination);
-    }catch(e){}
-  },
-
-  tone(freq,start,dur,vol=0.2,type='square'){
-    if(!this.ctx||this.muted)return;
-    try{
-      const o=this.ctx.createOscillator();
-      const g=this.ctx.createGain();
-      o.type=type;o.frequency.value=freq;
-      g.gain.setValueAtTime(0.001,this.ctx.currentTime+start);
-      g.gain.linearRampToValueAtTime(vol,this.ctx.currentTime+start+0.01);
-      g.gain.exponentialRampToValueAtTime(0.001,this.ctx.currentTime+start+dur);
-      o.connect(g);g.connect(this.master);
-      o.start(this.ctx.currentTime+start);
-      o.stop(this.ctx.currentTime+start+dur+0.05);
-    }catch(e){}
-  },
-
-  stop(){if(this.loopId){clearInterval(this.loopId);this.loopId=null;}},
-
-  // タイトル・ホーム：冒険系アドベンチャーBGM
-  home(){
-    this.stop();this.init();
-    const play=()=>{
-      if(this.muted)return;
-      // メロディ（ペンタトニック）
-      [[261.6,0],[293.7,.35],[329.6,.7],[392,.95],[440,1.3],[392,1.6],[329.6,1.9],[261.6,2.3]].forEach(([f,t])=>{
-        this.tone(f,t,.3,.12,'triangle');
-        this.tone(f*2,t,.2,.04,'sine');
-      });
-      // ベース
-      [[130.8,0,.6],[130.8,.7,.5],[146.8,1.3,.6],[130.8,1.95,.6]].forEach(([f,t,d])=>this.tone(f,t,d,.1,'sine'));
-      // パーカッション風
-      [0,.7,1.4,2.1].forEach(t=>{this.tone(80,t,.08,.18,'sine');this.tone(40,t,.15,.12,'sine');});
-    };
-    play();this.loopId=setInterval(play,2700);
-  },
-
-  // バトル：クラブ系エレクトロ
-  battle(){
-    this.stop();this.init();
-    const play=()=>{
-      if(this.muted)return;
-      // キック（ズンズン）
-      [0,.5,1.0,1.5].forEach(t=>{
-        this.tone(60,t,.18,.35,'sine');
-        this.tone(40,t,.25,.2,'sine');
-      });
-      // ハイハット
-      [0,.25,.5,.75,1.0,1.25,1.5,1.75].forEach(t=>this.tone(6000+Math.random()*2000,t,.04,.04,'square'));
-      // シンセベース
-      [110,110,130.8,110,98,110,110,123.5].forEach((f,i)=>this.tone(f,i*.25,.22,.18,'sawtooth'));
-      // シンセリード
-      [440,494,440,392,440,523,494,440].forEach((f,i)=>this.tone(f,i*.25,.18,.1,'square'));
-    };
-    play();this.loopId=setInterval(play,2000);
-  },
-
-  // 勝利：ファンファーレ（ドラクエ風）
-  fanfare(){
-    this.stop();this.init();
-    if(this.muted)return;
-    [[523,.0,.14],[523,.15,.14],[523,.3,.14],[415,.45,.1],[523,.56,.14],[622,.72,.14],[784,.88,.5]].forEach(([f,t,d])=>{
-      this.tone(f,t,d,.28,'square');
-      this.tone(f*1.5,t,d,.08,'triangle');
-    });
-  },
-
-  // 都市クリア時
-  clear(){
-    this.stop();this.init();
-    if(this.muted)return;
-    [[784,0,.1],[880,.12,.1],[988,.24,.1],[1047,.36,.3]].forEach(([f,t,d])=>{
-      this.tone(f,t,d,.2,'square');
-      this.tone(f*.5,t,d,.1,'sine');
-    });
-  },
-
-  // 敗北
-  lose(){
-    this.stop();this.init();
-    if(this.muted)return;
-    [[392,0,.2],[349.2,.22,.2],[311.1,.45,.4]].forEach(([f,t,d])=>this.tone(f,t,d,.2,'square'));
-  },
-
-  toggle(){
-    this.muted=!this.muted;
-    if(this.master)this.master.gain.value=this.muted?0:.22;
-    return this.muted;
   }
 };
 
