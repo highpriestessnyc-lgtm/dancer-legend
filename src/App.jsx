@@ -130,11 +130,11 @@ const SHOP={
     {id:"goldring",n:"ゴールドリング",         slot:"hand",    lv:20, p:2000, b:{charisma:4},         desc:"存在感抜群のリング"},
   ],
   drinks:[
-    {id:"water",   n:"ミネラルウォーター",     lv:1, p:100,  energy:5,  desc:"基本の水分補給"},
-    {id:"sports",  n:"スポーツドリンク",       lv:1, p:300,  energy:10, desc:"素早いエネルギー補給"},
-    {id:"energy",  n:"エナジードリンク",       lv:5, p:600,  energy:25, desc:"エネルギー爆発補給！"},
-    {id:"protein", n:"プロテインシェイク",     lv:8, p:800,  energy:15, desc:"スタミナ+3も！",bonus:{stamina:3}},
-    {id:"medial",  n:"メディカルドリンク",     lv:20,p:2000, energy:50, desc:"完全回復！"},
+    {id:"water",   n:"ミネラルウォーター", lv:1, p:1,  energy:5,  desc:"基本の水分補給"},
+    {id:"sports",  n:"スポーツドリンク",   lv:1, p:2,  energy:10, desc:"素早いエネルギー補給"},
+    {id:"energy",  n:"エナジードリンク",   lv:5, p:4,  energy:25, desc:"エネルギー爆発補給！"},
+    {id:"protein", n:"プロテインシェイク", lv:8, p:5,  energy:15, desc:"スタミナ+3も！",bonus:{stamina:3}},
+    {id:"medial",  n:"メディカルドリンク", lv:20,p:10, energy:50, desc:"完全回復！"},
   ],
 };
 
@@ -715,6 +715,7 @@ function BattleOverlay({state,gc,onClose}){
       <div style={{display:"flex",gap:16,justifyContent:"center",marginBottom:10}}>
         <span style={{fontSize:13,color:"#ffd60a"}}>+{eg} EXP</span>
         {coins>0&&<span style={{fontSize:13,color:"#b3ff00",fontWeight:700}}>{fc(coins)}</span>}
+        {state.gems>0&&<span style={{fontSize:13,color:"#88eeff",fontWeight:700}}>💎+{state.gems}</span>}
       </div>
       {title&&<div style={{fontSize:12,color:"#ce93d8",marginBottom:12}}>🎖 「{title}」獲得！</div>}
       <Btn col={gc} tc="#000" onClick={onClose} sx={{fontSize:12,padding:"10px 36px"}}>続ける</Btn>
@@ -908,14 +909,15 @@ function MapTab({char,setChar,genre,pushNotif,addLog}){
     const{won,flags}=btl;
     const eg=won?city.rw.exp:Math.floor(city.rw.exp*.2),coins=won?city.rw.coins:Math.floor(city.rw.coins*.05);
     const nt=won&&city.rw.title&&!char.titles?.includes(city.rw.title)?city.rw.title:null;
-    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-20),
+    const gemReward=won&&!cleared[city.id]?3:0; // 初回クリアで💎3
+    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,gems:(c.gems||0)+gemReward,energy:Math.max(0,c.energy-20),
       mood:won?Math.min(100,c.mood+20):Math.max(0,c.mood-15),
       battlesWon:won?c.battlesWon+1:c.battlesWon,
       titles:nt?[...(c.titles||[]),nt]:c.titles||[],
       clearedCities:won?{...cleared,[city.id]:true}:cleared}));
-    setBattle({phase:"result",won,eg,coins,title:nt,flags,myP:btl.myP,thP:btl.thP});
+    setBattle({phase:"result",won,eg,coins,gems:gemReward,title:nt,flags,myP:btl.myP,thP:btl.thP});
     if(won){if(nt)Sound.fanfare();else Sound.clear();}else Sound.lose();
-    addLog(`${won?"🏆 CLEAR":"💀 敗北"} ${city.name} +${eg}EXP`);
+    addLog(`${won?"🏆 CLEAR":"💀 敗北"} ${city.name} +${eg}EXP${gemReward?` 💎+${gemReward}`:""}`);
   }
 
   function eatFood(food,city){
@@ -1167,11 +1169,11 @@ function ShopTab({char,setChar,genre,pushNotif}){
   const items=SHOP[sub]||[];
 
   function buyDrink(drink){
-    if(char.coins<drink.p){pushNotif("コインが足りない！","#ff5555");return;}
+    if((char.gems||0)<drink.p){pushNotif(`💎 ジェムが足りない！${drink.p}💎必要`,"#ff5555");return;}
     const MAX=char.maxEnergy||50;
-    setChar(c=>({...c,coins:c.coins-drink.p,
-      energy:Math.min(MAX,c.energy+drink.energy),
-      ...(drink.bonus?Object.fromEntries(Object.entries(drink.bonus).map(([k,v])=>[k,(char.stats[k]||0)+v])):{})}));
+    const ns={...char.stats};
+    if(drink.bonus)Object.entries(drink.bonus).forEach(([k,v])=>{ns[k]=(ns[k]||0)+v;});
+    setChar(c=>({...c,gems:(c.gems||0)-drink.p,energy:Math.min(MAX,c.energy+drink.energy),stats:ns}));
     pushNotif(`${drink.n}飲んだ！ ⚡+${drink.energy}`,genre.c);
   }
   function buy(item){
@@ -1210,13 +1212,13 @@ function ShopTab({char,setChar,genre,pushNotif}){
     {sub==="drinks"&&(<div>
       <div style={{fontSize:11,color:TX2,marginBottom:14,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>飲み物でエネルギー即回復！現地グルメはMAPの各都市でも食べられるよ。</div>
       {SHOP.drinks.map(d=>{
-        const ok=lv>=(d.lv||0);const can=ok&&char.coins>=d.p;
+        const ok=lv>=(d.lv||0);const can=ok&&(char.gems||0)>=d.p;
         return(<div key={d.id} style={{background:BG2,border:`1px solid ${BD}`,borderRadius:8,padding:"12px 14px",marginBottom:10,opacity:ok?1:.55}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
             <div><div style={{fontWeight:700,fontSize:13,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{d.n}</div><div style={{fontSize:10,color:TX3}}>{d.desc}</div></div>
-            <div style={{textAlign:"right"}}><div style={{fontSize:12,color:can?"#b3ff00":"#ff6060",fontWeight:700}}>{fc(d.p)}</div><div style={{fontSize:10,color:"#00e5ff"}}>⚡+{d.energy}</div></div>
+            <div style={{textAlign:"right"}}><div style={{fontSize:12,color:can?"#88eeff":"#ff6060",fontWeight:700}}>💎{d.p}</div><div style={{fontSize:10,color:"#00e5ff"}}>⚡+{d.energy}</div></div>
           </div>
-          <Btn disabled={!can} col="#0a1828" tc="#00e5ff" onClick={()=>buyDrink(d)} full sx={{fontSize:11,border:"1px solid #1a4870"}}>{!ok?`🔒 Lv.${d.lv}`:`飲む ${fc(d.p)}`}</Btn>
+          <Btn disabled={!can} col="#0a1828" tc="#00e5ff" onClick={()=>buyDrink(d)} full sx={{fontSize:11,border:"1px solid #1a4870"}}>{!ok?`🔒 Lv.${d.lv}`:`飲む 💎${d.p}`}</Btn>
         </div>);
       })}
     </div>)}
@@ -1354,7 +1356,15 @@ function Game({char,setChar,onTitle}){
   function addLog(msg){setLog(l=>[{msg,id:Date.now()},...l.slice(0,12)]);}
 
   function useHeart(){
-    if((char.hearts||0)<=0){notif2("ハートがない！4時間待って回復しよう","#ff5555");return;}
+    if((char.hearts||0)<=0){
+      // ハートなし → ジェムで即回復
+      if((char.gems||0)<3){notif2("ハートもジェムも足りない！💎3必要","#ff5555");return;}
+      if(!window.confirm("💎3を使ってエネルギー全回復しますか？"))return;
+      const MAX=char.maxEnergy||50;
+      setChar(c=>({...c,gems:(c.gems||0)-3,energy:MAX,lastEnergyTime:Date.now()}));
+      notif2("💎3→⚡ エネルギー全回復！","#88eeff");addLog("💎3を使ってエネルギー全回復！");
+      return;
+    }
     const MAX=char.maxEnergy||50;
     setChar(c=>({...c,hearts:Math.max(0,(c.hearts||0)-1),energy:MAX,lastEnergyTime:Date.now()}));
     notif2("❤️→⚡ エネルギー全回復！","#ff9ec4");addLog("❤️を使ってエネルギー全回復！");
@@ -1381,7 +1391,10 @@ function Game({char,setChar,onTitle}){
         </div>
         <div style={{textAlign:"right"}}>
           <div style={{fontSize:10,color:rnk.c,fontWeight:700}}>Lv.{lv} {rnk.jp}</div>
-          <div style={{fontSize:10,color:"#b3ff00",fontWeight:700}}>{fc(char.coins)}</div>
+          <div style={{display:"flex",gap:8}}>
+            <span style={{fontSize:10,color:"#b3ff00",fontWeight:700}}>{fc(char.coins)}</span>
+            <span style={{fontSize:10,color:"#88eeff",fontWeight:700}}>💎{char.gems||0}</span>
+          </div>
           <div style={{width:90,height:5,background:BG3,borderRadius:3,marginTop:3}}><div style={{height:"100%",width:`${xpP}%`,background:genre.c,borderRadius:3,transition:"width .5s"}}/></div>
           <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
             <span style={{fontSize:8,color:"#40c060"}}>💾 AUTO</span>
@@ -1458,19 +1471,65 @@ function Create({onStart}){
 }
 
 /* ── ROOT ── */
+/* ── セーブデータ移行（アップデートしても消えない） ── */
+function migrateChar(raw){
+  if(!raw)return null;
+  const defaults={
+    gems:5, coins:500, fame:0,
+    energy:50, maxEnergy:50, lastEnergyTime:Date.now(),
+    hearts:6, maxHearts:6, lastHeartTime:Date.now(),
+    mood:80, hunger:70,
+    inventory:[], equipped:{accessories:[]},
+    titles:[], battlesWon:0, showsDone:0,
+    clearedCities:{}, lastLoginDate:"",
+  };
+  return{
+    ...defaults,
+    ...raw,
+    equipped:{accessories:[],...(raw.equipped||{})},
+    titles:raw.titles||[],
+    inventory:raw.inventory||[],
+    clearedCities:raw.clearedCities||{},
+    gems:raw.gems??5,
+    hearts:raw.hearts??6,
+    maxHearts:raw.maxHearts??6,
+    lastHeartTime:raw.lastHeartTime??Date.now(),
+    energy:raw.energy??50,
+    maxEnergy:raw.maxEnergy??50,
+    lastEnergyTime:raw.lastEnergyTime??Date.now(),
+  };
+}
+
 export default function DancerLegend(){
   const[screen,setScreen]=useState("title");
-  const[char,setChar]=useState(()=>{try{const s=localStorage.getItem("dancer_save");return s?JSON.parse(s):null;}catch{return null;}});
+  const[char,setChar]=useState(()=>{
+    try{
+      const s=localStorage.getItem("dancer_save");
+      return s?migrateChar(JSON.parse(s)):null;
+    }catch{return null;}
+  });
+
+  // オートセーブ
   useEffect(()=>{if(char)localStorage.setItem("dancer_save",JSON.stringify(char));},[char]);
+
+  // ログインボーナス（毎日1💎）
+  useEffect(()=>{
+    if(!char)return;
+    const today=new Date().toDateString();
+    if(char.lastLoginDate===today)return;
+    setChar(c=>({...c,gems:(c.gems||0)+1,lastLoginDate:today}));
+  },[char?.name]);
 
   function start(name,genre,hometown){
     const h=HT.find(x=>x.id===hometown);
     const stats={...BASE[genre]};
     if(h?.bonus){const bg=BASE[h.bonus];Object.entries(bg).forEach(([k,v])=>{stats[k]=(stats[k]||0)+Math.round(v*.3);});}
     const newChar={name,genre,hometown,currentCity:hometown,clearedCities:{[hometown]:true},
-      exp:0,coins:500,fame:0,energy:50,maxEnergy:50,lastEnergyTime:Date.now(),
+      exp:0,coins:500,gems:5,fame:0,
+      energy:50,maxEnergy:50,lastEnergyTime:Date.now(),
       hearts:6,maxHearts:6,lastHeartTime:Date.now(),
-      mood:80,hunger:70,stats,inventory:[],equipped:{accessories:[]},titles:[],battlesWon:0,showsDone:0};
+      mood:80,hunger:70,stats,inventory:[],equipped:{accessories:[]},
+      titles:[],battlesWon:0,showsDone:0,lastLoginDate:new Date().toDateString()};
     setChar(newChar);setScreen("game");
   }
   function deleteSave(){if(!window.confirm("セーブデータを削除しますか？"))return;localStorage.removeItem("dancer_save");setChar(null);setScreen("title");}
