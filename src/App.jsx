@@ -179,22 +179,86 @@ const SHOWS=[
 
 /* ── JAPAN MAP ── */
 const J={
-  kagoshima:{id:"kagoshima",name:"鹿児島",x:152,y:408,g:"house",lv:1,cn:["kumamoto","miyazaki"],ch:{name:"溶岩ハウサー・ケン",e:"🌋",pw:150},rw:{exp:160,coins:400,title:"鹿児島の王"},desc:"火山の島から生まれたHOUSEの聖地",food:[{n:"黒豚しゃぶしゃぶ",p:800,e:15,h:40,desc:"鹿児島名物！甘みのある黒豚"},{n:"さつまあげ",p:300,e:5,h:20,desc:"揚げたて熱々"},{n:"鶏刺し",p:500,e:10,h:30,desc:"新鮮な鶏肉の刺身"}]},
-  miyazaki:{id:"miyazaki",name:"宮崎",x:200,y:365,g:"breaking",lv:3,cn:["kagoshima","kumamoto","oita"],ch:{name:"サーファーBreaker・Ryo",e:"🏄",pw:320},rw:{exp:220,coins:600,title:"宮崎ライダー"},desc:"南国の太陽の下のBREAKING",food:[{n:"冷や汁",p:400,e:8,h:30,desc:"宮崎の冷たい汁かけご飯"},{n:"地頭鶏炭火焼き",p:900,e:18,h:40,desc:"本物の地鶏の旨さ"}]},
-  nagasaki:{id:"nagasaki",name:"長崎",x:86,y:316,g:"waacking",lv:5,cn:["kumamoto","hakata"],ch:{name:"海の女神・マリア",e:"⛵",pw:500},rw:{exp:300,coins:800,title:"長崎ソウルクイーン"},desc:"港町の哀愁を纏うSOUL & WAACKING",food:[{n:"トルコライス",p:700,e:12,h:45,desc:"長崎名物のハイカラ飯"},{n:"ちゃんぽん",p:600,e:10,h:40,desc:"野菜たっぷり長崎ちゃんぽん"}]},
-  kumamoto:{id:"kumamoto",name:"熊本",x:148,y:330,g:"lock",lv:5,cn:["kagoshima","miyazaki","oita","nagasaki","hakata"],ch:{name:"熊本城ロッカー・Tomo",e:"🏯",pw:480},rw:{exp:290,coins:750,title:"熊本ロックダウン"},desc:"お城の麓で炸裂するLOCK",food:[{n:"馬刺し",p:1200,e:20,h:35,desc:"熊本名物！上質な馬のたたき"},{n:"太平燕",p:500,e:8,h:30,desc:"熊本独自のヘルシー麺料理"}]},
-  oita:{id:"oita",name:"大分",x:200,y:298,g:"jazz",lv:7,cn:["miyazaki","kumamoto","kokura"],ch:{name:"温泉ジャズマン・Hiro",e:"♨",pw:680},rw:{exp:360,coins:900,title:"大分スウィング"},desc:"湯けむりの中に流れるJAZZ",food:[{n:"とり天",p:600,e:12,h:35,desc:"大分のソウルフード！"},{n:"関アジ刺身",p:1500,e:20,h:30,desc:"日本一の鯵の刺身"}]},
-  hakata:{id:"hakata",name:"博多",x:136,y:296,g:"lock",lv:8,cn:["nagasaki","kumamoto","kokura"],ch:{name:"屋台ロックキング・Shin",e:"🍜",pw:820},rw:{exp:400,coins:1100,title:"博多の王者"},desc:"熱い男たちのLOCKが博多の夜を揺らす",food:[{n:"博多ラーメン",p:900,e:18,h:50,desc:"濃厚豚骨！元気爆発"},{n:"もつ鍋",p:1200,e:20,h:45,desc:"コラーゲン満点"},{n:"明太子おにぎり",p:250,e:5,h:20,desc:"ぷちぷち明太子"}]},
-  kokura:{id:"kokura",name:"小倉",x:166,y:284,g:"house",lv:9,cn:["hakata","oita","hiroshima"],ch:{name:"鉄の街ハウサー・Masa",e:"🏭",pw:1000},rw:{exp:450,coins:1300,title:"小倉HouseChamp"},desc:"鉄の街のHOUSEスタイル",food:[{n:"焼うどん",p:500,e:10,h:35,desc:"北九州名物！焼きうどんの本場"},{n:"ぬか炊き",p:400,e:8,h:25,desc:"小倉の家庭の味"}]},
-  hiroshima:{id:"hiroshima",name:"広島",x:148,y:252,g:"contemporary",lv:11,cn:["kokura","kobe"],ch:{name:"平和の踊り子・Nana",e:"🕊",pw:1300},rw:{exp:520,coins:1600,title:"広島コンテポラリー"},desc:"平和への祈りを込めたCONTEMPORARY",food:[{n:"広島風お好み焼き",p:800,e:15,h:45,desc:"そば入り！本場の味"},{n:"牡蠣フライ",p:700,e:12,h:30,desc:"広島産の新鮮な牡蠣"}]},
-  kobe:{id:"kobe",name:"神戸",x:184,y:226,g:"waacking",lv:12,cn:["hiroshima","osaka"],ch:{name:"港の女王・Yuki",e:"⚓",pw:1600},rw:{exp:580,coins:1800,title:"神戸ディスコクイーン"},desc:"異国情緒の港町のWAACKING",food:[{n:"神戸牛ステーキ",p:5000,e:30,h:50,desc:"世界最高の和牛！特別な夜に"},{n:"神戸プリン",p:500,e:10,h:20,desc:"スイーツの街の定番"}]},
-  osaka:{id:"osaka",name:"大阪",x:208,y:224,g:"popping",lv:13,cn:["kobe","kyoto"],ch:{name:"難波POPPINキング・Taka",e:"🐡",pw:2000},rw:{exp:600,coins:2000,title:"大阪の帝王"},desc:"ど派手なPOPPINGが大阪を沸かせる！",food:[{n:"たこ焼き",p:400,e:8,h:30,desc:"外カリ中トロ！本場の味"},{n:"串カツ",p:600,e:12,h:35,desc:"二度漬け禁止！"},{n:"お好み焼き",p:800,e:15,h:45,desc:"ソースの香りが食欲をそそる"}]},
-  kyoto:{id:"kyoto",name:"京都",x:194,y:210,g:"ballet",lv:14,cn:["osaka","nagoya"],ch:{name:"舞妓バレリーナ・Kei",e:"🏮",pw:2400},rw:{exp:650,coins:2200,title:"京都の雅"},desc:"千年の都の和と洋の融合バレエ",food:[{n:"湯豆腐",p:800,e:10,h:30,desc:"繊細な京豆腐の味"},{n:"おばんざい定食",p:1000,e:15,h:40,desc:"京都の家庭料理の真髄"}]},
-  nagoya:{id:"nagoya",name:"名古屋",x:228,y:202,g:"breaking",lv:16,cn:["kyoto","tokyo","yokohama"],ch:{name:"モーニングBreaker・Jun",e:"☕",pw:3200},rw:{exp:720,coins:2600,title:"名古屋城の破壊者"},desc:"味噌の街のBREAKINGパワー",food:[{n:"味噌カツ",p:900,e:18,h:40,desc:"濃厚味噌ダレが最高！"},{n:"ひつまぶし",p:3000,e:25,h:45,desc:"鰻の新しい楽しみ方"}]},
-  yokohama:{id:"yokohama",name:"横浜",x:280,y:190,g:"breaking",lv:18,cn:["nagoya","tokyo"],ch:{name:"港ブレイカー・Daisuke",e:"🛳",pw:4200},rw:{exp:800,coins:3000,title:"横浜レジェンド"},desc:"関東最強の横浜ブレイキン",food:[{n:"横浜家系ラーメン",p:900,e:18,h:45,desc:"豚骨醤油の最高峰！"},{n:"崎陽軒シウマイ",p:400,e:8,h:20,desc:"横浜名物のシウマイ"}]},
-  tokyo:{id:"tokyo",name:"東京",x:294,y:172,g:"popping",lv:22,cn:["yokohama","sendai"],ch:{name:"東京ゴッド・ZERO",e:"🏙",pw:6000},rw:{exp:1000,coins:5000,title:"東京の覇者"},desc:"全スタイルが集結する日本の聖地",food:[{n:"築地海鮮丼",p:1500,e:25,h:50,desc:"新鮮なネタが輝く"},{n:"もんじゃ焼き",p:700,e:12,h:35,desc:"下町の味"},{n:"寿司（高級）",p:5000,e:30,h:45,desc:"江戸前寿司の真髄"}]},
-  sendai:{id:"sendai",name:"仙台",x:290,y:122,g:"lock",lv:26,cn:["tokyo","sapporo"],ch:{name:"七夕LOCKer・Tanaka",e:"🎋",pw:8000},rw:{exp:1100,coins:6000,title:"東北のLOCK王"},desc:"七夕のリズムに乗るLOCK",food:[{n:"牛タン定食",p:1500,e:22,h:45,desc:"仙台の牛タンは別格！"},{n:"ずんだ餅",p:300,e:6,h:20,desc:"枝豆の甘さが絶品"}]},
-  sapporo:{id:"sapporo",name:"札幌",x:272,y:50,g:"jazz",lv:30,cn:["sendai"],ch:{name:"雪のジャズダンサー・Miku",e:"❄",pw:11000},rw:{exp:1300,coins:8000,title:"北の王者"},desc:"雪と氷の中に咲くJAZZ",food:[{n:"味噌ラーメン",p:900,e:18,h:45,desc:"北海道味噌！バターコーン付き"},{n:"ジンギスカン",p:2000,e:25,h:50,desc:"北海道の大地の恵み"},{n:"スープカレー",p:1200,e:20,h:40,desc:"野菜たっぷりスパイシー"}]},
+  kagoshima:{id:"kagoshima",name:"鹿児島",x:152,y:408,g:"house",lv:1,cn:["kumamoto","miyazaki"],ch:{name:"溶岩ハウサー・ケン",e:"🌋",pw:150},rw:{exp:160,coins:400,title:"鹿児島の王"},desc:"火山の島から生まれたHOUSEの聖地",food:[
+    {n:"油そば専門 兎",p:900,e:15,h:40,desc:"鹿児島発！自分好みにカスタムする油そば"},
+    {n:"うなぎの松重",p:2500,e:25,h:45,desc:"鹿児島名物！ふっくら肉厚のうなぎ蒲焼き"},
+    {n:"爾今のそば",p:1200,e:12,h:35,desc:"手打ちそばの名店。落ち着いた一杯"},
+  ]},
+  miyazaki:{id:"miyazaki",name:"宮崎",x:200,y:365,g:"breaking",lv:3,cn:["kagoshima","kumamoto","oita"],ch:{name:"サーファーBreaker・Ryo",e:"🏄",pw:320},rw:{exp:220,coins:600,title:"宮崎ライダー"},desc:"南国の太陽の下のBREAKING",food:[
+    {n:"味のおぐら チキン南蛮",p:1400,e:22,h:50,desc:"チキン南蛮発祥の名店！秘伝タルタルが絶品"},
+    {n:"おらが村 地鶏炭火焼き",p:1800,e:20,h:40,desc:"宮崎地鶏を炭火でじっくり。ワイルドな旨さ"},
+    {n:"戸隠本店 冷や汁",p:800,e:10,h:30,desc:"宮崎の郷土料理。夏に最高の冷たい汁かけ飯"},
+  ]},
+  nagasaki:{id:"nagasaki",name:"長崎",x:86,y:316,g:"waacking",lv:5,cn:["kumamoto","hakata"],ch:{name:"海の女神・マリア",e:"⛵",pw:500},rw:{exp:300,coins:800,title:"長崎ソウルクイーン"},desc:"港町の哀愁を纏うSOUL & WAACKING",food:[
+    {n:"新地中華街 角煮まん",p:600,e:12,h:30,desc:"日本三大中華街！とろとろ角煮がたまらない"},
+    {n:"四海楼のちゃんぽん",p:1200,e:18,h:45,desc:"ちゃんぽん発祥の店！野菜たっぷり濃厚スープ"},
+    {n:"トルコライス",p:900,e:15,h:40,desc:"長崎名物のハイカラ飯。ピラフ＋カツ＋スパゲティ"},
+  ]},
+  kumamoto:{id:"kumamoto",name:"熊本",x:148,y:330,g:"lock",lv:5,cn:["kagoshima","miyazaki","oita","nagasaki","hakata"],ch:{name:"熊本城ロッカー・Tomo",e:"🏯",pw:480},rw:{exp:290,coins:750,title:"熊本ロックダウン"},desc:"お城の麓で炸裂するLOCK",food:[
+    {n:"馬刺し（上赤身）",p:1500,e:20,h:35,desc:"熊本名物！甘口醤油で食べる最高の馬刺し"},
+    {n:"太平燕（たいぴーえん）",p:800,e:12,h:35,desc:"熊本だけの春雨鍋料理。ヘルシーで旨い"},
+    {n:"辛子蓮根",p:500,e:8,h:20,desc:"熊本の郷土料理。ピリ辛の味噌が蓮根に最高"},
+  ]},
+  oita:{id:"oita",name:"大分",x:200,y:298,g:"jazz",lv:7,cn:["miyazaki","kumamoto","kokura"],ch:{name:"温泉ジャズマン・Hiro",e:"♨",pw:680},rw:{exp:360,coins:900,title:"大分スウィング"},desc:"湯けむりの中に流れるJAZZ",food:[
+    {n:"炎の中華",p:1000,e:15,h:35,desc:"大分の名中華料理店。本格的な一皿"},
+    {n:"大納言のとり天定食",p:1100,e:18,h:40,desc:"大分名物とり天！サクサクのもも肉天ぷら"},
+    {n:"だご汁定食",p:800,e:12,h:35,desc:"大分の郷土料理。平打ち麺が入った味噌汁"},
+  ]},
+  hakata:{id:"hakata",name:"博多",x:136,y:296,g:"lock",lv:8,cn:["nagasaki","kumamoto","kokura"],ch:{name:"屋台ロックキング・Shin",e:"🍜",pw:820},rw:{exp:400,coins:1100,title:"博多の王者"},desc:"熱い男たちのLOCKが博多の夜を揺らす",food:[
+    {n:"水炊き いろは",p:3500,e:25,h:50,desc:"昭和28年創業の名店！コラーゲンたっぷり水炊き"},
+    {n:"元祖長浜屋のラーメン",p:700,e:18,h:40,desc:"長浜ラーメン発祥の店。極細麺と豚骨スープ"},
+    {n:"博多もつ鍋",p:2000,e:22,h:45,desc:"コラーゲン満点のもつ鍋。〆はちゃんぽん麺"},
+  ]},
+  kokura:{id:"kokura",name:"小倉",x:166,y:284,g:"house",lv:9,cn:["hakata","oita","hiroshima"],ch:{name:"鉄の街ハウサー・Masa",e:"🏭",pw:1000},rw:{exp:450,coins:1300,title:"小倉HouseChamp"},desc:"鉄の街のHOUSEスタイル",food:[
+    {n:"娘娘（にゃんにゃん）肉やきめし",p:800,e:15,h:40,desc:"テレビで話題！豚コマ肉をのせた小倉名物焼き飯"},
+    {n:"だるま堂の焼きうどん",p:700,e:12,h:35,desc:"焼きうどん発祥のお店！乾麺ならではの食感"},
+    {n:"サバのぬか炊き",p:600,e:10,h:25,desc:"小倉の郷土料理。骨まで柔らか甘辛風味"},
+  ]},
+  hiroshima:{id:"hiroshima",name:"広島",x:148,y:252,g:"contemporary",lv:11,cn:["kokura","kobe"],ch:{name:"平和の踊り子・Nana",e:"🕊",pw:1300},rw:{exp:520,coins:1600,title:"広島コンテポラリー"},desc:"平和への祈りを込めたCONTEMPORARY",food:[
+    {n:"広島風お好み焼き",p:1000,e:15,h:45,desc:"そば入り！重ねて焼く本場の広島スタイル"},
+    {n:"牡蠣フライ定食",p:1200,e:18,h:40,desc:"広島産の新鮮な牡蠣。外カリ中トロ！"},
+    {n:"汁なし担々麺",p:900,e:12,h:35,desc:"広島で人気の辛旨まぜそば"},
+  ]},
+  kobe:{id:"kobe",name:"神戸",x:184,y:226,g:"waacking",lv:12,cn:["hiroshima","osaka"],ch:{name:"港の女王・Yuki",e:"⚓",pw:1600},rw:{exp:580,coins:1800,title:"神戸ディスコクイーン"},desc:"異国情緒の港町のWAACKING",food:[
+    {n:"神戸牛ステーキ",p:8000,e:30,h:50,desc:"世界最高の和牛！口の中でとける至極の一枚"},
+    {n:"神戸プリン",p:400,e:8,h:20,desc:"港町スイーツの定番。濃厚で上品な甘さ"},
+    {n:"ケバブサンド（北野）",p:600,e:10,h:25,desc:"異人館の街・北野の本格トルコケバブ"},
+  ]},
+  osaka:{id:"osaka",name:"大阪",x:208,y:224,g:"popping",lv:13,cn:["kobe","kyoto"],ch:{name:"難波POPPINキング・Taka",e:"🐡",pw:2000},rw:{exp:600,coins:2000,title:"大阪の帝王"},desc:"ど派手なPOPPINGが大阪を沸かせる！",food:[
+    {n:"象屋（ぞうや）お好み焼き",p:1000,e:15,h:45,desc:"玉出の百名店！厚切り豚が覆うカリふわ焼き"},
+    {n:"たこ焼き（道頓堀）",p:400,e:8,h:25,desc:"外カリ中トロ！これが本場の味やで"},
+    {n:"串カツ（新世界）",p:700,e:12,h:30,desc:"二度漬け禁止！衣サクサクのソース串カツ"},
+  ]},
+  kyoto:{id:"kyoto",name:"京都",x:194,y:210,g:"ballet",lv:14,cn:["osaka","nagoya"],ch:{name:"舞妓バレリーナ・Kei",e:"🏮",pw:2400},rw:{exp:650,coins:2200,title:"京都の雅"},desc:"千年の都の和と洋の融合バレエ",food:[
+    {n:"湯豆腐（嵯峨野）",p:1500,e:10,h:35,desc:"京都の繊細な豆腐料理。出汁の旨さが染みる"},
+    {n:"おばんざい定食",p:1200,e:15,h:40,desc:"京都の家庭料理の真髄。旬の野菜が主役"},
+    {n:"鴨川沿いのラーメン",p:900,e:15,h:35,desc:"京都独自のあっさり醤油ラーメン"},
+  ]},
+  nagoya:{id:"nagoya",name:"名古屋",x:228,y:202,g:"breaking",lv:16,cn:["kyoto","tokyo","yokohama"],ch:{name:"モーニングBreaker・Jun",e:"☕",pw:3200},rw:{exp:720,coins:2600,title:"名古屋城の破壊者"},desc:"味噌の街のBREAKINGパワー",food:[
+    {n:"味噌カツ（矢場とん）",p:1500,e:20,h:45,desc:"濃厚八丁味噌ダレのカツ！名古屋の魂"},
+    {n:"ひつまぶし",p:3500,e:25,h:45,desc:"鰻の3通りの楽しみ方。名古屋の極上グルメ"},
+    {n:"名古屋モーニング",p:400,e:8,h:25,desc:"コーヒー頼んだら全部ついてくる名古屋の文化"},
+  ]},
+  yokohama:{id:"yokohama",name:"横浜",x:280,y:190,g:"breaking",lv:18,cn:["nagoya","tokyo"],ch:{name:"港ブレイカー・Daisuke",e:"🛳",pw:4200},rw:{exp:800,coins:3000,title:"横浜レジェンド"},desc:"関東最強の横浜ブレイキン",food:[
+    {n:"横浜家系ラーメン（壱六家）",p:950,e:20,h:45,desc:"豚骨醤油の最高峰！太麺と濃厚スープ"},
+    {n:"崎陽軒のシウマイ",p:500,e:8,h:20,desc:"横浜を代表する名物。冷めても旨いシウマイ"},
+    {n:"中華街の北京ダック",p:3000,e:25,h:40,desc:"日本最大の中華街で食べる本格北京ダック"},
+  ]},
+  tokyo:{id:"tokyo",name:"東京",x:294,y:172,g:"popping",lv:22,cn:["yokohama","sendai"],ch:{name:"東京ゴッド・ZERO",e:"🏙",pw:6000},rw:{exp:1000,coins:5000,title:"東京の覇者"},desc:"全スタイルが集結する日本の聖地",food:[
+    {n:"築地の海鮮丼",p:2000,e:25,h:50,desc:"新鮮なネタが輝く！築地場外の本物を食らえ"},
+    {n:"もんじゃ焼き（月島）",p:1200,e:12,h:35,desc:"下町の味！おこげが美味しい月島スタイル"},
+    {n:"高級寿司（銀座）",p:8000,e:30,h:45,desc:"江戸前の真髄。口に入れた瞬間にとろける"},
+  ]},
+  sendai:{id:"sendai",name:"仙台",x:290,y:122,g:"lock",lv:26,cn:["tokyo","sapporo"],ch:{name:"七夕LOCKer・Tanaka",e:"🎋",pw:8000},rw:{exp:1100,coins:6000,title:"東北のLOCK王"},desc:"七夕のリズムに乗るLOCK",food:[
+    {n:"牛タン焼き定食（喜助）",p:2000,e:22,h:45,desc:"仙台の牛タンは別格！分厚くてジューシー"},
+    {n:"ずんだ餅",p:400,e:6,h:20,desc:"枝豆の甘さが絶品！仙台の定番スイーツ"},
+    {n:"冷やし中華（発祥の地）",p:800,e:10,h:30,desc:"冷やし中華は仙台発祥！夏の名物"},
+  ]},
+  sapporo:{id:"sapporo",name:"札幌",x:272,y:50,g:"jazz",lv:30,cn:["sendai"],ch:{name:"雪のジャズダンサー・Miku",e:"❄",pw:11000},rw:{exp:1300,coins:8000,title:"北の王者"},desc:"雪と氷の中に咲くJAZZ",food:[
+    {n:"味噌ラーメン（すみれ）",p:1100,e:20,h:45,desc:"北海道味噌！バターコーン入りの濃厚スープ"},
+    {n:"ジンギスカン（だるま）",p:2500,e:25,h:50,desc:"北海道の大地の恵み！豪快に焼いて食らえ"},
+    {n:"スープカレー（奥芝商店）",p:1400,e:18,h:40,desc:"野菜たっぷりスパイシー！スープカレー発祥の地"},
+  ]},
 };
 const JE=[["sapporo","sendai"],["sendai","tokyo"],["tokyo","yokohama"],["tokyo","nagoya"],["yokohama","nagoya"],["nagoya","kyoto"],["kyoto","osaka"],["osaka","kobe"],["kobe","hiroshima"],["hiroshima","kokura"],["kokura","hakata"],["kokura","oita"],["hakata","nagasaki"],["hakata","kumamoto"],["oita","kumamoto"],["oita","miyazaki"],["kumamoto","nagasaki"],["kumamoto","miyazaki"],["miyazaki","kagoshima"],["kumamoto","kagoshima"]];
 
