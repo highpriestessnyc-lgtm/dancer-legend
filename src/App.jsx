@@ -51,10 +51,53 @@ const BASE={
 const BC={
   ballet:["グランジュテで宙を舞う！✨","完璧なピルエット7回転！","アラベスクで空間を支配する","ポアントに全魂を集中！","クラシックの女神が降臨！"],
   contemporary:["魂のインプロビゼーション！","フロアワークで大地を掌握","感情が爆発する全身表現！","重力を無視した動き！","コンタクトで一体化する"],
-  house:["パドルステップが止まらない！🕺","ジャックムーブで会場が沸騰","フットワークが神速！","ロフティングで頂点へ！","グルーヴが伝染していく"],
-  lock:["ロック！電光石火の急停止！🔒","ポイントで観客を射抜く！","スクービードゥーが炸裂！","リストトワールが輝く！","ファンクの魂が爆発する"],
-  popping:["フレックスが電撃のよう！⚡","ウェーブが全身を伝う！","タットで幾何学模様を描く","グライドで床を滑走！","ポッピングが止まらない！"],
-  breaking:["トップロックで場を制圧！🌀","6ステップが轟く！","フリーズで時間が凍る！","ウィンドミルが炸裂！","重力を無視したパワームーブ"],
+  house:[
+    "パドルステップが止まらない！🕺",
+    "ジャックムーブで会場が沸騰",
+    "フットワークが神速！",
+    "ロフティングで頂点へ！",
+    "グルーヴが伝染していく",
+    "三連のビートが会場を唸らす！",
+    "スムースなフロアムーブが決まった！",
+    "オリジナルのニューステップが炸裂！",
+    "アクロバットが空を切り裂く！",
+    "オリジネーターさながらのリズム！",
+    "奥義！ピーターポール炸裂！！",
+  ],
+  lock:[
+    "ロック！電光石火の急停止！🔒",
+    "ポイントで観客を射抜く！",
+    "スクービードゥーが炸裂！",
+    "ファンクの魂が爆発する",
+    "ダブルロックが大地を揺らす！",
+    "軽快なウィッチウェイ！",
+    "GET DOWN !!!!!!!!",
+    "華麗なJB'Sステップ！",
+    "なんだそのリズムは！",
+  ],
+  popping:[
+    "フレックスが電撃のよう！⚡",
+    "ウェーブが全身を伝う！",
+    "タットで幾何学模様を描く",
+    "グライドで床を滑走！",
+    "ポッピングが止まらない！",
+    "オリジナルムーブ炸裂！",
+    "スムースなフロアムーブが決まった！",
+    "ニューステップが大地を切り裂く！",
+    "タットの数々！観客が震える！",
+    "驚愕のミュージカリティ！",
+    "キートみたい！",
+  ],
+  breaking:[
+    "トップロックで場を制圧！🌀",
+    "6ステップが轟く！",
+    "フリーズで時間が凍る！",
+    "スレッドが炸裂！",
+    "重力を無視したパワームーブ",
+    "オリジナルムーブ炸裂！",
+    "驚愕のミュージカリティ！",
+    "ニューステップが大地を切り裂く！",
+  ],
   waacking:["アームスウィングが閃光！💃","ポーズが完璧に決まった！","ワックが空気を切り裂く！","キャットウォークで魅了","ディスコの女神が降臨"],
   jazz:["ジャズスクエアが流れる🎷","ピルエットでスウィング！","ジャズランで疾走！","スプリットリープで飛翔","リズムが体から溢れる！"],
 };
@@ -142,14 +185,61 @@ const AG={chain:"neck",sunglass:"face",bandana:"forehead",cap:"head",beanie:"hea
 
 /* ── TRAINING MOVES ── */
 const MOVES={
-  ballet:[{id:"pl",name:"プリエ",cost:8,g:{technique:2,stamina:1},exp:14},{id:"ar",name:"アラベスク",cost:14,g:{technique:3,style:2},exp:28},{id:"pi",name:"ピルエット",cost:18,g:{technique:2,rhythm:2},exp:36},{id:"gj",name:"グランジュテ",cost:24,g:{stamina:2,charisma:2,style:2},exp:52}],
-  contemporary:[{id:"fl",name:"フロアワーク",cost:9,g:{style:2,technique:1},exp:15},{id:"im",name:"インプロ",cost:11,g:{style:3,charisma:1},exp:23},{id:"re",name:"リリース",cost:18,g:{stamina:2,style:2,technique:1},exp:38},{id:"co",name:"コンタクト",cost:22,g:{charisma:3,style:2},exp:50}],
-  house:[{id:"pa",name:"パドルステップ",cost:8,g:{rhythm:2,stamina:1},exp:14},{id:"ja",name:"ジャック",cost:11,g:{rhythm:3,stamina:1},exp:21},{id:"fw",name:"フットワーク",cost:18,g:{rhythm:2,technique:2,stamina:1},exp:38},{id:"lo",name:"ロフティング",cost:22,g:{charisma:2,style:2,rhythm:1},exp:46}],
-  lock:[{id:"lk",name:"ロック",cost:8,g:{charisma:2,rhythm:1},exp:14},{id:"pt",name:"ポイント",cost:9,g:{charisma:2,style:1},exp:17},{id:"sc",name:"スクービードゥー",cost:18,g:{charisma:3,rhythm:2},exp:38},{id:"wr",name:"リストトワール",cost:13,g:{style:2,technique:2},exp:28}],
-  popping:[{id:"fx",name:"フレックス",cost:8,g:{technique:2,style:1},exp:14},{id:"wv",name:"ウェーブ",cost:13,g:{technique:2,style:2},exp:28},{id:"tt",name:"タット",cost:18,g:{technique:3,style:2},exp:40},{id:"gl",name:"グライド",cost:16,g:{style:3,charisma:1,technique:1},exp:34}],
-  breaking:[{id:"tr",name:"トップロック",cost:8,g:{stamina:2,charisma:1},exp:14},{id:"ss",name:"6ステップ",cost:13,g:{stamina:2,technique:2},exp:28},{id:"fr",name:"フリーズ",cost:22,g:{technique:3,stamina:2},exp:48},{id:"wm",name:"ウィンドミル",cost:28,g:{stamina:3,technique:2,charisma:1},exp:58}],
-  waacking:[{id:"sw",name:"アームスウィング",cost:8,g:{charisma:2,style:1},exp:14},{id:"po",name:"ポーズ",cost:9,g:{charisma:2,style:2},exp:19},{id:"wh",name:"ワック",cost:18,g:{charisma:3,rhythm:2},exp:38},{id:"cw",name:"キャットウォーク",cost:13,g:{style:3,charisma:1},exp:28}],
-  jazz:[{id:"js",name:"ジャズスクエア",cost:8,g:{rhythm:2,style:1},exp:14},{id:"jr",name:"ジャズラン",cost:18,g:{rhythm:2,charisma:2,stamina:1},exp:38},{id:"sl",name:"スプリットリープ",cost:22,g:{stamina:2,style:2,charisma:1},exp:48},{id:"pj",name:"ピルエット",cost:13,g:{technique:2,style:2},exp:28}],
+  ballet:[
+    {id:"pl", name:"プリエ",       cost:8,  g:{technique:2,stamina:1},      exp:14},
+    {id:"tn", name:"タンジュ",     cost:14, g:{technique:2,style:1},         exp:26},
+    {id:"fo", name:"フォンデュ",   cost:14, g:{technique:3,style:1},         exp:28},
+    {id:"pi", name:"ピルエット",   cost:18, g:{technique:2,rhythm:2},        exp:36},
+    {id:"gj", name:"グランジュテ", cost:24, g:{stamina:2,charisma:2,style:2},exp:52},
+  ],
+  contemporary:[
+    {id:"fl", name:"フロアワーク", cost:9,  g:{style:2,technique:1},         exp:15},
+    {id:"im", name:"インプロ",     cost:11, g:{style:3,charisma:1},           exp:23},
+    {id:"br", name:"呼吸",         cost:11, g:{stamina:2,style:1},            exp:20},
+    {id:"re", name:"リリース",     cost:18, g:{stamina:2,style:2,technique:1},exp:38},
+    {id:"co", name:"コンタクト",   cost:22, g:{charisma:3,style:2},           exp:50},
+  ],
+  house:[
+    {id:"pb", name:"パドブレ",     cost:8,  g:{rhythm:2,style:1},             exp:14},
+    {id:"ll", name:"ルースレッグ", cost:8,  g:{rhythm:2,stamina:1},           exp:14},
+    {id:"jk", name:"ジャッキング", cost:11, g:{rhythm:3,stamina:1},           exp:22},
+    {id:"fw", name:"フットワーク", cost:18, g:{rhythm:2,technique:2,stamina:1},exp:38},
+    {id:"lo", name:"ロフティング", cost:22, g:{charisma:2,style:2,rhythm:1},  exp:46},
+  ],
+  lock:[
+    {id:"lk", name:"ロック",           cost:8,  g:{charisma:2,rhythm:1},      exp:14},
+    {id:"pt", name:"ポイント",         cost:9,  g:{charisma:2,style:1},        exp:17},
+    {id:"tw", name:"トゥエル",         cost:9,  g:{style:2,technique:1},       exp:18},
+    {id:"sg", name:"ストップアンドゴー",cost:18, g:{rhythm:2,stamina:2},       exp:36},
+    {id:"sc", name:"スクービードゥー", cost:13, g:{charisma:3,rhythm:2},       exp:28},
+  ],
+  popping:[
+    {id:"fx", name:"フレックス",   cost:8,  g:{technique:2,style:1},          exp:14},
+    {id:"wv", name:"ウェーブ",     cost:13, g:{technique:2,style:2},          exp:28},
+    {id:"sb", name:"ストロボ",     cost:18, g:{technique:3,rhythm:1},         exp:38},
+    {id:"tt", name:"タット",       cost:22, g:{technique:3,style:2},          exp:46},
+    {id:"cb", name:"コブラ",       cost:16, g:{style:3,charisma:1,technique:1},exp:34},
+  ],
+  breaking:[
+    {id:"tr", name:"トップロック", cost:8,  g:{stamina:2,charisma:1},         exp:14},
+    {id:"ss", name:"6ステップ",    cost:13, g:{stamina:2,technique:2},        exp:28},
+    {id:"fr", name:"フリーズ",     cost:22, g:{technique:3,stamina:2},        exp:48},
+    {id:"th", name:"スレッド",     cost:28, g:{stamina:3,technique:2,style:1},exp:58},
+  ],
+  waacking:[
+    {id:"sw", name:"アームスウィング",cost:8,  g:{charisma:2,style:1},        exp:14},
+    {id:"wp", name:"プリエ",          cost:8,  g:{style:2,technique:1},       exp:14},
+    {id:"po", name:"ポーズ",          cost:9,  g:{charisma:2,style:2},        exp:19},
+    {id:"wh", name:"ワック",          cost:18, g:{charisma:3,rhythm:2},       exp:38},
+    {id:"cw", name:"キャットウォーク",cost:13, g:{style:3,charisma:1},        exp:28},
+  ],
+  jazz:[
+    {id:"st", name:"ストレッチ",   cost:8,  g:{stamina:1,style:1},            exp:14},
+    {id:"jp", name:"プリエ",       cost:10, g:{technique:2,style:1},          exp:18},
+    {id:"jt", name:"タンジュ",     cost:13, g:{rhythm:2,technique:1},         exp:24},
+    {id:"pi", name:"ピルエット",   cost:18, g:{technique:2,style:2},          exp:36},
+    {id:"gj", name:"グランジュテ", cost:18, g:{stamina:2,style:2,charisma:1}, exp:38},
+  ],
 };
 const CMOVES=[{id:"st",name:"ストレッチ",cost:4,g:{stamina:1,style:1},exp:8},{id:"im2",name:"イメトレ",cost:3,g:{technique:1},exp:6},{id:"vd",name:"ビデオ研究",cost:2,g:{style:1,charisma:1},exp:7}];
 
@@ -338,7 +428,171 @@ function canVisit(id,char,region){
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 
 /* ── SOUND SYSTEM ── */
+const KYUSHU_IDS=['kagoshima','miyazaki','nagasaki','kumamoto','oita','hakata','kokura'];
+const HONSHU_IDS=['hiroshima','kobe','osaka','kyoto','nagoya','yokohama','tokyo','sendai','sapporo'];
+const USA_IDS=['ny','la','chicago','atl','miami','seattle'];
+
+function getCityBGM(cityId){
+  if(!cityId)return'kyushu';
+  if(SP[cityId])return'space';
+  if(USA_IDS.includes(cityId))return'usa';
+  if(Object.keys(W).includes(cityId))return'world';
+  if(HONSHU_IDS.includes(cityId))return'honshu';
+  return'kyushu';
+}
+
 const Sound={
+  ctx:null, master:null, loopId:null, muted:false,
+
+  init(){
+    if(this.ctx)return;
+    try{
+      this.ctx=new(window.AudioContext||window.webkitAudioContext)();
+      this.master=this.ctx.createGain();
+      this.master.gain.value=0.2;
+      this.master.connect(this.ctx.destination);
+    }catch(e){}
+  },
+
+  tone(freq,start,dur,vol=0.2,type='square'){
+    if(!this.ctx||this.muted)return;
+    try{
+      const o=this.ctx.createOscillator();
+      const g=this.ctx.createGain();
+      o.type=type;o.frequency.value=freq;
+      g.gain.setValueAtTime(0.001,this.ctx.currentTime+start);
+      g.gain.linearRampToValueAtTime(vol,this.ctx.currentTime+start+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001,this.ctx.currentTime+start+dur);
+      o.connect(g);g.connect(this.master);
+      o.start(this.ctx.currentTime+start);
+      o.stop(this.ctx.currentTime+start+dur+0.05);
+    }catch(e){}
+  },
+
+  stop(){if(this.loopId){clearInterval(this.loopId);this.loopId=null;}},
+
+  // 九州：ファンキー・ソウル
+  kyushu(){
+    this.stop();this.init();
+    const play=()=>{
+      if(this.muted)return;
+      [[98,0],[98,.2],[110,.4],[98,.6],[87.3,.8],[98,1.0],[110,1.2],[87.3,1.4]].forEach(([f,t])=>this.tone(f,t,.18,.16,'sawtooth'));
+      [[330,0],[370,.3],[330,.6],[294,.9],[330,1.2],[370,1.5],[392,1.8],[330,2.1]].forEach(([f,t])=>this.tone(f,t,.22,.1,'triangle'));
+      [.5,1.5].forEach(t=>{this.tone(1800,t,.04,.1,'square');this.tone(2200,t+.02,.04,.06,'square');});
+      [0,.5,1.0,1.5].forEach(t=>this.tone(70,t,.1,.2,'sine'));
+    };
+    play();this.loopId=setInterval(play,2400);
+  },
+
+  // 本州：J-POP冒険
+  honshu(){
+    this.stop();this.init();
+    const play=()=>{
+      if(this.muted)return;
+      [[392,0],[440,.3],[494,.6],[523,.9],[587,1.2],[523,1.5],[494,1.8],[440,2.1]].forEach(([f,t])=>{
+        this.tone(f,t,.25,.1,'triangle');
+        this.tone(f*.5,t,.2,.05,'sine');
+      });
+      [[196,0,.55],[220,.6,.55],[247,1.2,.55],[196,1.8,.55]].forEach(([f,t,d])=>this.tone(f,t,d,.1,'sine'));
+      [0,.6,1.2,1.8].forEach(t=>{this.tone(80,t,.12,.22,'sine');this.tone(50,t,.18,.15,'sine');});
+      [.3,.9,1.5,2.1].forEach(t=>this.tone(2500,t,.05,.08,'square'));
+    };
+    play();this.loopId=setInterval(play,2500);
+  },
+
+  // USA：ヒップホップ
+  usa(){
+    this.stop();this.init();
+    const play=()=>{
+      if(this.muted)return;
+      [0,.5,1.0,1.5].forEach(t=>{this.tone(55,t,.22,.38,'sine');this.tone(40,t,.32,.22,'sine');});
+      [.5,1.5].forEach(t=>{this.tone(2800,t,.06,.15,'square');this.tone(3200,t+.01,.05,.1,'square');});
+      Array.from({length:8}).forEach((_,i)=>this.tone(7000+Math.random()*1500,i*.25,.04,.06,'square'));
+      [55,55,65.4,55,55,49,55,65.4].forEach((f,i)=>this.tone(f,i*.25,.2,.18,'square'));
+    };
+    play();this.loopId=setInterval(play,2000);
+  },
+
+  // WORLD：グローバルエレクトロ
+  world(){
+    this.stop();this.init();
+    const play=()=>{
+      if(this.muted)return;
+      [0,.5,1.0,1.5].forEach(t=>this.tone(58,t,.18,.3,'sine'));
+      [.25,.75,1.25,1.75].forEach(t=>this.tone(4000,t,.05,.08,'square'));
+      [[293.7,0],[329.6,.3],[369.9,.6],[392,.9],[440,1.2],[392,1.5],[369.9,1.8],[329.6,2.1]].forEach(([f,t])=>this.tone(f,t,.24,.11,'square'));
+      [[73.4,0,.45],[82.4,.5,.45],[73.4,1.0,.45],[65.4,1.5,.45]].forEach(([f,t,d])=>this.tone(f,t,d,.14,'sine'));
+    };
+    play();this.loopId=setInterval(play,2300);
+  },
+
+  // SPACE：コズミックアンビエント
+  space(){
+    this.stop();this.init();
+    const play=()=>{
+      if(this.muted)return;
+      [[130.8,0],[164.8,.6],[196,1.2],[261.6,1.8]].forEach(([f,t])=>{
+        this.tone(f,t,.8,.06,'sine');
+        this.tone(f*2,t+.15,.6,.03,'triangle');
+        this.tone(f*3,t+.3,.4,.02,'sine');
+      });
+      [[880,.2],[1047,.8],[784,1.4],[1175,2.0]].forEach(([f,t])=>this.tone(f,t,.12,.05,'sine'));
+    };
+    play();this.loopId=setInterval(play,2900);
+  },
+
+  // バトル：クラブエレクトロ（地域問わず）
+  battle(){
+    this.stop();this.init();
+    const play=()=>{
+      if(this.muted)return;
+      [0,.5,1.0,1.5].forEach(t=>{this.tone(60,t,.18,.35,'sine');this.tone(40,t,.25,.2,'sine');});
+      [0,.25,.5,.75,1.0,1.25,1.5,1.75].forEach(t=>this.tone(6000+Math.random()*2000,t,.04,.05,'square'));
+      [110,110,130.8,110,98,110,110,123.5].forEach((f,i)=>this.tone(f,i*.25,.22,.18,'sawtooth'));
+      [440,494,440,392,440,523,494,440].forEach((f,i)=>this.tone(f,i*.25,.18,.1,'square'));
+    };
+    play();this.loopId=setInterval(play,2000);
+  },
+
+  // 勝利ファンファーレ（ドラクエ風）
+  fanfare(){
+    this.stop();this.init();
+    if(this.muted)return;
+    [[523,.0,.14],[523,.15,.14],[523,.3,.14],[415,.45,.1],[523,.56,.14],[622,.72,.14],[784,.88,.5]].forEach(([f,t,d])=>{
+      this.tone(f,t,d,.28,'square');this.tone(f*1.5,t,d,.08,'triangle');
+    });
+  },
+
+  // 都市クリア
+  clear(){
+    this.stop();this.init();
+    if(this.muted)return;
+    [[784,0,.1],[880,.13,.1],[988,.26,.1],[1047,.4,.35]].forEach(([f,t,d])=>{
+      this.tone(f,t,d,.2,'square');this.tone(f*.5,t,d,.1,'sine');
+    });
+  },
+
+  // 敗北
+  lose(){
+    this.stop();this.init();
+    if(this.muted)return;
+    [[392,0,.22],[349.2,.24,.22],[311.1,.48,.45]].forEach(([f,t,d])=>this.tone(f,t,d,.2,'square'));
+  },
+
+  toggle(){
+    this.muted=!this.muted;
+    if(this.master)this.master.gain.value=this.muted?0:.2;
+    return this.muted;
+  },
+
+  // エリアに合ったBGMを再生
+  playRegion(cityId){
+    const region=getCityBGM(cityId);
+    this[region]();
+  }
+};
+
+
   ctx:null, master:null, loopId:null, muted:false,
 
   init(){
@@ -609,7 +863,24 @@ function buildBattle(char,oppStyle,oppPow){
   const playerGenre=char.genre;
   const eb=eqBonus(char.equipped||{});const ts={};
   Object.entries(char.stats).forEach(([k,v])=>{ts[k]=v+(eb[k]||0);});
-  const myP=calcPow(ts)+Math.floor(Math.random()*50);
+  let myP=calcPow(ts);
+
+  // 気分補正（ご飯・休息で上がる）
+  const mood=char.mood||0;
+  if(mood>=90)myP=Math.floor(myP*1.18);      // 最高の気分！
+  else if(mood>=75)myP=Math.floor(myP*1.10); // いい感じ
+  else if(mood>=50)myP=Math.floor(myP*1.0);  // 普通
+  else if(mood>=25)myP=Math.floor(myP*0.88); // テンション低い
+  else myP=Math.floor(myP*0.75);             // 最悪の状態
+
+  // お腹補正（ご飯を食べてると強い！）
+  const hunger=char.hunger||0;
+  if(hunger>=80)myP=Math.floor(myP*1.08);    // お腹満タン！
+  else if(hunger>=50)myP=Math.floor(myP*1.0);// 普通
+  else if(hunger>=30)myP=Math.floor(myP*0.92);// 少し空腹
+  else myP=Math.floor(myP*0.78);             // 空腹で動けない！
+
+  myP+=Math.floor(Math.random()*50);
   const thP=oppPow+Math.floor(Math.random()*40);
   const won=myP>=thP;
   const pComments=BC[playerGenre]||BC.jazz;
@@ -620,7 +891,6 @@ function buildBattle(char,oppStyle,oppPow){
     {isPlayer:true,  comment:pick(pComments)},
     {isPlayer:false, comment:pick(oComments)},
   ];
-  // 5 flags based on result
   const flags=Array.from({length:5}).map((_,i)=>{
     if(won)return i<3||Math.random()<0.6?"blue":"red";
     return i>=3||Math.random()<0.6?"red":"blue";
@@ -926,6 +1196,15 @@ function BattleTab({char,setChar,genre,pushNotif,addLog}){
         <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3}}>QUICK BATTLE ⚡15</div>
         <div style={{fontSize:11,color:"#ffd60a"}}>MY POWER <span style={{fontWeight:700}}>{mp}</span></div>
       </div>
+      {/* 気分・お腹の状態ヒント */}
+      <div style={{background:BG3,borderRadius:6,padding:"8px 12px",marginBottom:12,display:"flex",gap:12,flexWrap:"wrap"}}>
+        <span style={{fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",color:char.mood>=75?"#b3ff00":char.mood>=50?"#ffcc02":"#ff5555"}}>
+          気分 {char.mood>=90?"😄 最高！+18%":char.mood>=75?"😊 いい！+10%":char.mood>=50?"😐 普通":char.mood>=25?"😔 低い -12%":"😰 最悪 -25%"}
+        </span>
+        <span style={{fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",color:char.hunger>=80?"#b3ff00":char.hunger>=50?"#ffcc02":"#ff5555"}}>
+          お腹 {char.hunger>=80?"🍜 満腹！+8%":char.hunger>=50?"🍱 普通":char.hunger>=30?"😤 空腹 -8%":"💀 超空腹 -22%"}
+        </span>
+      </div>
       {QOPPS.map(opp=>{
         const diff=opp.pw<mp-100?"easy":opp.pw>mp+100?"hard":"fair";
         const dc={easy:"#81c784",fair:"#ffcc02",hard:"#ff6b6b"}[diff];
@@ -1170,14 +1449,13 @@ function Game({char,setChar,onTitle}){
   const genre=GENRES[char.genre];const lv=getLv(char.exp);const rnk=rnkOf(lv);
   const xpC=char.exp-xpL(lv),xpN=xpL(lv+1)-xpL(lv),xpP=Math.min(100,Math.round((xpC/xpN)*100));
 
-  // BGM制御
+  // BGM制御（エリア別）
   useEffect(()=>{
-    if(tab==="home"||tab==="status"||tab==="shop")Sound.home();
-    else if(tab==="battle"||tab==="map")Sound.battle();
-    return()=>{};
-  },[tab]);
+    if(tab==="battle")Sound.battle();
+    else Sound.playRegion(char.currentCity);
+  },[tab,char.currentCity]);
 
-  useEffect(()=>{Sound.home();return()=>Sound.stop();},[]);
+  useEffect(()=>{Sound.playRegion(char.currentCity);return()=>Sound.stop();},[]);
   useEffect(()=>{
     const REGEN_MS=5*60*1000;
     const check=()=>setChar(c=>{
