@@ -598,8 +598,8 @@ function CityPanel({city,char,region,cleared,gc2,onClose,onTravel,onBattle,onEat
         {city.rw.title&&<span style={{fontSize:10,color:"#ce93d8"}}>🎖{city.rw.title}</span>}
       </div>
     </div>
-    {/* 現地グルメ */}
-    {isCur&&city.food&&city.food.length>0&&(
+    {/* 現地グルメ - 現在地 OR クリア済みで移動後に表示 */}
+    {(isCur)&&city.food&&city.food.length>0&&(
       <div style={{background:"#0a1a0a",border:"1px solid #1a3a1a",borderRadius:6,padding:"8px 12px",marginBottom:10}}>
         <div style={{fontSize:9,color:"#60c060",fontFamily:"'Press Start 2P',monospace",marginBottom:8}}>🍜 現地グルメ</div>
         {city.food.map(f=>(
@@ -613,7 +613,26 @@ function CityPanel({city,char,region,cleared,gc2,onClose,onTravel,onBattle,onEat
         ))}
       </div>
     )}
-    {isCl?<div style={{fontSize:12,color:"#60c080",textAlign:"center",padding:"8px",fontWeight:700}}>✓ クリア済み！</div>:(
+    {/* クリア済み → 移動ボタン＋グルメ予告 */}
+    {isCl?(
+      <div>
+        <div style={{fontSize:11,color:"#60c080",textAlign:"center",padding:"6px 0",fontWeight:700,marginBottom:8}}>✓ クリア済み！</div>
+        {!isCur&&city.food&&city.food.length>0&&(
+          <div style={{background:"#0a1a0a",border:"1px solid #1a3a1a",borderRadius:6,padding:"8px 12px",marginBottom:8}}>
+            <div style={{fontSize:9,color:"#60c060",fontFamily:"'Press Start 2P',monospace",marginBottom:6}}>🍜 現地グルメ（移動して食べよう）</div>
+            {city.food.map(f=>(
+              <div key={f.n} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:11,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{f.n}</div>
+                  <div style={{fontSize:9,color:TX3}}>⚡+{f.e} 🍚+{f.h} · {fc(f.p)}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {!isCur&&<Btn disabled={char.energy<5} col="#0a1828" tc="#00e5ff" onClick={()=>onTravel(city)} full sx={{fontSize:11,border:"1px solid #1a4870"}}>{char.energy<5?"⚡ エネルギー不足":"📍 グルメ目的で移動 ⚡5"}</Btn>}
+      </div>
+    ):(
       <div style={{display:"flex",gap:8}}>
         {!isCur&&<Btn disabled={!isAvail||char.energy<5} col="#0a1828" tc="#00e5ff" onClick={()=>onTravel(city)} sx={{flex:1,fontSize:11,border:"1px solid #1a4870"}}>{isAvail?"📍 移動 ⚡5":"🔒 未開通"}</Btn>}
         {isCur&&<Btn disabled={!canBoss} col="#280a0a" tc="#ff7070" onClick={()=>onBattle(city)} sx={{flex:2,fontSize:12,padding:"11px",border:"1px solid #5a1818",fontWeight:700}}>{char.energy<20?"⚡ エネルギー不足":"⚔️ ボスに挑む！"}</Btn>}
