@@ -337,7 +337,110 @@ function canVisit(id,char,region){
 }
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 
-/* ── DANCER SVG ── */
+/* ── SOUND SYSTEM ── */
+const Sound={
+  ctx:null, master:null, loopId:null, muted:false,
+
+  init(){
+    if(this.ctx)return;
+    try{
+      this.ctx=new(window.AudioContext||window.webkitAudioContext)();
+      this.master=this.ctx.createGain();
+      this.master.gain.value=0.22;
+      this.master.connect(this.ctx.destination);
+    }catch(e){}
+  },
+
+  tone(freq,start,dur,vol=0.2,type='square'){
+    if(!this.ctx||this.muted)return;
+    try{
+      const o=this.ctx.createOscillator();
+      const g=this.ctx.createGain();
+      o.type=type;o.frequency.value=freq;
+      g.gain.setValueAtTime(0.001,this.ctx.currentTime+start);
+      g.gain.linearRampToValueAtTime(vol,this.ctx.currentTime+start+0.01);
+      g.gain.exponentialRampToValueAtTime(0.001,this.ctx.currentTime+start+dur);
+      o.connect(g);g.connect(this.master);
+      o.start(this.ctx.currentTime+start);
+      o.stop(this.ctx.currentTime+start+dur+0.05);
+    }catch(e){}
+  },
+
+  stop(){if(this.loopId){clearInterval(this.loopId);this.loopId=null;}},
+
+  // タイトル・ホーム：冒険系アドベンチャーBGM
+  home(){
+    this.stop();this.init();
+    const play=()=>{
+      if(this.muted)return;
+      // メロディ（ペンタトニック）
+      [[261.6,0],[293.7,.35],[329.6,.7],[392,.95],[440,1.3],[392,1.6],[329.6,1.9],[261.6,2.3]].forEach(([f,t])=>{
+        this.tone(f,t,.3,.12,'triangle');
+        this.tone(f*2,t,.2,.04,'sine');
+      });
+      // ベース
+      [[130.8,0,.6],[130.8,.7,.5],[146.8,1.3,.6],[130.8,1.95,.6]].forEach(([f,t,d])=>this.tone(f,t,d,.1,'sine'));
+      // パーカッション風
+      [0,.7,1.4,2.1].forEach(t=>{this.tone(80,t,.08,.18,'sine');this.tone(40,t,.15,.12,'sine');});
+    };
+    play();this.loopId=setInterval(play,2700);
+  },
+
+  // バトル：クラブ系エレクトロ
+  battle(){
+    this.stop();this.init();
+    const play=()=>{
+      if(this.muted)return;
+      // キック（ズンズン）
+      [0,.5,1.0,1.5].forEach(t=>{
+        this.tone(60,t,.18,.35,'sine');
+        this.tone(40,t,.25,.2,'sine');
+      });
+      // ハイハット
+      [0,.25,.5,.75,1.0,1.25,1.5,1.75].forEach(t=>this.tone(6000+Math.random()*2000,t,.04,.04,'square'));
+      // シンセベース
+      [110,110,130.8,110,98,110,110,123.5].forEach((f,i)=>this.tone(f,i*.25,.22,.18,'sawtooth'));
+      // シンセリード
+      [440,494,440,392,440,523,494,440].forEach((f,i)=>this.tone(f,i*.25,.18,.1,'square'));
+    };
+    play();this.loopId=setInterval(play,2000);
+  },
+
+  // 勝利：ファンファーレ（ドラクエ風）
+  fanfare(){
+    this.stop();this.init();
+    if(this.muted)return;
+    [[523,.0,.14],[523,.15,.14],[523,.3,.14],[415,.45,.1],[523,.56,.14],[622,.72,.14],[784,.88,.5]].forEach(([f,t,d])=>{
+      this.tone(f,t,d,.28,'square');
+      this.tone(f*1.5,t,d,.08,'triangle');
+    });
+  },
+
+  // 都市クリア時
+  clear(){
+    this.stop();this.init();
+    if(this.muted)return;
+    [[784,0,.1],[880,.12,.1],[988,.24,.1],[1047,.36,.3]].forEach(([f,t,d])=>{
+      this.tone(f,t,d,.2,'square');
+      this.tone(f*.5,t,d,.1,'sine');
+    });
+  },
+
+  // 敗北
+  lose(){
+    this.stop();this.init();
+    if(this.muted)return;
+    [[392,0,.2],[349.2,.22,.2],[311.1,.45,.4]].forEach(([f,t,d])=>this.tone(f,t,d,.2,'square'));
+  },
+
+  toggle(){
+    this.muted=!this.muted;
+    if(this.master)this.master.gain.value=this.muted?0:.22;
+    return this.muted;
+  }
+};
+
+
 function DancerSVG({genre:gn,mood,energy,equipped,size=120}){
   const g=GENRES[gn]||GENRES.house;
   const fs=faceOf(mood,energy);
@@ -676,6 +779,7 @@ function MapTab({char,setChar,genre,pushNotif,addLog}){
       titles:nt?[...(c.titles||[]),nt]:c.titles||[],
       clearedCities:won?{...cleared,[city.id]:true}:cleared}));
     setBattle({phase:"result",won,eg,coins,title:nt,flags,myP:btl.myP,thP:btl.thP});
+    if(won){if(nt)Sound.fanfare();else Sound.clear();}else Sound.lose();
     addLog(`${won?"🏆 CLEAR":"💀 敗北"} ${city.name} +${eg}EXP`);
   }
 
@@ -794,6 +898,7 @@ function BattleTab({char,setChar,genre,pushNotif,addLog}){
     const nt=won&&opp.rw.title&&!char.titles?.includes(opp.rw.title)?opp.rw.title:null;
     setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-15),mood:won?Math.min(100,c.mood+18):Math.max(0,c.mood-12),battlesWon:won?c.battlesWon+1:c.battlesWon,titles:nt?[...(c.titles||[]),nt]:c.titles||[]}));
     setBattle({phase:"result",won,eg,coins,title:nt,flags,myP:btl.myP,thP:btl.thP});
+    if(won)Sound.fanfare();else Sound.lose();
     addLog(`${won?"🏆 勝利":"💀 敗北"} vs ${opp.name} +${eg}EXP ${fc(coins)}`);
   }
 
@@ -1061,10 +1166,18 @@ function Game({char,setChar,onTitle}){
   const[tab,setTab]=useState("home");
   const[notif,setNotif]=useState(null);
   const[log,setLog]=useState([]);
+  const[muted,setMuted]=useState(false);
   const genre=GENRES[char.genre];const lv=getLv(char.exp);const rnk=rnkOf(lv);
   const xpC=char.exp-xpL(lv),xpN=xpL(lv+1)-xpL(lv),xpP=Math.min(100,Math.round((xpC/xpN)*100));
 
-  // Energy time-based regen
+  // BGM制御
+  useEffect(()=>{
+    if(tab==="home"||tab==="status"||tab==="shop")Sound.home();
+    else if(tab==="battle"||tab==="map")Sound.battle();
+    return()=>{};
+  },[tab]);
+
+  useEffect(()=>{Sound.home();return()=>Sound.stop();},[]);
   useEffect(()=>{
     const REGEN_MS=5*60*1000;
     const check=()=>setChar(c=>{
@@ -1129,7 +1242,10 @@ function Game({char,setChar,onTitle}){
           <div style={{width:90,height:5,background:BG3,borderRadius:3,marginTop:3}}><div style={{height:"100%",width:`${xpP}%`,background:genre.c,borderRadius:3,transition:"width .5s"}}/></div>
           <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
             <span style={{fontSize:8,color:"#40c060"}}>💾 AUTO</span>
-            <span style={{fontSize:9,color:TX3,cursor:"pointer"}} onClick={onTitle}>タイトルへ</span>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              <button onClick={()=>{const m=Sound.toggle();setMuted(m);}} style={{fontSize:14,background:"none",padding:"0 2px",opacity:.8}}>{muted?"🔇":"🔊"}</button>
+              <span style={{fontSize:9,color:TX3,cursor:"pointer"}} onClick={onTitle}>タイトルへ</span>
+            </div>
           </div>
         </div>
       </div>
