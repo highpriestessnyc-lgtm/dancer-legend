@@ -1,4 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import QRCode from 'qrcode';
+import { createClient } from '@supabase/supabase-js';
+
+let supabase = null;
+try{
+  const url=import.meta.env.VITE_SUPABASE_URL;
+  const key=import.meta.env.VITE_SUPABASE_ANON_KEY;
+  if(url&&key&&url.startsWith('http')){
+    supabase=createClient(url,key);
+  }
+}catch(e){console.error('Supabase init failed:',e);}
 (function(){
   if(document.getElementById("dl5"))return;
   const l=document.createElement("link");l.rel="stylesheet";
@@ -954,19 +965,36 @@ function OnlineArena({char,setChar,genre,pushNotif,addLog}){
   const[battle,setBattle]=useState(null);
   const[result,setResult]=useState(null);
   const myPow=calcPow({...char.stats,...eqBonus(char.equipped||{})});
-  const pk=`dancer:${(char.name+char.genre).replace(/\W/g,"_")}`;
-  const hasSt=typeof window!=="undefined"&&window.storage;
+  const myId=`${char.name}_${char.genre}`.replace(/\W/g,"_");
 
   async function reload(){
-    if(!hasSt)return;setLoading(true);
+    setLoading(true);
+    if(!supabase){
+      pushNotif("⚠️ Supabase未接続。Vercelの環境変数を確認して","#ffcc02");
+      setLoading(false);
+      return;
+    }
     try{
-      await window.storage.set(pk,JSON.stringify({name:char.name,genre:char.genre,hometown:char.hometown,power:myPow,lv:getLv(char.exp),fame:char.fame,t:Date.now()}),true);
-      const res=await window.storage.list("dancer:",true);
-      const keys=(res?.keys)||[];const others=keys.filter(k=>k!==pk).slice(0,16);
-      const data=[];
-      for(const k of others){try{const r=await window.storage.get(k,true);if(r){const p=JSON.parse(r.value);if(Date.now()-p.t<7*24*3600*1000)data.push(p);}}catch{}}
-      setPlayers(data.sort((a,b)=>b.power-a.power));
-    }catch(e){console.error(e);}setLoading(false);
+      // 古い自分のデータを削除してから新しく登録
+      await supabase.from('dancers').delete().eq('name',char.name);
+      await supabase.from('dancers').insert({
+        name:char.name, genre:char.genre,
+        power:myPow, level:getLv(char.exp), hometown:char.hometown||"",
+        stats:char.stats, equipped:char.equipped||{}
+      });
+      // 他のプレイヤーを取得
+      const{data,error}=await supabase.from('dancers')
+        .select('name,genre,power,level,hometown')
+        .neq('name',char.name)
+        .order('power',{ascending:false})
+        .limit(20);
+      if(error)throw error;
+      setPlayers(data||[]);
+    }catch(e){
+      console.error(e);
+      pushNotif("通信エラー。しばらくして再試行","#ff5555");
+    }
+    setLoading(false);
   }
 
   async function fight(opp){
@@ -975,45 +1003,170 @@ function OnlineArena({char,setChar,genre,pushNotif,addLog}){
     setBattle({...btl,oppName:opp.name,step:0,phase:"seq"});
     for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,1000));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
     const{won,flags}=btl;
-    const prize=won?Math.floor(opp.power*14+800):Math.floor(opp.power*1.5);
+    const prize=won?Math.floor(opp.power*14+800):0;
     const eg=won?Math.floor(opp.power*2.5+120):Math.floor(opp.power*.4+30);
-    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+prize,energy:Math.max(0,c.energy-20),mood:won?Math.min(100,c.mood+20):Math.max(0,c.mood-15),battlesWon:won?c.battlesWon+1:c.battlesWon}));
+    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+prize,energy:Math.max(0,c.energy-20),
+      mood:won?Math.min(100,c.mood+20):Math.max(0,c.mood-15),
+      battlesWon:won?c.battlesWon+1:c.battlesWon}));
     setBattle(null);setResult({won,eg,prize,flags,opp});
-    addLog(`🌐 ${won?"勝利":"敗北"} vs ${opp.name} +${eg}EXP ${fc(prize)}`);
+    if(won)Sound.fanfare();else Sound.lose();
+    addLog(`🌐 ${won?"勝利":"敗北"} vs ${opp.name} +${eg}EXP${prize?` ${fc(prize)}`:""}`);
   }
 
   return(<div style={{marginTop:12,border:`1px solid ${BD}`,borderRadius:8,overflow:"hidden"}}>
     {battle&&<BattleOverlay state={battle} gc={genre.c} onClose={()=>setBattle(null)}/>}
     <button onClick={()=>{setOpen(o=>{if(!o)reload();return!o;});}} style={{width:"100%",padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:BG2,fontFamily:"M PLUS Rounded 1c,sans-serif",color:TX2,fontSize:12,fontWeight:700}}>
-      <span>🌐 オンライン全国バトル（賞金制）</span><span style={{fontSize:10,color:TX3}}>{open?"▲":"▼"}</span>
+      <span>🌐 オンライン全国バトル（Supabase）</span><span style={{fontSize:10,color:TX3}}>{open?"▲":"▼"}</span>
     </button>
     {open&&(<div style={{padding:12,background:BG}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-        <div style={{fontSize:10,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>POWER: <span style={{color:"#ffd60a",fontWeight:700}}>{myPow}</span><span style={{color:TX3,fontSize:9}}> · {players.length}人参戦中</span></div>
-        <Btn onClick={reload} sx={{fontSize:9,padding:"5px 10px"}}>{loading?"⏳":"🔄 更新"}</Btn>
+        <div style={{fontSize:10,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+          MY POWER: <span style={{color:"#ffd60a",fontWeight:700}}>{myPow}</span>
+          <span style={{color:TX3,fontSize:9}}> · {players.length}人参戦中</span>
+        </div>
+        <Btn onClick={reload} sx={{fontSize:9,padding:"5px 10px"}}>{loading?"⏳ 接続中":"🔄 更新"}</Btn>
       </div>
       {result&&(<div style={{background:result.won?"#0a2010":"#200a0a",border:`1px solid ${result.won?"#2a6030":"#602a2a"}`,borderRadius:8,padding:12,marginBottom:10}}>
         <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:10,color:result.won?"#b3ff00":"#ff6b6b",marginBottom:6}}>{result.won?"🏆 WIN!":"💀 LOSE..."}</div>
         <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:8}}>{result.flags?.map((f,i)=><span key={i} style={{fontSize:18}}>{f==="blue"?"🔵":"🔴"}</span>)}</div>
-        <div style={{display:"flex",gap:14}}><span style={{color:"#ffd60a",fontSize:12}}>+{result.eg} EXP</span><span style={{color:"#b3ff00",fontSize:12,fontWeight:700}}>賞金 {fc(result.prize)}</span></div>
+        <div style={{display:"flex",gap:14}}>
+          <span style={{color:"#ffd60a",fontSize:12}}>+{result.eg} EXP</span>
+          {result.prize>0&&<span style={{color:"#b3ff00",fontSize:12,fontWeight:700}}>賞金 {fc(result.prize)}</span>}
+        </div>
         <Btn onClick={()=>setResult(null)} sx={{marginTop:8,fontSize:10}}>閉じる</Btn>
       </div>)}
-      {players.length===0&&!loading&&<div style={{textAlign:"center",color:TX3,fontSize:11,padding:"20px 0",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>参戦者なし。<Btn onClick={reload} sx={{marginTop:8,fontSize:10}}>参戦登録</Btn></div>}
+      {players.length===0&&!loading&&(
+        <div style={{textAlign:"center",color:TX3,fontSize:11,padding:"20px 0",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+          まだ誰もいない！<br/>「更新」で参戦登録して最初のダンサーになろう！
+        </div>
+      )}
       {players.map((p,i)=>{
         const diff=p.power<myPow-80?"easy":p.power>myPow+80?"hard":"fair";
         const dc={easy:"#81c784",fair:"#ffcc02",hard:"#ff6b6b"}[diff];
         const prize=Math.floor(p.power*14+800);
-        return(<div key={i} style={{background:BG2,border:`1px solid ${i===0?"#ffd60a44":BD}`,borderRadius:7,padding:"10px 12px",marginBottom:8}}>
+        return(<div key={p.id||i} style={{background:BG2,border:`1px solid ${i===0?"#ffd60a44":BD}`,borderRadius:7,padding:"10px 12px",marginBottom:8}}>
           {i===0&&<div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:"#ffd60a",marginBottom:5}}>👑 RANK 1</div>}
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-            <div><div style={{fontWeight:700,fontSize:12,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{p.name}</div><div style={{fontSize:9,color:TX3}}>{GENRES[p.genre]?.jp||p.genre} · Lv.{p.lv}</div></div>
-            <span style={{fontSize:9,color:dc,background:`${dc}22`,padding:"2px 7px",borderRadius:3,alignSelf:"flex-start",border:`1px solid ${dc}44`}}>{diff==="easy"?"楽勝":diff==="fair"?"互角":"強敵"}</span>
+            <div>
+              <div style={{fontWeight:700,fontSize:12,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{p.name}</div>
+              <div style={{fontSize:9,color:TX3}}>{GENRES[p.genre]?.jp||p.genre} · Lv.{p.level}</div>
+            </div>
+            <span style={{fontSize:9,color:dc,background:`${dc}22`,padding:"2px 7px",borderRadius:3,alignSelf:"flex-start",border:`1px solid ${dc}44`}}>
+              {diff==="easy"?"楽勝":diff==="fair"?"互角":"強敵"}
+            </span>
           </div>
-          <div style={{display:"flex",gap:12,marginBottom:8}}><span style={{fontSize:10,color:"#ff7c3a"}}>POWER {p.power}</span><span style={{fontSize:10,color:"#b3ff00",fontWeight:700}}>賞金 {fc(prize)}</span></div>
-          <Btn disabled={!!battle||char.energy<20} col="#200a0a" tc="#ff7070" onClick={()=>fight(p)} full sx={{fontSize:11,border:"1px solid #501818"}}>⚔️ 挑戦 ⚡20</Btn>
+          <div style={{display:"flex",gap:12,marginBottom:8}}>
+            <span style={{fontSize:10,color:"#ff7c3a"}}>POWER {p.power}</span>
+            <span style={{fontSize:10,color:"#b3ff00",fontWeight:700}}>賞金 {fc(prize)}</span>
+          </div>
+          <Btn disabled={!!battle||char.energy<20} col="#200a0a" tc="#ff7070" onClick={()=>fight(p)} full sx={{fontSize:11,border:"1px solid #501818"}}>
+            {char.energy<20?"⚡ エネルギー不足":"⚔️ 挑戦 ⚡20"}
+          </Btn>
         </div>);
       })}
     </div>)}
+  </div>);
+}
+
+/* ── QR BATTLE ── */
+function QRBattle({char,genre,pushNotif,addLog,setChar}){
+  const[qrUrl,setQrUrl]=useState(null);
+  const[scanning,setScanning]=useState(false);
+  const[battle,setBattle]=useState(null);
+  const videoRef=useRef(null);
+  const animRef=useRef(null);
+  const streamRef=useRef(null);
+  const myP=calcPow({...char.stats,...eqBonus(char.equipped||{})});
+
+  useEffect(()=>{
+    const d=JSON.stringify({n:char.name,g:char.genre,p:myP,lv:getLv(char.exp),e:GENRES[char.genre]?.e||'🕺'});
+    QRCode.toDataURL(d,{width:220,margin:2,color:{dark:'#111111',light:'#ffffff'}})
+      .then(url=>setQrUrl(url)).catch(()=>{});
+    return()=>stopScan();
+  },[]);
+
+  async function startScan(){
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+      streamRef.current=stream;
+      if(videoRef.current){videoRef.current.srcObject=stream;videoRef.current.play();}
+      setScanning(true);
+      if('BarcodeDetector' in window){
+        const det=new window.BarcodeDetector({formats:['qr_code']});
+        const check=async()=>{
+          if(!streamRef.current)return;
+          try{
+            const bc=await det.detect(videoRef.current);
+            if(bc.length>0){
+              const opp=JSON.parse(bc[0].rawValue);
+              stopScan();doBattle(opp);return;
+            }
+          }catch{}
+          animRef.current=requestAnimationFrame(check);
+        };
+        animRef.current=requestAnimationFrame(check);
+      }else{
+        pushNotif("Chrome推奨 — QRスキャンはChromeで動作","#ffcc02");
+      }
+    }catch{pushNotif("カメラへのアクセスを許可してください","#ff5555");setScanning(false);}
+  }
+
+  function stopScan(){
+    setScanning(false);
+    if(animRef.current)cancelAnimationFrame(animRef.current);
+    if(streamRef.current){streamRef.current.getTracks().forEach(t=>t.stop());streamRef.current=null;}
+  }
+
+  async function doBattle(opp){
+    if(char.energy<15){pushNotif("エネルギー不足！","#ff5555");return;}
+    const btl=buildBattle(char,opp.g,opp.p);
+    setBattle({phase:"seq",...btl,oppName:opp.n,step:0});
+    for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,1100));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
+    const{won,flags}=btl;
+    const eg=won?Math.floor(opp.p*2+100):Math.floor(opp.p*.3+20);
+    const coins=won?Math.floor(opp.p*10+500):0;
+    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-15),
+      mood:won?Math.min(100,c.mood+15):Math.max(0,c.mood-10),
+      battlesWon:won?c.battlesWon+1:c.battlesWon}));
+    setBattle({phase:"result",won,eg,coins,flags,myP:btl.myP,thP:btl.thP});
+    if(won)Sound.fanfare();else Sound.lose();
+    addLog(`📱 QR対戦 ${won?"勝利":"敗北"} vs ${opp.n} +${eg}EXP`);
+  }
+
+  return(<div>
+    {battle&&<BattleOverlay state={battle} gc={genre.c} onClose={()=>setBattle(null)}/>}
+    {/* 自分のQRコード */}
+    <div style={{textAlign:"center",marginBottom:16,padding:"14px",background:BG2,borderRadius:10,border:`1px solid ${BD}`}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>MY QR CODE</div>
+      <div style={{fontSize:10,color:TX2,marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>相手のスマホに見せよう 📱</div>
+      {qrUrl?(
+        <div style={{display:"inline-block",padding:10,background:"#fff",borderRadius:8,marginBottom:8}}>
+          <img src={qrUrl} alt="QR" style={{display:"block",width:180,height:180}}/>
+        </div>
+      ):(
+        <div style={{width:180,height:180,background:BG3,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center",color:TX3,fontSize:11}}>生成中...</div>
+      )}
+      <div style={{marginTop:8,fontSize:12,color:genre.c,fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{char.name}</div>
+      <div style={{fontSize:10,color:TX3}}>{genre.jp} · POWER {myP} · Lv.{getLv(char.exp)}</div>
+    </div>
+    {/* スキャンエリア */}
+    <div style={{background:BG2,borderRadius:10,padding:14,border:`1px solid ${BD}`}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>SCAN & BATTLE</div>
+      <video ref={videoRef} style={{width:"100%",borderRadius:8,border:`2px solid ${genre.c}66`,display:scanning?"block":"none",maxHeight:280,objectFit:"cover"}} muted playsInline/>
+      {scanning&&<div style={{fontSize:11,color:"#b3ff00",textAlign:"center",padding:"8px 0",fontFamily:"M PLUS Rounded 1c,sans-serif",animation:"pu 1s infinite"}}>📷 相手のQRコードに向けて！</div>}
+      <div style={{marginTop:scanning?8:0}}>
+        {scanning?(
+          <Btn onClick={stopScan} full sx={{fontSize:11}}>キャンセル</Btn>
+        ):(
+          <Btn disabled={char.energy<15} col="#0a2a0a" tc="#80e080" onClick={startScan} full sx={{fontSize:12,padding:"13px",border:"1px solid #1a5a1a",fontWeight:700}}>
+            {char.energy<15?"⚡ エネルギー不足":"📷 相手のQRをスキャン ⚡15"}
+          </Btn>
+        )}
+      </div>
+      <div style={{fontSize:10,color:TX3,marginTop:10,textAlign:"center",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+        ※ Chrome/Safariで動作 · 同じ場所にいる人と対戦
+      </div>
+    </div>
   </div>);
 }
 
@@ -1054,10 +1207,11 @@ function BattleTab({char,setChar,genre,pushNotif,addLog}){
   return(<div>
     {battle&&<BattleOverlay state={battle} gc={genre.c} onClose={()=>setBattle(null)}/>}
     <div style={{display:"flex",background:BG2,borderRadius:8,padding:3,gap:2,marginBottom:14}}>
-      {[["battle","⚔️ バトル"],["show","🎭 ショー・発表会"]].map(([id,label])=>(
-        <button key={id} onClick={()=>setSub(id)} style={{flex:1,padding:"9px 4px",fontSize:11,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:sub===id?genre.c+"33":"none",color:sub===id?genre.c:TX3,borderRadius:6,border:sub===id?`1px solid ${genre.c}66`:"1px solid transparent",transition:"all .15s"}}>{label}</button>
+      {[["battle","⚔️ バトル"],["qr","📱 QR対戦"],["show","🎭 ショー"]].map(([id,label])=>(
+        <button key={id} onClick={()=>setSub(id)} style={{flex:1,padding:"9px 4px",fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:sub===id?genre.c+"33":"none",color:sub===id?genre.c:TX3,borderRadius:6,border:sub===id?`1px solid ${genre.c}66`:"1px solid transparent",transition:"all .15s"}}>{label}</button>
       ))}
     </div>
+    {sub==="qr"&&<QRBattle char={char} genre={genre} pushNotif={pushNotif} addLog={addLog} setChar={setChar}/>}
     {sub==="battle"&&(<div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
         <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3}}>QUICK BATTLE ⚡15</div>
