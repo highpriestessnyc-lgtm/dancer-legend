@@ -377,7 +377,7 @@ const QOPPS=[
   {id:"q7",name:"ストリート王者Shin",style:"breaking",e:"⚡",lv:32, pw:5500, rw:{exp:1800,coins:6000, title:"ストリートの王者"}},
   {id:"q8",name:"ワールドスターYuki",style:"contemporary",e:"🌟",lv:48,pw:9000, rw:{exp:3000,coins:12000,title:"ワールドクラス"}},
   {id:"q9", name:"レジェンド・GOAT", style:"popping",  e:"👑",lv:60, pw:15000, rw:{exp:6000, coins:30000,title:"GOAT"}, requireItems:["michael_glove","michael_hat"]},
-  {id:"q10",name:"宇宙人ダンサー",  style:"breaking", e:"👽",lv:70, pw:25000, rw:{exp:12000,coins:80000,title:"GALAXY DANCER"}, requireItems:["michael_glove","michael_loafer","michael_hat"]},
+  {id:"q10",name:"宇宙人ダンサー",  style:"breaking", e:"👽",lv:70, pw:25000, rw:{exp:12000,coins:80000,title:"GALAXY DANCER"}, requireItems:["michael_glove","michael_loafer","michael_hat","moon_stone"], requireHint:"月に光るものが見える..."},
 ];
 
 /* ── SHOWS ── */
@@ -526,6 +526,214 @@ const J={
   ]},
 };
 const JE=[["sapporo","sendai"],["sendai","tokyo"],["tokyo","yokohama"],["tokyo","nagoya"],["yokohama","nagoya"],["nagoya","kyoto"],["kyoto","osaka"],["osaka","kobe"],["kobe","hiroshima"],["hiroshima","kokura"],["kokura","hakata"],["kokura","oita"],["hakata","nagasaki"],["hakata","kumamoto"],["oita","kumamoto"],["oita","miyazaki"],["kumamoto","nagasaki"],["kumamoto","miyazaki"],["miyazaki","kagoshima"],["kumamoto","kagoshima"]];
+
+
+/* ── ASIA CITIES DATA ── */
+const ASIA={
+  seoul:     {id:"seoul",     name:"ソウル",       e:"🇰🇷",g:"popping",   lv:18,
+    ch:{name:"K-POPPER",e:"🇰🇷",pw:5000},
+    bosses:[
+      {name:"K-POPPER",  e:"🇰🇷",pw:5000,style:"popping",intro:"K-POPが世界を変えた！韓国のPOPPINGシーン！"},
+      {name:"SEOULWAVE", e:"⚡",pw:5800,style:"hiphop", intro:"ソウルの夜に轟くHIPHOPウェーブ！"},
+    ],
+    rw:{exp:1200,coins:7000,title:"Seoul Style"},
+    desc:"K-POPとストリートダンスが融合した熱狂の都",
+    food:[{n:"サムギョプサル",p:1500,e:20,h:45,desc:"焼肉の王道！豚バラ肉がジューシー"},{n:"チキン＆ビール",p:1000,e:12,h:30,desc:"韓国の国民食！チメク文化"}]},
+  busan:     {id:"busan",     name:"釜山",         e:"🌊",g:"breaking",  lv:19,
+    ch:{name:"BUSAN B-BOY",e:"🌊",pw:5500},
+    bosses:[{name:"BUSAN B-BOY",e:"🌊",pw:5500,style:"breaking",intro:"海風が吹く釜山！B-BOYシーンは本物だ！"}],
+    rw:{exp:1300,coins:7500,title:"Busan B-Boy"},
+    desc:"韓国第2の都市の熱いB-BOYシーン",
+    food:[{n:"ミルメク（ラーメン）",p:400,e:8,h:25,desc:"釜山の粉もん文化！ローカルラーメン"},{n:"タコ刺し",p:1200,e:15,h:35,desc:"釜山の新鮮な海の幸"}]},
+  beijing:   {id:"beijing",   name:"北京",         e:"🐉",g:"breaking",  lv:20,
+    ch:{name:"BEIJING DRAGON",e:"🐉",pw:6000},
+    bosses:[{name:"BEIJING DRAGON",e:"🐉",pw:6000,style:"breaking",intro:"中国B-BOYシーンのトップ！龍の如く舞う！"}],
+    rw:{exp:1400,coins:8000,title:"Beijing Champion"},
+    desc:"中国B-BOYシーンの聖地。歴史と革命の都",
+    food:[{n:"北京ダック",p:3000,e:25,h:50,desc:"世界最高峰の鴨料理！皮がパリパリ"},{n:"炸酱面（ジャージャー麺）",p:600,e:12,h:35,desc:"北京の魂のローカル麺"}]},
+  shanghai:  {id:"shanghai",  name:"上海",         e:"🌆",g:"hiphop",    lv:21,
+    ch:{name:"SHANGHAI BOSS",e:"🌆",pw:6500},
+    bosses:[{name:"SHANGHAI BOSS",e:"🌆",pw:6500,style:"hiphop",intro:"上海のクラブシーンを支配する！Asia HipHopの王！"}],
+    rw:{exp:1500,coins:9000,title:"Shanghai King"},
+    desc:"アジアHipHopの震源地。東洋のパリ",
+    food:[{n:"小籠包",p:800,e:15,h:35,desc:"上海名物！スープがじゅわっと溢れる"},{n:"生煎包（焼き小籠包）",p:600,e:12,h:28,desc:"底がカリカリ！上海ソウルフード"}]},
+  taipei:    {id:"taipei",    name:"台北",         e:"🌸",g:"popping",   lv:20,
+    ch:{name:"TAIPEI ELECTRIC",e:"🌸",pw:5800},
+    bosses:[{name:"TAIPEI ELECTRIC",e:"🌸",pw:5800,style:"popping",intro:"台湾のPOPPINGシーンは最高峰！電流が走る！"}],
+    rw:{exp:1350,coins:7800,title:"Taipei Popper"},
+    desc:"台湾のストリートダンスシーンは世界レベル",
+    food:[{n:"鶏排（ジーパイ）",p:300,e:10,h:30,desc:"台湾の巨大フライドチキン！屋台名物"},{n:"タピオカミルクティー",p:200,e:5,h:15,desc:"台湾発祥！世界を席巻したドリンク"}]},
+  bangkok:   {id:"bangkok",   name:"バンコク",     e:"🙏",g:"contemporary",lv:19,
+    ch:{name:"BANGKOK SOUL",e:"🙏",pw:5200},
+    bosses:[{name:"BANGKOK SOUL",e:"🙏",pw:5200,style:"contemporary",intro:"タイの魂を体で表現！CONTEMPORARYの花が咲く！"}],
+    rw:{exp:1250,coins:7200,title:"Bangkok Dancer"},
+    desc:"タイのダンスシーンは独自の美学を持つ",
+    food:[{n:"パッタイ",p:500,e:12,h:32,desc:"タイ炒め麺の王道！甘辛酸っぱい絶品"},{n:"マンゴースティッキーライス",p:400,e:8,h:22,desc:"タイのデザートの王様！甘くて最高"}]},
+  manila:    {id:"manila",    name:"マニラ",       e:"💃",g:"waacking",  lv:20,
+    ch:{name:"MANILA QUEEN",e:"💃",pw:5800},
+    bosses:[{name:"MANILA QUEEN",e:"💃",pw:5800,style:"waacking",intro:"フィリピンのWAACKINGは世界最強！女王降臨！"}],
+    rw:{exp:1350,coins:7500,title:"Manila Queen"},
+    desc:"フィリピンのWAACKINGシーンは世界が注目",
+    food:[{n:"アドボ",p:700,e:15,h:38,desc:"フィリピンのソウルフード！酢醤油煮込み"},{n:"ハロハロ",p:400,e:8,h:20,desc:"フィリピン最強かき氷！具材盛りだくさん"}]},
+  singapore: {id:"singapore", name:"シンガポール", e:"🦁",g:"house",     lv:22,
+    ch:{name:"LION CITY GROOVER",e:"🦁",pw:7000},
+    bosses:[{name:"LION CITY GROOVER",e:"🦁",pw:7000,style:"house",intro:"シンガポールのHOUSEは洗練の極み！"}],
+    rw:{exp:1600,coins:10000,title:"Singapore Lion"},
+    desc:"アジア最先端のHOUSEシーン。多文化が融合",
+    food:[{n:"チキンライス",p:500,e:12,h:32,desc:"シンガポール国民食！シンプルで最高"},{n:"チリクラブ",p:3000,e:22,h:45,desc:"シンガポール名物！スパイシーシーフード"}]},
+  jakarta:   {id:"jakarta",   name:"ジャカルタ",   e:"🌴",g:"breaking",  lv:19,
+    ch:{name:"JAKARTA CREW",e:"🌴",pw:5300},
+    bosses:[{name:"JAKARTA CREW",e:"🌴",pw:5300,style:"breaking",intro:"インドネシアB-BOYシーン！熱帯の闘志で来い！"}],
+    rw:{exp:1280,coins:7300,title:"Jakarta B-Boy"},
+    desc:"インドネシアのB-BOYシーンは急成長中",
+    food:[{n:"ナシゴレン",p:500,e:12,h:32,desc:"インドネシアの炒飯！スパイシーで旨い"},{n:"バクソ（ミートボールスープ）",p:400,e:10,h:28,desc:"ジャカルタの屋台名物スープ"}]},
+};
+
+const ASIA_W=42,ASIA_H=65;
+const ASIA_WALK_CITIES=[
+  {id:"seoul",     x:36,y:8,  name:"ソウル",       e:"🇰🇷",g:"popping"},
+  {id:"busan",     x:36,y:14, name:"釜山",         e:"🌊",g:"breaking"},
+  {id:"beijing",   x:22,y:10, name:"北京",         e:"🐉",g:"breaking"},
+  {id:"shanghai",  x:26,y:20, name:"上海",         e:"🌆",g:"hiphop"},
+  {id:"taipei",    x:28,y:28, name:"台北",         e:"🌸",g:"popping"},
+  {id:"manila",    x:33,y:38, name:"マニラ",       e:"💃",g:"waacking"},
+  {id:"bangkok",   x:20,y:40, name:"バンコク",     e:"🙏",g:"contemporary"},
+  {id:"singapore", x:22,y:50, name:"シンガポール", e:"🦁",g:"house"},
+  {id:"jakarta",   x:20,y:56, name:"ジャカルタ",   e:"🌴",g:"breaking"},
+];
+
+function buildASIAMap(){
+  const G=Array.from({length:ASIA_H},()=>new Array(ASIA_W).fill('~'));
+  const s=(x,y,t)=>{if(y>=0&&y<ASIA_H&&x>=0&&x<ASIA_W)G[y][x]=t;};
+  const rect=(x1,y1,x2,y2,t)=>{for(let y=Math.min(y1,y2);y<=Math.max(y1,y2);y++)for(let x=Math.min(x1,x2);x<=Math.max(x1,x2);x++)s(x,y,t);};
+  const road=(x1,y1,x2,y2)=>{let x=x1,y=y1;while(y!==y2){s(x,y,'.');y+=(y<y2?1:-1);}while(x!==x2){s(x,y,'.');x+=(x<x2?1:-1);}s(x2,y2,'.');};
+  // 中国大陸
+  rect(4,5,32,35,'f');rect(6,7,30,33,'.');
+  // 朝鮮半島
+  rect(33,5,40,18,'f');rect(34,6,39,17,'.');
+  // 台湾（島）
+  rect(26,25,30,32,'f');rect(27,26,29,31,'.');
+  // フィリピン諸島
+  rect(31,35,38,44,'f');rect(32,36,37,43,'.');
+  // 東南アジア半島
+  rect(14,35,26,58,'f');rect(15,37,25,57,'.');
+  // インドネシア
+  rect(16,52,26,60,'f');rect(17,53,25,59,'.');
+  // シンガポール（マレーシア南端）
+  rect(20,48,24,54,'f');rect(21,49,23,53,'.');
+  // 各都市間の道
+  for(let i=0;i<ASIA_WALK_CITIES.length-1;i++){
+    const a=ASIA_WALK_CITIES[i],b=ASIA_WALK_CITIES[i+1];
+    road(a.x,a.y,b.x,b.y);
+  }
+  road(26,20,22,10);// 上海→北京
+  road(36,14,26,20);// 釜山→上海（海路イメージ）
+  ASIA_WALK_CITIES.forEach(c=>s(c.x,c.y,'@'));
+  return G;
+}
+const ASIA_MAP=buildASIAMap();
+
+/* ── USA CITIES DATA ── */
+const USA={
+  harlem:     {id:"harlem",    name:"ハーレム",       e:"🎷",g:"jazz",     lv:25,
+    ch:{name:"HARLEM KING",e:"🎷",pw:8000},
+    bosses:[{name:"HARLEM KING",e:"🎷",pw:8000,style:"jazz",intro:"ハーレムに響くJAZZの魂！1920年代から続く伝説！"}],
+    rw:{exp:1800,coins:12000,title:"Harlem Renaissance"},
+    desc:"JAZZ DANCEの魂の故郷。Renaissance の聖地",
+    food:[{n:"ソウルフード",p:1000,e:18,h:40,desc:"コラードグリーン＆フライドチキン"},{n:"スイートポテトパイ",p:600,e:10,h:25,desc:"ハーレムのおばあちゃんの味"}]},
+  bronx:      {id:"bronx",     name:"ブロンクス",     e:"🏙",g:"breaking", lv:27,
+    ch:{name:"BBOY BRONX",e:"🏙",pw:9500},
+    bosses:[
+      {name:"BBOY BRONX",   e:"🏙",pw:9500, style:"breaking",intro:"Breaking発祥の地！1970年代の路上が俺の故郷！"},
+      {name:"ZULU KING",    e:"⚡",pw:10500,style:"hiphop",  intro:"Afrika Bambaataa の魂を継ぐ者！"},
+    ],
+    rw:{exp:2200,coins:18000,title:"Bronx B-Boy Legend"},
+    desc:"Breaking発祥の地。HipHop4大要素が生まれた聖地",
+    food:[{n:"グランドコンコース・ピザ",p:500,e:12,h:30,desc:"ブロンクス定番のNYスタイルピザ"},{n:"プエルトリコ料理",p:800,e:15,h:35,desc:"ブロンクスの多文化が生んだ味"}]},
+  brooklyn:   {id:"brooklyn",  name:"ブルックリン",   e:"🌉",g:"hiphop",   lv:26,
+    ch:{name:"BK FINEST",e:"🌉",pw:9000},
+    bosses:[
+      {name:"BK FINEST",   e:"🌉",pw:9000, style:"hiphop",intro:"Brooklyn in the house！BKスタイルで来い！"},
+      {name:"HOUSE QUEEN", e:"🕺",pw:9800, style:"house", intro:"BKのHOUSEシーンを牛耳る女王！"},
+    ],
+    rw:{exp:2000,coins:15000,title:"Brooklyn Legend"},
+    desc:"HipHopとHouseが交差するストリートの聖地",
+    food:[{n:"Junior's チーズケーキ",p:1200,e:15,h:30,desc:"ブルックリン名物！絶品チーズケーキ"},{n:"ブルックリンスタイルピザ",p:700,e:12,h:28,desc:"薄くてパリッとしたNYピザの原点"}]},
+  atlanta:    {id:"atlanta",   name:"アトランタ",     e:"🍑",g:"hiphop",   lv:24,
+    ch:{name:"ATL OG",e:"🍑",pw:7500},
+    bosses:[{name:"ATL OG",e:"🍑",pw:7500,style:"hiphop",intro:"Dirty South！アトランタがHipHopを変えた！"}],
+    rw:{exp:1700,coins:11000,title:"ATL Legend"},
+    desc:"Dirty South HipHopの震源地。Trap発祥の地",
+    food:[{n:"フライドチキン＆ワッフル",p:1100,e:20,h:45,desc:"アトランタ名物の最強コンビ"},{n:"ピーチコブラー",p:600,e:10,h:25,desc:"ジョージアの桃を使った極上デザート"}]},
+  newolreans: {id:"newolreans",name:"ニューオーリンズ",e:"🎷",g:"jazz",     lv:23,
+    ch:{name:"JAZZ SAINT",e:"🎷",pw:7000},
+    bosses:[{name:"JAZZ SAINT",e:"🎷",pw:7000,style:"jazz",intro:"マルディグラの夜に踊る！JAZZ発祥の地の魂！"}],
+    rw:{exp:1600,coins:10000,title:"New Orleans Jazz King"},
+    desc:"Jazz発祥の港町。Second Lineの聖地",
+    food:[{n:"ガンボ",p:1200,e:20,h:42,desc:"ニューオーリンズ名物！シーフードたっぷりシチュー"},{n:"ベニエ",p:400,e:8,h:20,desc:"揚げドーナツに粉砂糖！カフェ・デュ・モンド"}]},
+  fresno:     {id:"fresno",    name:"フレズノ",       e:"⚡",g:"popping",  lv:22,
+    ch:{name:"ELECTRIC SAM",e:"⚡",pw:6500},
+    bosses:[{name:"ELECTRIC SAM",e:"⚡",pw:6500,style:"popping",intro:"POPPING発祥の地フレズノ！Electric Boogaloos の魂！"}],
+    rw:{exp:1500,coins:9000,title:"Fresno Popping OG"},
+    desc:"POPPINGとElectric Boogaloosが生まれた地",
+    food:[{n:"フレズノ・バーベキュー",p:1000,e:18,h:40,desc:"カリフォルニア農業地帯の旨いBBQ"},{n:"タコス",p:500,e:10,h:25,desc:"本格メキシカンタコス。LAより安くて旨い"}]},
+  compton:    {id:"compton",   name:"コンプトン",     e:"🎤",g:"hiphop",   lv:23,
+    ch:{name:"WEST COAST G",e:"🎤",pw:7000},
+    bosses:[{name:"WEST COAST G",e:"🎤",pw:7000,style:"hiphop",intro:"West Side！ギャングスタラップの聖地コンプトン！"}],
+    rw:{exp:1600,coins:10000,title:"West Coast Legend"},
+    desc:"West Coast HipHopの聖地。N.W.Aの故郷",
+    food:[{n:"フライドチキン",p:800,e:15,h:38,desc:"コンプトンのローカル名物チキン"},{n:"クールエイド",p:200,e:5,h:15,desc:"ストリートの定番ドリンク。甘くて冷たい"}]},
+  hollywood:  {id:"hollywood", name:"ハリウッド",     e:"🎬",g:"jazz",     lv:21,
+    ch:{name:"STAGE STAR",e:"🎬",pw:6000},
+    bosses:[{name:"STAGE STAR",e:"🎬",pw:6000,style:"jazz",intro:"ハリウッドのステージを支配するJAZZの女王！"}],
+    rw:{exp:1400,coins:8000,title:"Hollywood Star"},
+    desc:"エンタメとJAZZ DANCEが輝く夢の街",
+    food:[{n:"In-N-Out バーガー",p:800,e:15,h:35,desc:"カリフォルニア名物！ダブルダブルマストライ！"},{n:"アサイーボウル",p:1000,e:12,h:25,desc:"LAヘルシー飯の定番。映えも最高"}]},
+};
+
+/* ── USA WALK MAP ── */
+const USA_W=42,USA_H=62;
+const USA_WALK_CITIES=[
+  {id:"harlem",   x:38,y:10,name:"ハーレム",    e:"🎷",g:"jazz"},
+  {id:"bronx",    x:39,y:13,name:"ブロンクス",  e:"🏙",g:"breaking"},
+  {id:"brooklyn", x:38,y:17,name:"ブルックリン",e:"🌉",g:"hiphop"},
+  {id:"atlanta",  x:30,y:35,name:"アトランタ",  e:"🍑",g:"hiphop"},
+  {id:"newolreans",x:24,y:46,name:"ニューオーリンズ",e:"🎷",g:"jazz"},
+  {id:"fresno",   x:5, y:20,name:"フレズノ",    e:"⚡",g:"popping"},
+  {id:"compton",  x:5, y:30,name:"コンプトン",  e:"🎤",g:"hiphop"},
+  {id:"hollywood",x:6, y:38,name:"ハリウッド",  e:"🎬",g:"jazz"},
+];
+
+function buildUSAMap(){
+  const G=Array.from({length:USA_H},()=>new Array(USA_W).fill('~'));
+  const s=(x,y,t)=>{if(y>=0&&y<USA_H&&x>=0&&x<USA_W)G[y][x]=t;};
+  const rect=(x1,y1,x2,y2,t)=>{for(let y=Math.min(y1,y2);y<=Math.max(y1,y2);y++)for(let x=Math.min(x1,x2);x<=Math.max(x1,x2);x++)s(x,y,t);};
+  const road=(x1,y1,x2,y2)=>{let x=x1,y=y1;while(y!==y2){s(x,y,'.');y+=(y<y2?1:-1);}while(x!==x2){s(x,y,'.');x+=(x<x2?1:-1);}s(x2,y2,'.');};
+
+  // 西海岸（California）
+  rect(2,10,12,52,'f');rect(3,12,10,50,'.');
+  // ロッキー山脈（通行不可）
+  rect(13,10,18,50,'^');
+  // 中央平原〜南部
+  rect(19,28,35,52,'f');rect(20,30,33,50,'.');
+  // 東海岸（NY〜南部）
+  rect(34,5,41,42,'f');rect(35,7,40,40,'.');
+  // 北部接続
+  rect(19,10,34,14,'f');rect(20,11,33,13,'.');
+  // 西〜東の接続ルート（南部経由）
+  road(10,50,24,46);road(24,46,30,35);road(30,35,35,35);
+  // 西海岸〜ロッキー越え（北ルート）
+  road(10,12,19,12);road(19,12,34,12);road(34,12,38,10);
+
+  // 各都市間
+  for(let i=0;i<USA_WALK_CITIES.length-1;i++){
+    const a=USA_WALK_CITIES[i],b=USA_WALK_CITIES[i+1];
+    road(a.x,a.y,b.x,b.y);
+  }
+  USA_WALK_CITIES.forEach(c=>s(c.x,c.y,'@'));
+  return G;
+}
+const USA_MAP=buildUSAMap();
 
 /* ── WORLD MAP (拡張版 13都市) ── */
 // viewBox 0 0 380 230
@@ -978,9 +1186,13 @@ function buildBattle(char,oppStyle,oppPow){
   // 相性チェック（2ジャンルある場合は有利な方を自動選択）
   const cb1=compatBonus(char.genre,oppStyle);
   const cb2=char.genre2?compatBonus(char.genre2,oppStyle):{bonus:0,label:""};
-  const useGenre2=char.genre2&&cb2.bonus>cb1.bonus;
-  const usedGenre=useGenre2?char.genre2:char.genre;
-  const compat=useGenre2?cb2:cb1;
+  const cb3=char.genre3?compatBonus(char.genre3,oppStyle):{bonus:0,label:""};
+  const best=[{g:char.genre,cb:cb1},{g:char.genre2,cb:cb2},{g:char.genre3,cb:cb3}]
+    .filter(x=>x.g).reduce((a,b)=>b.cb.bonus>a.cb.bonus?b:a);
+  const usedGenre=best.g;
+  const compat=best.cb;
+  const useGenre2=usedGenre===char.genre2; // 後方互換
+  const useGenre3=usedGenre===char.genre3;
   myP=Math.floor(myP*compat.bonus);
 
   myP+=Math.floor(Math.random()*50);
@@ -988,9 +1200,7 @@ function buildBattle(char,oppStyle,oppPow){
   const won=myP>=thP;
   const pComments=BC[usedGenre]||BC.jazz;
   const oComments=OBC[oppStyle]||OBC.house;
-
-  // 2ジャンルの場合はサブジャンルの台詞も混ぜる
-  const p2Comments=char.genre2&&useGenre2?BC[char.genre2]:null;
+  const p2Comments=BC[usedGenre]; // 使用中のジャンルのコメント
   const moves=[
     {isPlayer:true,  comment:pick(pComments), genre:usedGenre},
     {isPlayer:false, comment:pick(oComments), genre:oppStyle},
@@ -1001,7 +1211,7 @@ function buildBattle(char,oppStyle,oppPow){
     if(won)return i<3||Math.random()<0.6?"blue":"red";
     return i>=3||Math.random()<0.6?"red":"blue";
   });
-  return{moves,flags,won,myP,thP,playerGenre:usedGenre,usedGenre,compat,useGenre2};
+  return{moves,flags,won,myP,thP,playerGenre:usedGenre,usedGenre,compat,useGenre2,useGenre3};
 }
 
 /* ── MAP SVG ── */
@@ -1259,7 +1469,862 @@ function AButton({onPress,label="A",col="#ff4da6",disabled=false,sub=""}){
   </div>);
 }
 
-/* ── 都市ミニマップ（ご飯屋・クラブ・溜まり場） ── */
+/* ── 🌙 MOON WALK MODE ── */
+const MOON_W=20,MOON_H=15;
+const MOON_TILES=[
+  "~~~~~~~~~~~~~~~~~~~~",
+  "~~..............~~~~",
+  "~...............~~~~",
+  "~................~~~",
+  "~.......^^.......~~~",
+  "~......^^^^.......~~",
+  "~.....^^^^^^^.....~~",
+  "~................~~~",
+  "~...............~~~~",
+  "~~..............~~~~",
+  "~~~..........~~~~~~~",
+  "~~~~.......~~~~~~~~~",
+  "~~~~~.....~~~~~~~~~~",
+  "~~~~~~...~~~~~~~~~~~",
+  "~~~~~~~~~~~~~~~~~~~~",
+];
+const MOON_STONE_POS={x:3,y:2}; // 光る石の場所（左上隅に隠れてる）
+
+function MoonWalkMode({char,setChar,genre,onExit,pushNotif,addLog}){
+  const[pos,setPos]=useState({x:10,y:7}); // 中央からスタート
+  const[gotStone,setGotStone]=useState(false);
+  const[msg,setMsg]=useState("🌙 月面に降り立った... 静寂だ。");
+
+  const hasStone=(char.specialItems||[]).includes("moon_stone");
+
+  function gt(x,y){if(y<0||y>=MOON_H||x<0||x>=MOON_W)return'~';return MOON_TILES[y]?.[x]||'~';}
+
+  function move(dir){
+    if(gotStone)return;
+    setPos(prev=>{
+      let{x,y}=prev;let nx=x,ny=y;
+      if(dir==="up")ny--;if(dir==="down")ny++;if(dir==="left")nx--;if(dir==="right")nx++;
+      if(gt(nx,ny)==='~'||gt(nx,ny)==='^')return prev;
+      // 月の石チェック
+      if(nx===MOON_STONE_POS.x&&ny===MOON_STONE_POS.y&&!hasStone){
+        setTimeout(()=>{
+          setGotStone(true);
+          setChar(c=>({...c,specialItems:[...(c.specialItems||[]),"moon_stone"]}));
+          setMsg("✨「これは...！謎の輝きを持つ石を拾った」");
+          addLog("🌙 月の石を発見！");
+          pushNotif("🌙 月の石を手に入れた！","#c0c0ff");
+        },100);
+      }
+      return{x:nx,y:ny};
+    });
+  }
+
+  useEffect(()=>{
+    const h=e=>{const m={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right"};if(m[e.key]){e.preventDefault();move(m[e.key]);}};
+    window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
+  },[pos,gotStone]);
+
+  const TS2=24;
+  const tileColor=(t)=>({'.':'#1a1a2a','^':'#2a2a3a','~':'#050510'}[t]||'#050510');
+
+  return(<div style={{background:"#020210",minHeight:"100vh",paddingBottom:180}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 14px",background:"#0a0a20",borderBottom:"1px solid #2a2a5a"}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:9,color:"#c0c0ff",letterSpacing:2}}>🌙 MOON SURFACE</div>
+      <button onClick={onExit} style={{fontSize:10,color:"#6060a0",background:"none",border:"1px solid #2a2a5a",borderRadius:4,padding:"5px 10px",cursor:"pointer"}}>← MAP</button>
+    </div>
+
+    {/* 星空背景 */}
+    <div style={{textAlign:"center",padding:"8px 0 4px",fontSize:9,color:"#4a4a8a",fontFamily:"M PLUS Rounded 1c,sans-serif",letterSpacing:2}}>
+      ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦
+    </div>
+
+    {/* マップ */}
+    <div style={{margin:"4px",border:"1px solid #2a2a5a",borderRadius:8,overflow:"hidden"}}>
+      <svg viewBox={`0 0 ${MOON_W*TS2} ${MOON_H*TS2}`} width="100%" style={{display:"block"}}>
+        <rect width={MOON_W*TS2} height={MOON_H*TS2} fill="#020210"/>
+        {/* 星 */}
+        {[[30,20],[80,50],[150,30],[200,80],[300,40],[350,70],[100,100],[250,120]].map(([sx,sy],i)=>(
+          <circle key={i} cx={sx} cy={sy} r="1.5" fill="#ffffff" opacity="0.6"/>
+        ))}
+        {/* タイル */}
+        {Array.from({length:MOON_H},(_,y)=>Array.from({length:MOON_W},(_,x)=>{
+          const t=gt(x,y);
+          const isStone=x===MOON_STONE_POS.x&&y===MOON_STONE_POS.y&&!hasStone&&!gotStone;
+          return(<g key={`${x}-${y}`}>
+            <rect x={x*TS2} y={y*TS2} width={TS2} height={TS2} fill={tileColor(t)} stroke="#0a0a20" strokeWidth=".5"/>
+            {t==='.'&&<rect x={x*TS2+2} y={y*TS2+2} width={TS2-4} height={TS2-4} fill="#1e1e30" rx="2"/>}
+            {t==='^'&&<text x={x*TS2+TS2*.5} y={y*TS2+TS2*.65} textAnchor="middle" fontSize={TS2*.6}>🪨</text>}
+            {isStone&&<g>
+              <circle cx={x*TS2+TS2*.5} cy={y*TS2+TS2*.5} r={TS2*.35} fill="#4040ff" opacity="0.3"/>
+              <text x={x*TS2+TS2*.5} y={y*TS2+TS2*.62} textAnchor="middle" fontSize={TS2*.55} style={{animation:"vi 1s ease infinite"}}>✨</text>
+            </g>}
+            {hasStone&&x===MOON_STONE_POS.x&&y===MOON_STONE_POS.y&&(
+              <text x={x*TS2+TS2*.5} y={y*TS2+TS2*.62} textAnchor="middle" fontSize={TS2*.4} opacity=".3">　</text>
+            )}
+          </g>);
+        }))}
+        {/* プレイヤー */}
+        {(()=>{const vx=pos.x,vy=pos.y;return(<g>
+          <circle cx={vx*TS2+TS2*.5} cy={vy*TS2+TS2*.5} r={TS2*.4} fill={genre.c} stroke="#fff" strokeWidth="1.5" opacity=".9"/>
+          <text x={vx*TS2+TS2*.5} y={vy*TS2+TS2*.58} textAnchor="middle" dominantBaseline="middle" fontSize={TS2*.45}>{genre.e}</text>
+        </g>);})()}
+      </svg>
+    </div>
+
+    {/* メッセージ */}
+    <div style={{margin:"8px 4px",padding:"12px 14px",background:"#0a0a20",borderRadius:8,border:"1px solid #2a2a5a",fontFamily:"M PLUS Rounded 1c,sans-serif",fontSize:12,color:"#c0c0ff",lineHeight:1.7}}>
+      {msg}
+    </div>
+
+    {gotStone&&<div style={{margin:"0 4px 12px",padding:16,background:"#0a0a2a",borderRadius:10,border:"1px solid #4a4aff",textAlign:"center"}}>
+      <div style={{fontSize:32,marginBottom:8}}>🌙</div>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:9,color:"#c0c0ff",marginBottom:8}}>MOON STONE GET</div>
+      <div style={{fontSize:11,color:"#8080c0",fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:12}}>これが何かはわからない...<br/>でも何かが変わった気がする</div>
+      <Btn onClick={onExit} col="#0a0a2a" tc="#c0c0ff" full sx={{fontSize:11,border:"1px solid #4a4aff"}}>← 地球に戻る</Btn>
+    </div>}
+
+    {hasStone&&!gotStone&&<div style={{margin:"0 4px",padding:12,background:"#0a0a20",borderRadius:8,border:"1px solid #2a2a5a",textAlign:"center",fontSize:10,color:"#4a4a8a",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+      🌙 月の石はすでに所持中
+    </div>}
+
+    {!gotStone&&!hasStone&&<div style={{textAlign:"center",fontSize:9,color:"#3a3a6a",fontFamily:"M PLUS Rounded 1c,sans-serif",marginTop:4}}>
+      十字キーで探索...
+    </div>}
+    <DPad onMove={move}/>
+  </div>);
+}
+
+/* ── AFRICA CITIES DATA ── */
+const AFRICA={
+  cairo:      {id:"cairo",     name:"カイロ",         e:"🏛",g:"contemporary",lv:24,
+    ch:{name:"PHARAOH DANCER",e:"🏛",pw:7800},
+    bosses:[
+      {name:"PHARAOH DANCER",e:"🏛",pw:7800, style:"contemporary",intro:"古代エジプトから続く舞踊の魂！ファラオの動きを見よ！"},
+      {name:"NILE GODDESS",  e:"🌊",pw:8500, style:"ballet",      intro:"ナイル川の女神が舞う！エジプシャンバレエ！"},
+    ],
+    rw:{exp:1900,coins:13000,title:"Cairo Pharaoh Dancer"},
+    desc:"古代から続くエジプト舞踊。世界最古のダンスの地",
+    food:[{n:"コシャリ",p:200,e:10,h:30,desc:"エジプト国民食！豆・米・パスタの最強盛り合わせ"},{n:"クナーファ",p:400,e:8,h:22,desc:"チーズ入りの甘いエジプトスイーツ！シロップたっぷり"}]},
+  dakar:      {id:"dakar",     name:"ダカール",       e:"🥁",g:"contemporary",lv:22,
+    ch:{name:"SABAR MASTER",e:"🥁",pw:6800},
+    bosses:[{name:"SABAR MASTER",e:"🥁",pw:6800,style:"contemporary",intro:"サバールドラムに合わせて踊れ！セネガルの魂！"}],
+    rw:{exp:1600,coins:10000,title:"Dakar Sabar King"},
+    desc:"サバール発祥の地。西アフリカCONTEMPORARYの聖地",
+    food:[{n:"チェブジェン",p:800,e:16,h:40,desc:"セネガル国民食！魚と米の炊き込みご飯"},{n:"ティアクリ",p:300,e:7,h:20,desc:"キビ粉のデザート。セネガルのおばあちゃんの味"}]},
+  lagos:      {id:"lagos",     name:"ラゴス",         e:"🎵",g:"hiphop",     lv:25,
+    ch:{name:"AFROBEAT KING",e:"🎵",pw:8200},
+    bosses:[
+      {name:"AFROBEAT KING", e:"🎵",pw:8200,style:"hiphop",  intro:"Afrobeatが世界を変えた！ラゴスから全世界へ！"},
+      {name:"LAGOS STRIKER", e:"⚡",pw:9000,style:"breaking",intro:"ナイジェリアBREAKINGシーン！爆発するエネルギー！"},
+    ],
+    rw:{exp:2000,coins:14000,title:"Lagos Afrobeat Legend"},
+    desc:"Afrobeatの聖地。フェラ・クティの魂が生きる街",
+    food:[{n:"ジョロフライス",p:600,e:14,h:36,desc:"西アフリカの魂の炊き込みご飯！スパイスが命"},{n:"スープ・オグボノ",p:700,e:12,h:32,desc:"マンゴーシードのシチュー！ナイジェリア定番"}]},
+  douala:     {id:"douala",    name:"ドゥアラ",       e:"🌴",g:"hiphop",     lv:24,
+    ch:{name:"CAMEROON GROOVER",e:"🌴",pw:7500},
+    bosses:[{name:"CAMEROON GROOVER",e:"🌴",pw:7500,style:"hiphop",intro:"カメルーンのHIPHOPは独自進化！アフリカの心臓で踊れ！"}],
+    rw:{exp:1800,coins:12000,title:"Douala Legend"},
+    desc:"中央アフリカのHIPHOPシーンの中心地",
+    food:[{n:"ンドレ",p:500,e:11,h:30,desc:"葉野菜と落花生の煮込み。カメルーンの家庭料理"},{n:"スフレ・ドゥ・バナン",p:300,e:7,h:18,desc:"バナナの揚げ物。ドゥアラの屋台名物"}]},
+  daressalaam:{id:"daressalaam",name:"ダルエスサラーム",e:"🌅",g:"waacking", lv:23,
+    ch:{name:"SWAHILI QUEEN",e:"🌅",pw:7200},
+    bosses:[{name:"SWAHILI QUEEN",e:"🌅",pw:7200,style:"waacking",intro:"スワヒリ海岸の女王！WAACKINGで夕陽を切り裂く！"}],
+    rw:{exp:1700,coins:11000,title:"Swahili Queen"},
+    desc:"スワヒリ文化が息づく東アフリカの港町",
+    food:[{n:"ウガリ＆スクマウィキ",p:300,e:9,h:28,desc:"東アフリカの主食！コーンミールと葉野菜"},{n:"ビリアニ（タンザニア式）",p:800,e:14,h:35,desc:"スパイス香るタンザニア風炊き込みご飯"}]},
+  harare:     {id:"harare",    name:"ハラレ",         e:"🦁",g:"jazz",      lv:26,
+    ch:{name:"ZIMBABWE JAZZ MAN",e:"🦁",pw:8800},
+    bosses:[{name:"ZIMBABWE JAZZ MAN",e:"🦁",pw:8800,style:"jazz",intro:"ジンバブエのJAZZは独自進化！ムビラの音色で踊る！"}],
+    rw:{exp:2100,coins:15000,title:"Harare Jazz Legend"},
+    desc:"ムビラ音楽とジャズが融合したジンバブエの首都",
+    food:[{n:"サザ＆ムトン",p:500,e:12,h:32,desc:"トウモロコシ粉の主食にマトンシチュー"},{n:"ムティケ（かぼちゃのデザート）",p:250,e:6,h:18,desc:"甘く煮たかぼちゃ。ジンバブエのおやつ"}]},
+  johannesburg:{id:"johannesburg",name:"ヨハネスブルグ",e:"💎",g:"breaking", lv:28,
+    ch:{name:"SOWETO B-BOY",e:"💎",pw:9500},
+    bosses:[
+      {name:"SOWETO B-BOY",  e:"💎",pw:9500, style:"breaking",    intro:"ソウェトから世界へ！南アフリカBREAKINGの頂点！"},
+      {name:"PANTSULA KING", e:"👟",pw:10200,style:"hiphop",      intro:"パンツラ！南アフリカ独自のストリートダンス！"},
+    ],
+    rw:{exp:2300,coins:18000,title:"Johannesburg Legend"},
+    desc:"ソウェトとパンツラ発祥の地。南アフリカのダンス首都",
+    food:[{n:"ブラーイ（南アBBQ）",p:1500,e:20,h:45,desc:"南アフリカ式BBQ！ボーレウォース（ソーセージ）が旨い"},{n:"ビルトン",p:600,e:8,h:20,desc:"南アフリカの干し肉スナック！ジャーキーの王様"}]},
+};
+
+const AFR_W=36,AFR_H=65;
+const AFR_WALK_CITIES=[
+  {id:"cairo",       x:26,y:7,  name:"カイロ",         e:"🏛",g:"contemporary"},
+  {id:"dakar",       x:3, y:20, name:"ダカール",       e:"🥁",g:"contemporary"},
+  {id:"lagos",       x:13,y:26, name:"ラゴス",         e:"🎵",g:"hiphop"},
+  {id:"douala",      x:17,y:34, name:"ドゥアラ",       e:"🌴",g:"hiphop"},
+  {id:"daressalaam", x:28,y:38, name:"ダルエスサラーム",e:"🌅",g:"waacking"},
+  {id:"harare",      x:24,y:48, name:"ハラレ",         e:"🦁",g:"jazz"},
+  {id:"johannesburg",x:21,y:56, name:"ヨハネスブルグ", e:"💎",g:"breaking"},
+];
+
+function buildAFRMap(){
+  const G=Array.from({length:AFR_H},()=>new Array(AFR_W).fill('~'));
+  const s=(x,y,t)=>{if(y>=0&&y<AFR_H&&x>=0&&x<AFR_W)G[y][x]=t;};
+  const rect=(x1,y1,x2,y2,t)=>{for(let y=Math.min(y1,y2);y<=Math.max(y1,y2);y++)for(let x=Math.min(x1,x2);x<=Math.max(x1,x2);x++)s(x,y,t);};
+  const road=(x1,y1,x2,y2)=>{let x=x1,y=y1;while(y!==y2){s(x,y,'.');y+=(y<y2?1:-1);}while(x!==x2){s(x,y,'.');x+=(x<x2?1:-1);}s(x2,y2,'.');};
+  // 北アフリカ（広大）
+  rect(2,3,34,18,'f');rect(3,4,33,17,'.');
+  // サハラ砂漠（山タイルで表現）
+  rect(4,10,28,18,'^');
+  // 西アフリカ
+  rect(2,18,20,32,'f');rect(3,19,19,31,'.');
+  // 中央アフリカ（密林）
+  rect(12,28,28,42,'f');rect(13,29,27,41,'.');
+  // 東アフリカ
+  rect(22,30,34,50,'f');rect(23,31,33,49,'.');
+  // 南アフリカ
+  rect(10,46,30,62,'f');rect(11,47,29,61,'.');
+  // 道路
+  for(let i=0;i<AFR_WALK_CITIES.length-1;i++){
+    const a=AFR_WALK_CITIES[i],b=AFR_WALK_CITIES[i+1];
+    road(a.x,a.y,b.x,b.y);
+  }
+  road(3,20,26,7); // ダカール→カイロ（北アフリカ横断）
+  road(13,26,28,38);// ラゴス→ダルエスサラーム（大陸横断）
+  AFR_WALK_CITIES.forEach(c=>s(c.x,c.y,'@'));
+  return G;
+}
+const AFR_MAP=buildAFRMap();
+
+function AFRICAWalkMode(p){return<WorldWalkMode {...p} walkCities={AFR_WALK_CITIES} walkMap={AFR_MAP} cityData={AFRICA} mapW={AFR_W} mapH={AFR_H} regionName="AFRICA MAP" flagEmoji="🌍"/>;}
+
+/* ── SOUTH AMERICA CITIES DATA ── */
+const SAMERICA={
+  kingston:  {id:"kingston",  name:"キングストン", e:"🎵",g:"hiphop",      lv:20,
+    ch:{name:"DANCEHALL KING",e:"🎵",pw:6000},
+    bosses:[{name:"DANCEHALL KING",e:"🎵",pw:6000,style:"hiphop",intro:"ジャマイカから世界へ！レゲエとダンスホールの王！"}],
+    rw:{exp:1400,coins:8500,title:"Kingston Legend"},
+    desc:"レゲエ・ダンスホール発祥の地。ボブ・マーリーの故郷",
+    food:[{n:"ジャークチキン",p:800,e:15,h:38,desc:"スパイシーな炭火焼きチキン！ジャマイカの魂"},{n:"アキーとソルトフィッシュ",p:600,e:12,h:30,desc:"ジャマイカの国民食！不思議な果物と塩漬け魚"}]},
+  cali:      {id:"cali",      name:"カリ",         e:"💃",g:"waacking",    lv:22,
+    ch:{name:"CALI SALSA QUEEN",e:"💃",pw:6800},
+    bosses:[
+      {name:"CALI SALSA QUEEN",e:"💃",pw:6800,style:"waacking",intro:"カリスタイルサルサ！コロンビアの情熱が爆発！"},
+      {name:"AFRO KING",       e:"🌟",pw:7400,style:"contemporary",intro:"アフロコロンビアンダンスの真髄！"},
+    ],
+    rw:{exp:1600,coins:10000,title:"Cali Salsa Legend"},
+    desc:"世界のサルサの首都カリ！WAACKINGのルーツにも繋がる",
+    food:[{n:"バンデハ・パイサ",p:1200,e:20,h:45,desc:"コロンビア最強の盛り合わせ料理！ボリューム満点"},{n:"アレパ",p:300,e:8,h:22,desc:"コーンの生地を焼いたコロンビアのソウルフード"}]},
+  lima:      {id:"lima",      name:"リマ",         e:"🦅",g:"breaking",   lv:23,
+    ch:{name:"LIMA B-BOY",e:"🦅",pw:7000},
+    bosses:[{name:"LIMA B-BOY",e:"🦅",pw:7000,style:"breaking",intro:"ペルーのB-BOYシーンは急成長中！マチュピチュの魂！"}],
+    rw:{exp:1650,coins:10500,title:"Lima B-Boy"},
+    desc:"南米BREAKING新興の聖地。インカの魂が宿る",
+    food:[{n:"セビーチェ",p:1500,e:18,h:38,desc:"ペルーが誇る生魚のマリネ！世界最高峰の一皿"},{n:"ロモ・サルタード",p:1000,e:15,h:35,desc:"中華×ペルーのフュージョン炒め！"}]},
+  salvador:  {id:"salvador",  name:"サルバドール", e:"🥁",g:"contemporary",lv:25,
+    ch:{name:"AFRO BAHIA MASTER",e:"🥁",pw:8000},
+    bosses:[{name:"AFRO BAHIA MASTER",e:"🥁",pw:8000,style:"contemporary",intro:"アフロブラジリアンダンスの聖地！カポエイラの魂！"}],
+    rw:{exp:1900,coins:13000,title:"Bahia Legend"},
+    desc:"アフロブラジル文化の中心地。カポエイラとサンバの聖地",
+    food:[{n:"アカラジェ",p:400,e:10,h:28,desc:"黒目豆のアフリカ風揚げ物！サルバドールの屋台名物"},{n:"モケカ",p:1200,e:18,h:40,desc:"ココナッツミルクのシーフードシチュー！バイーア名物"}]},
+  saopaulo:  {id:"saopaulo",  name:"サンパウロ",   e:"🌆",g:"hiphop",     lv:26,
+    ch:{name:"SP HIP HOP KING",e:"🌆",pw:8500},
+    bosses:[
+      {name:"SP HIP HOP KING",e:"🌆",pw:8500,style:"hiphop",  intro:"ブラジルHIPHOPは世界最大規模！サンパウロが震える！"},
+      {name:"BREAK SP",       e:"💥",pw:9200,style:"breaking",intro:"サンパウロのBREAKINGシーンも超一流！"},
+    ],
+    rw:{exp:2100,coins:15000,title:"São Paulo Legend"},
+    desc:"南米最大都市。世界最大のHIPHOPシーンを誇る",
+    food:[{n:"シュハスコ",p:2500,e:25,h:50,desc:"ブラジル式BBQ！炭火で焼いた肉が無限に来る！"},{n:"ピンガ（カシャーサ）",p:400,e:8,h:15,desc:"サトウキビ焼酎！カイピリーニャの原料"}]},
+  rio:       {id:"rio",       name:"リオデジャネイロ",e:"🌴",g:"breaking", lv:27,
+    ch:{name:"RIO BBOY",e:"🌴",pw:9000},
+    bosses:[
+      {name:"RIO BBOY",       e:"🌴",pw:9000, style:"breaking",    intro:"カポエイラがBREAKINGを生んだ！リオの街頭で踊れ！"},
+      {name:"SAMBA WARRIOR",  e:"🎭",pw:9800, style:"contemporary",intro:"カーニバルの魂！サンバとCONTEMPORARYの融合！"},
+    ],
+    rw:{exp:2200,coins:16000,title:"Rio de Janeiro Legend"},
+    desc:"カーニバルとカポエイラの都。BREAKING発祥の地の一つ",
+    food:[{n:"カイピリーニャ",p:500,e:8,h:18,desc:"ライムとカシャーサの国民カクテル！リオの夜に"},{n:"アサイーボウル",p:600,e:12,h:28,desc:"アマゾン発祥のスーパーフード！リオっ子の朝ごはん"}]},
+  buenosaires:{id:"buenosaires",name:"ブエノスアイレス",e:"🌹",g:"jazz",   lv:29,
+    ch:{name:"TANGO MASTER",e:"🌹",pw:10000},
+    bosses:[
+      {name:"TANGO MASTER",  e:"🌹",pw:10000,style:"jazz",        intro:"タンゴはここから生まれた！アルゼンチンの魂！"},
+      {name:"MILONGA QUEEN", e:"🌸",pw:10800,style:"contemporary",intro:"ミロンガのリズムで世界を制す女王！"},
+    ],
+    rw:{exp:2500,coins:20000,title:"Buenos Aires Tango Legend"},
+    desc:"タンゴ発祥の地。南米最大のジャズダンスシーン",
+    food:[{n:"アサード（アルゼンチンBBQ）",p:2000,e:24,h:48,desc:"世界最高の牛肉！炭火でじっくり焼く"},{n:"エンパナーダ",p:400,e:10,h:26,desc:"肉や野菜入りの揚げパイ。アルゼンチンの屋台名物"}]},
+};
+
+const SAM_W=34,SAM_H=65;
+const SAM_WALK_CITIES=[
+  {id:"kingston",   x:16,y:5,  name:"キングストン",  e:"🎵",g:"hiphop"},
+  {id:"cali",       x:9, y:16, name:"カリ",          e:"💃",g:"waacking"},
+  {id:"lima",       x:6, y:24, name:"リマ",          e:"🦅",g:"breaking"},
+  {id:"salvador",   x:24,y:24, name:"サルバドール",  e:"🥁",g:"contemporary"},
+  {id:"saopaulo",   x:22,y:34, name:"サンパウロ",    e:"🌆",g:"hiphop"},
+  {id:"rio",        x:23,y:40, name:"リオ",          e:"🌴",g:"breaking"},
+  {id:"buenosaires",x:14,y:54, name:"ブエノスアイレス",e:"🌹",g:"jazz"},
+];
+
+function buildSAMMap(){
+  const G=Array.from({length:SAM_H},()=>new Array(SAM_W).fill('~'));
+  const s=(x,y,t)=>{if(y>=0&&y<SAM_H&&x>=0&&x<SAM_W)G[y][x]=t;};
+  const rect=(x1,y1,x2,y2,t)=>{for(let y=Math.min(y1,y2);y<=Math.max(y1,y2);y++)for(let x=Math.min(x1,x2);x<=Math.max(x1,x2);x++)s(x,y,t);};
+  const road=(x1,y1,x2,y2)=>{let x=x1,y=y1;while(y!==y2){s(x,y,'.');y+=(y<y2?1:-1);}while(x!==x2){s(x,y,'.');x+=(x<x2?1:-1);}s(x2,y2,'.');};
+  // カリブ海諸島（ジャマイカ）
+  rect(13,3,20,8,'f');rect(14,4,19,7,'.');
+  // 中央アメリカ〜コロンビア
+  rect(4,10,18,22,'f');rect(5,11,17,21,'.');
+  // ブラジル（大陸の大部分）
+  rect(14,18,32,48,'f');rect(15,19,31,47,'.');
+  // ペルー〜チリ（西海岸）
+  rect(3,20,12,52,'f');rect(4,22,11,50,'.');
+  // アルゼンチン
+  rect(8,46,24,62,'f');rect(9,48,22,61,'.');
+  // アンデス山脈
+  rect(8,22,12,44,'^');
+  // 道路
+  for(let i=0;i<SAM_WALK_CITIES.length-1;i++){
+    const a=SAM_WALK_CITIES[i],b=SAM_WALK_CITIES[i+1];
+    road(a.x,a.y,b.x,b.y);
+  }
+  road(6,24,22,34);// リマ→サンパウロ（大陸横断）
+  road(9,16,24,24);// カリ→サルバドール
+  SAM_WALK_CITIES.forEach(c=>s(c.x,c.y,'@'));
+  return G;
+}
+const SAM_MAP=buildSAMMap();
+
+function SAMWalkMode(p){return<WorldWalkMode {...p} walkCities={SAM_WALK_CITIES} walkMap={SAM_MAP} cityData={SAMERICA} mapW={SAM_W} mapH={SAM_H} regionName="S.AMERICA MAP" flagEmoji="🌎"/>;}
+
+/* ── INDIA CITIES DATA ── */
+const INDIA={
+  delhi:     {id:"delhi",     name:"デリー",       e:"🕌",g:"contemporary",lv:24,
+    ch:{name:"DELHI CLASSICAL",e:"🕌",pw:7500},
+    bosses:[
+      {name:"DELHI CLASSICAL",e:"🕌",pw:7500, style:"contemporary",intro:"古代から続くインド舞踊の首都！魂の動きを見よ！"},
+      {name:"DELHI STREETS",  e:"🎤",pw:8200, style:"hiphop",      intro:"デリーのストリートHIPHOPは本物だ！"},
+    ],
+    rw:{exp:1800,coins:12000,title:"Delhi Dance King"},
+    desc:"インドの首都。古典舞踊とモダンが交差する",
+    food:[{n:"バターチキン",p:800,e:16,h:38,desc:"デリー発祥！世界で愛されるインドカレー"},{n:"チャパティ",p:200,e:6,h:18,desc:"インドの薄焼きパン。毎日食べたい"}]},
+  mumbai:    {id:"mumbai",    name:"ムンバイ",     e:"🎬",g:"jazz",        lv:23,
+    ch:{name:"BOLLYWOOD STAR",e:"🎬",pw:7000},
+    bosses:[{name:"BOLLYWOOD STAR",e:"🎬",pw:7000,style:"jazz",intro:"ボリウッドはムンバイが生んだ夢の工場！踊れ！"}],
+    rw:{exp:1600,coins:10500,title:"Bollywood Legend"},
+    desc:"ボリウッド映画の聖地。インドのエンタメの都",
+    food:[{n:"ヴァダ・パウ",p:100,e:8,h:22,desc:"ムンバイのソウルフード！スパイシーバーガー"},{n:"パウ・バジ",p:300,e:10,h:28,desc:"野菜カレー＆バターロール。屋台の王道"}]},
+  kolkata:   {id:"kolkata",   name:"コルカタ",     e:"🌺",g:"contemporary",lv:24,
+    ch:{name:"KOLKATA SOUL",e:"🌺",pw:7200},
+    bosses:[{name:"KOLKATA SOUL",e:"🌺",pw:7200,style:"contemporary",intro:"コルカタの文化と知性が生んだCONTEMPORARY！"}],
+    rw:{exp:1650,coins:11000,title:"Kolkata Artist"},
+    desc:"芸術と文化の都。タゴールが愛した街",
+    food:[{n:"ロショゴッラ",p:200,e:6,h:20,desc:"コルカタ発祥！シロップ漬けミルクボール"},{n:"コルカタ風ビリヤニ",p:700,e:14,h:36,desc:"ジャガイモ入り！コルカタ独自のビリヤニ"}]},
+  bangalore: {id:"bangalore", name:"バンガロール", e:"💻",g:"hiphop",      lv:25,
+    ch:{name:"TECH CITY GROOVER",e:"💻",pw:7800},
+    bosses:[{name:"TECH CITY GROOVER",e:"💻",pw:7800,style:"hiphop",intro:"インドのシリコンバレー！IT＆HIPHOPの融合！"}],
+    rw:{exp:1900,coins:13000,title:"Bangalore B-Boy"},
+    desc:"インドのIT都市。若者のHIPHOPシーンが急成長",
+    food:[{n:"マサラドーサ",p:400,e:10,h:28,desc:"南インドの薄焼きクレープ！カリカリが最高"},{n:"フィルターコーヒー",p:150,e:5,h:12,desc:"南インド伝統の本格コーヒー！甘くて濃い"}]},
+  chennai:   {id:"chennai",   name:"チェンナイ",   e:"🙏",g:"ballet",      lv:26,
+    ch:{name:"BHARATA MASTER",e:"🙏",pw:8500},
+    bosses:[{name:"BHARATA MASTER",e:"🙏",pw:8500,style:"ballet",intro:"バラタナティアム！インド最古の古典舞踊の真髄！"}],
+    rw:{exp:2000,coins:14000,title:"Bharatanatyam Master"},
+    desc:"バラタナティアム発祥の地。インドBALLETの聖地",
+    food:[{n:"イドリー＆サンバル",p:300,e:9,h:25,desc:"南インドの朝食の王道！ふわふわ蒸しケーキ"},{n:"チェットナードチキン",p:900,e:16,h:38,desc:"スパイスが命！チェンナイ名物辛口チキン"}]},
+  goa:       {id:"goa",       name:"ゴア",         e:"🌴",g:"waacking",    lv:22,
+    ch:{name:"GOA QUEEN",e:"🌴",pw:6500},
+    bosses:[{name:"GOA QUEEN",e:"🌴",pw:6500,style:"waacking",intro:"ゴアのビーチパーティ！WAACKINGで太陽を呼べ！"}],
+    rw:{exp:1500,coins:9500,title:"Goa Beach Queen"},
+    desc:"ポルトガル文化とインドが融合したビーチリゾート",
+    food:[{n:"ゴア・フィッシュカレー",p:800,e:14,h:35,desc:"ココナッツミルクベースの絶品シーフードカレー"},{n:"フェニ（ゴアの地酒）",p:300,e:6,h:15,desc:"カシューナッツ発酵の伝統的なゴアのお酒"}]},
+};
+
+const IND_W=30,IND_H=58;
+const IND_WALK_CITIES=[
+  {id:"delhi",     x:14,y:8,  name:"デリー",       e:"🕌",g:"contemporary"},
+  {id:"kolkata",   x:22,y:16, name:"コルカタ",     e:"🌺",g:"contemporary"},
+  {id:"mumbai",    x:7, y:24, name:"ムンバイ",     e:"🎬",g:"jazz"},
+  {id:"bangalore", x:14,y:36, name:"バンガロール", e:"💻",g:"hiphop"},
+  {id:"goa",       x:8, y:34, name:"ゴア",         e:"🌴",g:"waacking"},
+  {id:"chennai",   x:18,y:44, name:"チェンナイ",   e:"🙏",g:"ballet"},
+];
+
+function buildINDMap(){
+  const G=Array.from({length:IND_H},()=>new Array(IND_W).fill('~'));
+  const s=(x,y,t)=>{if(y>=0&&y<IND_H&&x>=0&&x<IND_W)G[y][x]=t;};
+  const rect=(x1,y1,x2,y2,t)=>{for(let y=Math.min(y1,y2);y<=Math.max(y1,y2);y++)for(let x=Math.min(x1,x2);x<=Math.max(x1,x2);x++)s(x,y,t);};
+  const road=(x1,y1,x2,y2)=>{let x=x1,y=y1;while(y!==y2){s(x,y,'.');y+=(y<y2?1:-1);}while(x!==x2){s(x,y,'.');x+=(x<x2?1:-1);}s(x2,y2,'.');};
+  // インド亜大陸（三角形状）
+  rect(4,4,26,20,'f');rect(5,5,25,19,'.');
+  // 中部
+  rect(5,18,24,35,'f');rect(6,20,22,34,'.');
+  // 南インド（先細り）
+  rect(7,32,22,42,'f');rect(8,34,21,41,'.');
+  rect(9,40,20,50,'f');rect(10,42,19,49,'.');
+  rect(11,48,18,54,'f');rect(12,50,17,53,'.');
+  // ゴア（西海岸）
+  rect(5,30,10,38,'f');rect(6,31,9,37,'.');
+  // 道路
+  for(let i=0;i<IND_WALK_CITIES.length-1;i++){
+    const a=IND_WALK_CITIES[i],b=IND_WALK_CITIES[i+1];
+    road(a.x,a.y,b.x,b.y);
+  }
+  road(14,8,22,16);// デリー→コルカタ
+  road(7,24,8,34); // ムンバイ→ゴア
+  IND_WALK_CITIES.forEach(c=>s(c.x,c.y,'@'));
+  return G;
+}
+const IND_MAP=buildINDMap();
+
+function INDIAWalkMode(p){return<WorldWalkMode {...p} walkCities={IND_WALK_CITIES} walkMap={IND_MAP} cityData={INDIA} mapW={IND_W} mapH={IND_H} regionName="INDIA MAP" flagEmoji="🇮🇳"/>;}
+
+/* ── EUROPE CITIES DATA ── */
+const EUROPE={
+  florence:  {id:"florence",  name:"フィレンツェ",e:"🌹",g:"ballet",      lv:28,
+    ch:{name:"MEDICI MASTER",e:"🌹",pw:10000},
+    bosses:[{name:"MEDICI MASTER",e:"🌹",pw:10000,style:"ballet",intro:"バレエはここフィレンツェで生まれた！メディチ家の魂！"}],
+    rw:{exp:2500,coins:20000,title:"Ballet Origin Master"},
+    desc:"バレエ発祥の地。メディチ家がルネサンスと共に育てた芸術",
+    food:[{n:"ビステッカ・アッラ・フィオレンティーナ",p:4000,e:28,h:55,desc:"フィレンツェ名物Tボーンステーキ！圧巻の旨さ"},{n:"ジェラート",p:500,e:8,h:20,desc:"本場イタリアのジェラート！毎日食べたい"}]},
+  milan:     {id:"milan",     name:"ミラノ",      e:"👗",g:"contemporary",lv:29,
+    ch:{name:"MILAN VOGUE",e:"👗",pw:10500},
+    bosses:[{name:"MILAN VOGUE",e:"👗",pw:10500,style:"contemporary",intro:"ファッションとダンスが交差するミラノ！"}],
+    rw:{exp:2600,coins:21000,title:"Milan Couture"},
+    desc:"モードの都でCONTEMPORARYが輝く",
+    food:[{n:"リゾット・アッラ・ミラネーゼ",p:2000,e:20,h:42,desc:"サフラン入りの黄金リゾット！ミラノの魂"},{n:"パネットーネ",p:800,e:10,h:25,desc:"ミラノ発祥の伝統菓子パン"}]},
+  paris:     {id:"paris",     name:"パリ",        e:"🗼",g:"ballet",      lv:30,
+    ch:{name:"PARIS ÉTOILE",e:"🗼",pw:11000},
+    bosses:[
+      {name:"PARIS ÉTOILE",  e:"🗼",pw:11000,style:"ballet",      intro:"パリ・オペラ座のエトワール！BALLETの真髄！"},
+      {name:"PARIS POPPER",  e:"⚡",pw:11800,style:"popping",     intro:"パリのストリートはPOPPINGも最強！"},
+    ],
+    rw:{exp:2800,coins:23000,title:"Paris Legend"},
+    desc:"バレエをイタリアから受け継ぎ世界へ広めた芸術の都",
+    food:[{n:"クロワッサン",p:300,e:8,h:18,desc:"本場フランスのバター香るクロワッサン！"},{n:"フォアグラ",p:5000,e:25,h:40,desc:"フランス三大珍味。究極の贅沢フード"}]},
+  london:    {id:"london",    name:"ロンドン",    e:"🏰",g:"contemporary",lv:31,
+    ch:{name:"GRIME KING",e:"🏰",pw:11500},
+    bosses:[
+      {name:"GRIME KING",    e:"🏰",pw:11500,style:"contemporary",intro:"UKグライムとCONTEMPORARY！ロンドン最強！"},
+      {name:"UK B-BOY",      e:"🎭",pw:12000,style:"breaking",    intro:"UKのBREAKINGシーンは世界トップレベル！"},
+    ],
+    rw:{exp:2900,coins:24000,title:"London Legend"},
+    desc:"グライム・コンテ・BREAKINGが交差する多文化都市",
+    food:[{n:"フィッシュ＆チップス",p:800,e:12,h:35,desc:"英国の魂のフード！新聞紙に包まれた伝統"},{n:"バノフィーパイ",p:600,e:8,h:22,desc:"バナナとトフィーの英国スイーツ"}]},
+  berlin:    {id:"berlin",    name:"ベルリン",    e:"🎛",g:"house",       lv:30,
+    ch:{name:"TECHNO KING",e:"🎛",pw:11200},
+    bosses:[{name:"TECHNO KING",e:"🎛",pw:11200,style:"house",intro:"ベルリンはTECHNO HOUSEの聖地！壁が崩れた夜に踊れ！"}],
+    rw:{exp:2750,coins:22500,title:"Berlin Techno God"},
+    desc:"ベルリンのクラブカルチャーは世界最高峰",
+    food:[{n:"カリーヴルスト",p:500,e:10,h:28,desc:"ベルリン名物カレーソースソーセージ！"},{n:"ベルリーナー（ドーナツ）",p:300,e:7,h:18,desc:"ベルリン名物揚げドーナツ"}]},
+  madrid:    {id:"madrid",    name:"マドリード",  e:"💃",g:"jazz",        lv:29,
+    ch:{name:"FLAMENCO SOUL",e:"💃",pw:10800},
+    bosses:[{name:"FLAMENCO SOUL",e:"💃",pw:10800,style:"jazz",intro:"フラメンコとJAZZが融合！スペインの情熱！"}],
+    rw:{exp:2650,coins:21500,title:"Madrid Flamenco King"},
+    desc:"フラメンコとラテンリズムが溢れる情熱の都",
+    food:[{n:"パエリア",p:2000,e:22,h:45,desc:"スペインの魂！サフランライスとシーフード"},{n:"チュロス＆チョコラテ",p:400,e:8,h:22,desc:"揚げたてチュロスをチョコレートに浸す！"}]},
+  moscow:    {id:"moscow",    name:"モスクワ",    e:"🏛",g:"ballet",      lv:33,
+    ch:{name:"BOLSHOI MASTER",e:"🏛",pw:13000},
+    bosses:[{name:"BOLSHOI MASTER",e:"🏛",pw:13000,style:"ballet",intro:"ボリショイバレエの真髄！ロシアBALLETは別格だ！"}],
+    rw:{exp:3200,coins:28000,title:"Bolshoi Legend"},
+    desc:"ボリショイバレエ団の本拠地。BALLETの極致",
+    food:[{n:"ボルシチ",p:800,e:15,h:38,desc:"ビーツの赤いスープ！ロシアの魂の一杯"},{n:"ペリメニ",p:700,e:12,h:32,desc:"ロシア式餃子！サワークリームで食べる"}]},
+};
+
+const EUR_W=40,EUR_H=60;
+const EUR_WALK_CITIES=[
+  {id:"madrid",   x:5,  y:36, name:"マドリード",  e:"💃",g:"jazz"},
+  {id:"paris",    x:13, y:22, name:"パリ",        e:"🗼",g:"ballet"},
+  {id:"london",   x:11, y:12, name:"ロンドン",    e:"🏰",g:"contemporary"},
+  {id:"berlin",   x:21, y:16, name:"ベルリン",    e:"🎛",g:"house"},
+  {id:"florence", x:20, y:34, name:"フィレンツェ",e:"🌹",g:"ballet"},
+  {id:"milan",    x:18, y:28, name:"ミラノ",      e:"👗",g:"contemporary"},
+  {id:"moscow",   x:34, y:10, name:"モスクワ",    e:"🏛",g:"ballet"},
+];
+
+function buildEURMap(){
+  const G=Array.from({length:EUR_H},()=>new Array(EUR_W).fill('~'));
+  const s=(x,y,t)=>{if(y>=0&&y<EUR_H&&x>=0&&x<EUR_W)G[y][x]=t;};
+  const rect=(x1,y1,x2,y2,t)=>{for(let y=Math.min(y1,y2);y<=Math.max(y1,y2);y++)for(let x=Math.min(x1,x2);x<=Math.max(x1,x2);x++)s(x,y,t);};
+  const road=(x1,y1,x2,y2)=>{let x=x1,y=y1;while(y!==y2){s(x,y,'.');y+=(y<y2?1:-1);}while(x!==x2){s(x,y,'.');x+=(x<x2?1:-1);}s(x2,y2,'.');};
+  // 西欧（イベリア半島〜英国〜中欧）
+  rect(2,10,28,45,'f');rect(4,12,26,43,'.');
+  // 英国（島）
+  rect(8,5,16,15,'f');rect(9,6,15,14,'.');
+  // イタリア半島
+  rect(16,26,24,44,'f');rect(17,28,23,43,'.');
+  // 東欧〜ロシア
+  rect(28,6,39,30,'f');rect(29,7,38,28,'.');
+  // ロシア大陸
+  rect(30,5,39,18,'f');rect(31,6,38,17,'.');
+  for(let i=0;i<EUR_WALK_CITIES.length-1;i++){
+    const a=EUR_WALK_CITIES[i],b=EUR_WALK_CITIES[i+1];
+    road(a.x,a.y,b.x,b.y);
+  }
+  road(11,12,13,22);// ロンドン→パリ（ユーロトンネル）
+  road(21,16,34,10);// ベルリン→モスクワ
+  EUR_WALK_CITIES.forEach(c=>s(c.x,c.y,'@'));
+  return G;
+}
+const EUR_MAP=buildEURMap();
+
+/* ── WORLD WALK MODE (汎用) ── */
+function WorldWalkMode({char,setChar,genre,onExit,pushNotif,addLog,
+  walkCities,walkMap,cityData,mapW,mapH,regionName,flagEmoji}){
+  const startC=walkCities[0];
+  const[pos,setPos]=useState({x:startC.x,y:startC.y});
+  const[steps,setSteps]=useState(0);
+  const[enc,setEnc]=useState(null);
+  const[cityAt,setCityAt]=useState(null);
+  const[cityMini,setCityMini]=useState(null);
+  const[msg,setMsg]=useState("");
+  const[battle,setBattle]=useState(null);
+
+  const camX=Math.max(0,Math.min(mapW-VW,pos.x-Math.floor(VW/2)));
+  const camY=Math.max(0,Math.min(mapH-VH,pos.y-Math.floor(VH/2)));
+  const gt=(x,y)=>{if(x<0||x>=mapW||y<0||y>=mapH)return'~';return walkMap[y]?.[x]||'~';};
+  const gd=(t)=>WT[t]||WT['~'];
+  const cityAt2=(x,y)=>walkCities.find(c=>c.x===x&&c.y===y)||null;
+
+  function move(dir){
+    if(enc||cityAt||cityMini)return;
+    setPos(prev=>{
+      let{x,y}=prev;let nx=x,ny=y;
+      if(dir==="up")ny--;if(dir==="down")ny++;if(dir==="left")nx--;if(dir==="right")nx++;
+      const t=gt(nx,ny);const d=gd(t);if(!d.pass)return prev;
+      const city=cityAt2(nx,ny);
+      if(city){setCityAt(city);setChar(c=>({...c,energy:Math.max(0,c.energy-1)}));setMsg(`🏙 ${city.name}に到着！`);return{x:nx,y:ny};}
+      if(d.enc&&Math.random()<d.rate){
+        const opps=QOPPS.filter(o=>o.lv<=Math.max(18,getLv(char.exp)+2));
+        const opp=opps[Math.floor(Math.random()*opps.length)]||QOPPS[5];
+        Sound.battle();setEnc(opp);return{x:nx,y:ny};
+      }
+      setSteps(s=>s+1);return{x:nx,y:ny};
+    });
+  }
+
+  async function fightEnc(){
+    if(!enc||char.energy<3)return;
+    const btl=buildBattle(char,enc.style,enc.pw);
+    setBattle({phase:"seq",...btl,oppName:enc.name,step:0});
+    setEnc(null);
+    for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,_battleSpeed===2?350:900));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
+    const{won}=btl;const eg=won?enc.rw.exp:Math.floor(enc.rw.exp*.5);
+    setChar(c=>({...c,exp:c.exp+eg,energy:Math.max(0,c.energy-3),mood:won?Math.min(100,c.mood+10):Math.max(0,c.mood-8),battlesWon:won?c.battlesWon+1:c.battlesWon}));
+    setBattle({phase:"result",won,eg,coins:won?enc.rw.coins:Math.floor(enc.rw.coins*.5),flags:btl.flags,myP:btl.myP,thP:btl.thP});
+    if(won)Sound.clear();else Sound.lose();
+    setMsg(won?`🏆 勝利！+${eg}EXP`:"💀 敗北...");
+    setTimeout(()=>setMsg(""),3000);
+  }
+
+  useEffect(()=>{
+    const h=e=>{const m={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right"};if(m[e.key]){e.preventDefault();move(m[e.key]);}};
+    window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
+  },[pos,enc,cityAt,cityMini]);
+
+  // 都市内ビュー
+  if(cityMini){
+    const cd=cityData[cityMini];const wc=walkCities.find(c=>c.id===cityMini);
+    if(!cd){setCityMini(null);return null;}
+    return<div style={{paddingBottom:80}}>
+      {battle&&<BattleOverlay state={battle} gc={genre.c} onClose={()=>setBattle(null)}/>}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"#0f0a1a",borderBottom:"1px solid #3a1a4a",marginBottom:12}}>
+        <span style={{color:"#ff4da6",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{wc?.e} {wc?.name} CLUB</span>
+        <button onClick={()=>{setCityMini(null);setCityAt(null);}} style={{fontSize:10,color:TX3,background:"none",border:`1px solid ${BD}`,borderRadius:4,padding:"4px 8px",cursor:"pointer"}}>← {regionName}</button>
+      </div>
+      {(cd.bosses||[{...cd.ch,style:cd.g}]).map((boss,i)=>(
+        <div key={i} style={{background:"#0f0a1a",borderRadius:10,margin:"0 4px 12px",border:`1px solid ${i===0?"#3a1a4a":"#2a1030"}`,padding:"18px 16px",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:8}}>{boss.e}</div>
+          <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:"#ff4da6",marginBottom:4}}>{i===0?"CLUB BOSS":"CHALLENGER"}</div>
+          <div style={{fontSize:18,color:TX,fontWeight:900,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>{boss.name}</div>
+          <div style={{fontSize:10,color:TX3,marginBottom:6}}>{GENRES[boss.style]?.e}{GENRES[boss.style]?.jp} · POWER {boss.pw.toLocaleString()}</div>
+          {boss.intro&&<div style={{fontSize:11,color:"#ff9ec4",marginBottom:12,fontFamily:"M PLUS Rounded 1c,sans-serif",fontStyle:"italic"}}>「{boss.intro}」</div>}
+          <Btn disabled={char.energy<20} col="#280a0a" tc="#ff7070" onClick={async()=>{
+            if(char.energy<20){pushNotif("⚡エネルギー不足","#ff5555");return;}
+            const btl=buildBattle(char,boss.style||cd.g,boss.pw);
+            setBattle({phase:"seq",...btl,oppName:boss.name,step:0});
+            for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,_battleSpeed===2?380:1050));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
+            const{won,flags}=btl;const eg=won?cd.rw.exp:Math.floor(cd.rw.exp*.5);
+            setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+(won?cd.rw.coins:Math.floor(cd.rw.coins*.5)),energy:Math.max(0,c.energy-20),
+              mood:won?Math.min(100,c.mood+20):Math.max(0,c.mood-15),
+              battlesWon:won?c.battlesWon+1:c.battlesWon,
+              clearedCities:won?{...(c.clearedCities||{}),[cityMini]:true}:c.clearedCities||{}}));
+            setBattle({phase:"result",won,eg,coins:won?cd.rw.coins:Math.floor(cd.rw.coins*.5),flags,myP:btl.myP,thP:btl.thP});
+            if(won)Sound.fanfare();else Sound.lose();
+            addLog(`${won?"🏆":"💀"} vs ${boss.name} @${wc?.name} +${eg}EXP`);
+          }} full sx={{fontSize:12,padding:"12px",fontWeight:700}}>⚔️ バトル！ ⚡20</Btn>
+        </div>
+      ))}
+      {cd.food?.length>0&&<div style={{margin:"0 4px 12px",background:"#1f1808",borderRadius:10,padding:14,border:"1px solid #4a3a08"}}>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:"#ffd60a",marginBottom:10}}>🍽 LOCAL FOOD</div>
+        {cd.food.map((f,i)=>(
+          <div key={i} style={{background:BG3,borderRadius:6,padding:"8px 10px",marginBottom:8}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+              <div><div style={{fontWeight:700,fontSize:12,color:TX}}>{f.n}</div><div style={{fontSize:9,color:TX3}}>{f.desc}</div></div>
+              <div style={{fontSize:11,color:char.coins>=f.p?"#b3ff00":"#ff5555",fontWeight:700}}>¥{f.p.toLocaleString()}</div>
+            </div>
+            <Btn disabled={char.coins<f.p} col="#1f1808" tc="#ffd60a" onClick={()=>{
+              setChar(c=>({...c,coins:c.coins-f.p,energy:Math.min(c.maxEnergy||50,c.energy+f.e),hunger:Math.min(100,(c.hunger||0)+f.h),mood:Math.min(100,(c.mood||50)+8)}));
+              pushNotif(`${f.n}食べた！⚡+${f.e}`,"#ffd60a");
+            }} full sx={{fontSize:11}}>食べる（¥{f.p.toLocaleString()}）</Btn>
+          </div>
+        ))}
+      </div>}
+      <DPad onMove={()=>{}}/>
+      <AButton onPress={()=>{setCityMini(null);setCityAt(null);}} col="#80c0ff" sub="EXIT"/>
+    </div>;
+  }
+
+  const gc=genre.c;
+  return(<div style={{background:BG,minHeight:"100vh",paddingBottom:180}}>
+    {battle&&<BattleOverlay state={battle} gc={gc} onClose={()=>setBattle(null)}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 14px",background:BG2,borderBottom:`2px solid ${gc}55`}}>
+      <div><div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:"#ffd60a"}}>{flagEmoji} {regionName} WALK</div>
+        <div style={{fontSize:10,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",marginTop:2}}>{steps}歩</div></div>
+      <button onClick={onExit} style={{fontSize:10,color:TX3,background:"none",border:`1px solid ${BD}`,borderRadius:4,padding:"5px 10px",cursor:"pointer"}}>🗺 WORLD MAP</button>
+    </div>
+    {enc&&<div style={{position:"fixed",inset:0,background:"rgba(3,3,15,.92)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",zIndex:900}}>
+      <div style={{fontSize:62,marginBottom:14}}>{enc.e}</div>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:11,color:"#ff6b6b",marginBottom:8}}>⚡ ENCOUNTER!</div>
+      <div style={{fontSize:15,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:20,fontWeight:700}}>{enc.name}</div>
+      <div style={{display:"flex",gap:12}}>
+        <Btn disabled={char.energy<3} col="#280a0a" tc="#ff7070" onClick={fightEnc} sx={{fontSize:13,padding:"12px 28px",fontWeight:700}}>⚔️ バトル</Btn>
+        <Btn col="#0a1828" tc="#00e5ff" onClick={()=>setEnc(null)} sx={{fontSize:13,padding:"12px 20px"}}>🏃 逃げる</Btn>
+      </div>
+    </div>}
+    <div style={{margin:"8px 4px",border:`1px solid ${BD}`,borderRadius:8,overflow:"hidden",position:"relative"}}>
+      <svg viewBox={`0 0 ${VW*TS} ${VH*TS}`} width="100%" style={{display:"block"}}>
+        <rect width={VW*TS} height={VH*TS} fill="#060c18"/>
+        {Array.from({length:VH},(_,vy)=>Array.from({length:VW},(_,vx)=>{
+          const mx=camX+vx,my=camY+vy;const t=gt(mx,my);const d=gd(t);
+          const city=cityAt2(mx,my);const gc2=city?GENRES[city.g]?.c:null;
+          return(<g key={`${vx}-${vy}`}>
+            <rect x={vx*TS} y={vy*TS} width={TS} height={TS} fill={city?"#1a0a2e":d.bg} stroke="#030810" strokeWidth=".4"/>
+            {t==='f'&&<text x={vx*TS+TS*.25} y={vy*TS+TS*.6} fontSize={TS*.35} opacity=".5">🌲</text>}
+            {t==='^'&&<text x={vx*TS+TS*.5} y={vy*TS+TS*.62} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.55}>⛰</text>}
+            {city&&<g>
+              <circle cx={vx*TS+TS*.5} cy={vy*TS+TS*.46} r={TS*.38} fill={`${gc2}44`} stroke={gc2} strokeWidth="1.4"/>
+              <text x={vx*TS+TS*.5} y={vy*TS+TS*.52} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.52}>{city.e}</text>
+              <text x={vx*TS+TS*.5} y={vy*TS+TS*.9} textAnchor="middle" fontSize="4" fill={gc2} fontFamily="M PLUS Rounded 1c,sans-serif">{city.name}</text>
+            </g>}
+          </g>);
+        }))}
+        {(()=>{const vx=pos.x-camX,vy=pos.y-camY;if(vx<0||vx>=VW||vy<0||vy>=VH)return null;return(<g><circle cx={vx*TS+TS*.5} cy={vy*TS+TS*.5} r={TS*.42} fill={gc} stroke="#fff" strokeWidth="2" style={{filter:`drop-shadow(0 0 5px ${gc})`}}/><text x={vx*TS+TS*.5} y={vy*TS+TS*.58} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.52}>{genre.e}</text></g>);})()}
+      </svg>
+      <div style={{position:"absolute",top:5,right:5,width:42,height:32,background:"rgba(0,0,0,.8)",borderRadius:4,border:"1px solid #2a2a4a",overflow:"hidden"}}>
+        <svg viewBox={`0 0 ${mapW} ${mapH}`} width="42" height="32">
+          {walkCities.map(c=><circle key={c.id} cx={c.x} cy={c.y} r="1.8" fill={GENRES[c.g]?.c||"#888"}/>)}
+          <circle cx={pos.x} cy={pos.y} r="2.2" fill="#fff"/>
+        </svg>
+      </div>
+    </div>
+    {msg&&<div style={{margin:"0 4px 6px",padding:"8px 12px",background:BG2,borderRadius:6,fontSize:11,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{msg}</div>}
+    {cityAt&&!enc&&<div style={{margin:"0 4px 8px",padding:14,background:BG2,borderRadius:10,border:`2px solid ${GENRES[cityAt.g]?.c||gc}66`}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          <span style={{fontSize:32}}>{cityAt.e}</span>
+          <div><div style={{fontWeight:700,fontSize:16,color:GENRES[cityAt.g]?.c||gc,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{cityAt.name}</div></div>
+        </div>
+        <button onClick={()=>setCityAt(null)} style={{color:TX3,fontSize:22,background:"none",border:"none",cursor:"pointer"}}>✕</button>
+      </div>
+      <Btn col={`${GENRES[cityAt.g]?.c||gc}22`} tc={GENRES[cityAt.g]?.c||gc} onClick={()=>setCityMini(cityAt.id)} full sx={{fontSize:13,fontWeight:700,padding:"12px"}}>🏙 {cityAt.name}に入る</Btn>
+    </div>}
+    {!cityAt&&!enc&&<div style={{textAlign:"center",fontSize:9,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>十字キーで移動 · 都市でAボタン</div>}
+    <DPad onMove={move}/>
+    {cityAt&&!enc&&<AButton onPress={()=>setCityMini(cityAt.id)} col={GENRES[cityAt.g]?.c||gc} sub="入る"/>}
+    {enc&&<AButton onPress={fightEnc} col="#ff4da6" sub="バトル！" disabled={char.energy<3}/>}
+  </div>);
+}
+
+// ASIA・EUROPE・USAはWorldWalkModeを流用
+function ASIAWalkMode(p){return<WorldWalkMode {...p} walkCities={ASIA_WALK_CITIES} walkMap={ASIA_MAP} cityData={ASIA} mapW={ASIA_W} mapH={ASIA_H} regionName="ASIA MAP" flagEmoji="🌏"/>;}
+function EUROPEWalkMode(p){return<WorldWalkMode {...p} walkCities={EUR_WALK_CITIES} walkMap={EUR_MAP} cityData={EUROPE} mapW={EUR_W} mapH={EUR_H} regionName="EUROPE MAP" flagEmoji="🌍"/>;}
+
+/* ── USA WALK MODE ── */
+function USAWalkMode({char,setChar,genre,onExit,pushNotif,addLog}){
+  const startC=USA_WALK_CITIES.find(c=>c.id==="hollywood")||USA_WALK_CITIES[0];
+  const[pos,setPos]=useState({x:startC.x,y:startC.y});
+  const[steps,setSteps]=useState(0);
+  const[enc,setEnc]=useState(null);
+  const[cityAt,setCityAt]=useState(null);
+  const[cityMini,setCityMini]=useState(null);
+  const[msg,setMsg]=useState("");
+  const[battle,setBattle]=useState(null);
+
+  const camX=Math.max(0,Math.min(USA_W-VW,pos.x-Math.floor(VW/2)));
+  const camY=Math.max(0,Math.min(USA_H-VH,pos.y-Math.floor(VH/2)));
+  const gt=(x,y)=>{if(x<0||x>=USA_W||y<0||y>=USA_H)return'~';return USA_MAP[y]?.[x]||'~';};
+  const gd=(t)=>WT[t]||WT['~'];
+  const cityAt2=(x,y)=>USA_WALK_CITIES.find(c=>c.x===x&&c.y===y)||null;
+  const region=(x)=>x<14?"West Coast":x<20?"Rocky Mts":x<34?"South":"East Coast";
+
+  function move(dir){
+    if(enc||cityAt||cityMini)return;
+    setPos(prev=>{
+      let{x,y}=prev;let nx=x,ny=y;
+      if(dir==="up")ny--;if(dir==="down")ny++;if(dir==="left")nx--;if(dir==="right")nx++;
+      const t=gt(nx,ny);const d=gd(t);
+      if(!d.pass)return prev;
+      const city=cityAt2(nx,ny);
+      if(city){
+        setCityAt(city);
+        setChar(c=>({...c,energy:Math.max(0,c.energy-1)}));
+        addLog(`📍 ${city.name}に到着！`);
+        setMsg(`🏙 ${city.name}に到着！`);
+        return{x:nx,y:ny};
+      }
+      if(d.enc&&Math.random()<d.rate){
+        const opps=QOPPS.filter(o=>o.lv<=Math.max(20,getLv(char.exp)+2));
+        const opp=opps[Math.floor(Math.random()*opps.length)]||QOPPS[5];
+        Sound.battle();setEnc(opp);
+        return{x:nx,y:ny};
+      }
+      setSteps(s=>s+1);return{x:nx,y:ny};
+    });
+  }
+
+  async function fightEnc(){
+    if(!enc||char.energy<3)return;
+    const btl=buildBattle(char,enc.style,enc.pw);
+    setBattle({phase:"seq",...btl,oppName:enc.name,step:0});
+    setEnc(null);
+    for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,_battleSpeed===2?350:900));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
+    const{won}=btl;const eg=won?enc.rw.exp:Math.floor(enc.rw.exp*.5);
+    setChar(c=>({...c,exp:c.exp+eg,energy:Math.max(0,c.energy-3),
+      mood:won?Math.min(100,c.mood+10):Math.max(0,c.mood-8),
+      battlesWon:won?c.battlesWon+1:c.battlesWon}));
+    setBattle({phase:"result",won,eg,coins:won?enc.rw.coins:Math.floor(enc.rw.coins*.5),flags:btl.flags,myP:btl.myP,thP:btl.thP});
+    if(won)Sound.clear();else Sound.lose();
+    setMsg(won?`🏆 勝利！+${eg}EXP`:"💀 敗北...");
+    setTimeout(()=>setMsg(""),3000);
+  }
+
+  useEffect(()=>{
+    const h=e=>{const m={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right"};if(m[e.key]){e.preventDefault();move(m[e.key]);}};
+    window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
+  },[pos,enc,cityAt,cityMini]);
+
+  // 都市ミニマップ
+  if(cityMini){
+    const cityData=USA[cityMini];
+    if(cityData){
+      // USAの都市はJapanWalkClub/Innを流用
+      const wc=USA_WALK_CITIES.find(c=>c.id===cityMini);
+      return<div style={{paddingBottom:80}}>
+        {battle&&<BattleOverlay state={battle} gc={genre.c} onClose={()=>setBattle(null)}/>}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"#0f0a1a",borderBottom:"1px solid #3a1a4a",marginBottom:12}}>
+          <span style={{color:"#ff4da6",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{wc?.e} {wc?.name} CLUB</span>
+          <button onClick={()=>{setCityMini(null);setCityAt(null);}} style={{fontSize:10,color:TX3,background:"none",border:`1px solid ${BD}`,borderRadius:4,padding:"4px 8px",cursor:"pointer"}}>← USA MAP</button>
+        </div>
+        {/* ボス一覧 */}
+        {(cityData.bosses||[{...cityData.ch,style:cityData.g}]).map((boss,i)=>(
+          <div key={i} style={{background:"#0f0a1a",borderRadius:10,margin:"0 4px 12px",border:`1px solid ${i===0?"#3a1a4a":"#2a1030"}`,padding:"18px 16px",textAlign:"center"}}>
+            <div style={{fontSize:48,marginBottom:8}}>{boss.e}</div>
+            <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:"#ff4da6",marginBottom:4}}>{i===0?"CLUB BOSS":"CHALLENGER"}</div>
+            <div style={{fontSize:18,color:TX,fontWeight:900,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>{boss.name}</div>
+            <div style={{fontSize:10,color:TX3,marginBottom:6}}>{GENRES[boss.style]?.e}{GENRES[boss.style]?.jp} · POWER {boss.pw.toLocaleString()}</div>
+            {boss.intro&&<div style={{fontSize:11,color:"#ff9ec4",marginBottom:12,fontFamily:"M PLUS Rounded 1c,sans-serif",fontStyle:"italic"}}>「{boss.intro}」</div>}
+            <Btn disabled={char.energy<20} col="#280a0a" tc="#ff7070" onClick={async()=>{
+              if(char.energy<20){pushNotif("⚡エネルギー不足","#ff5555");return;}
+              const btl=buildBattle(char,boss.style||cityData.g,boss.pw);
+              setBattle({phase:"seq",...btl,oppName:boss.name,step:0});
+              for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,_battleSpeed===2?380:1050));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
+              const{won,flags}=btl;const eg=won?cityData.rw.exp:Math.floor(cityData.rw.exp*.5);
+              const coins=won?cityData.rw.coins:Math.floor(cityData.rw.coins*.5);
+              setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-20),
+                mood:won?Math.min(100,c.mood+20):Math.max(0,c.mood-15),
+                battlesWon:won?c.battlesWon+1:c.battlesWon,
+                clearedCities:won?{...(c.clearedCities||{}),[cityMini]:true}:c.clearedCities||{}}));
+              setBattle({phase:"result",won,eg,coins,flags,myP:btl.myP,thP:btl.thP});
+              if(won)Sound.fanfare();else Sound.lose();
+              addLog(`${won?"🏆":"💀"} vs ${boss.name} @${wc?.name} +${eg}EXP`);
+            }} full sx={{fontSize:12,padding:"12px",fontWeight:700}}>⚔️ バトル！ ⚡20</Btn>
+          </div>
+        ))}
+        {/* グルメ */}
+        {cityData.food?.length>0&&<div style={{margin:"0 4px 12px",background:"#1f1808",borderRadius:10,padding:14,border:"1px solid #4a3a08"}}>
+          <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:"#ffd60a",marginBottom:10}}>🍔 LOCAL FOOD</div>
+          {cityData.food.map((f,i)=>(
+            <div key={i} style={{background:BG3,borderRadius:6,padding:"8px 10px",marginBottom:8}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                <div><div style={{fontWeight:700,fontSize:12,color:TX}}>{f.n}</div><div style={{fontSize:9,color:TX3}}>{f.desc}</div></div>
+                <div style={{fontSize:11,color:char.coins>=f.p?"#b3ff00":"#ff5555",fontWeight:700}}>¥{f.p.toLocaleString()}</div>
+              </div>
+              <Btn disabled={char.coins<f.p} col="#1f1808" tc="#ffd60a" onClick={()=>{
+                setChar(c=>({...c,coins:c.coins-f.p,energy:Math.min(c.maxEnergy||50,c.energy+f.e),hunger:Math.min(100,(c.hunger||0)+f.h),mood:Math.min(100,(c.mood||50)+8)}));
+                pushNotif(`${f.n}食べた！⚡+${f.e}`,"#ffd60a");
+              }} full sx={{fontSize:11}}>食べる（¥{f.p.toLocaleString()}）</Btn>
+            </div>
+          ))}
+        </div>}
+        <DPad onMove={()=>{}}/>
+        <AButton onPress={()=>{setCityMini(null);setCityAt(null);}} col="#80c0ff" sub="EXIT"/>
+      </div>;
+    }
+    setCityMini(null);
+  }
+
+  const gc=genre.c;
+  return(<div style={{background:BG,minHeight:"100vh",paddingBottom:180}}>
+    {battle&&<BattleOverlay state={battle} gc={gc} onClose={()=>setBattle(null)}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 14px",background:BG2,borderBottom:`2px solid ${gc}55`}}>
+      <div>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:"#00e5ff",letterSpacing:1}}>🇺🇸 USA WALK</div>
+        <div style={{fontSize:10,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",marginTop:2}}>{region(pos.x)} · {steps}歩</div>
+      </div>
+      <button onClick={onExit} style={{fontSize:10,color:TX3,background:"none",border:`1px solid ${BD}`,borderRadius:4,padding:"5px 10px",cursor:"pointer"}}>🗺 WORLD MAP</button>
+    </div>
+    {enc&&<div style={{position:"fixed",inset:0,background:"rgba(3,3,15,.92)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",zIndex:900}}>
+      <div style={{fontSize:62,marginBottom:14}}>{enc.e}</div>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:11,color:"#ff6b6b",marginBottom:8}}>⚡ ENCOUNTER!</div>
+      <div style={{fontSize:15,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:20,fontWeight:700}}>{enc.name}が現れた！</div>
+      <div style={{display:"flex",gap:12}}>
+        <Btn disabled={char.energy<3} col="#280a0a" tc="#ff7070" onClick={fightEnc} sx={{fontSize:13,padding:"12px 28px",fontWeight:700}}>⚔️ バトル</Btn>
+        <Btn col="#0a1828" tc="#00e5ff" onClick={()=>setEnc(null)} sx={{fontSize:13,padding:"12px 20px"}}>🏃 逃げる</Btn>
+      </div>
+    </div>}
+    <div style={{margin:"8px 4px",border:`1px solid ${BD}`,borderRadius:8,overflow:"hidden",position:"relative"}}>
+      <svg viewBox={`0 0 ${VW*TS} ${VH*TS}`} width="100%" style={{display:"block"}}>
+        <rect width={VW*TS} height={VH*TS} fill="#060c18"/>
+        {Array.from({length:VH},(_,vy)=>Array.from({length:VW},(_,vx)=>{
+          const mx=camX+vx,my=camY+vy;const t=gt(mx,my);const d=gd(t);
+          const city=cityAt2(mx,my);const gc2=city?GENRES[city.g]?.c:null;
+          return(<g key={`${vx}-${vy}`}>
+            <rect x={vx*TS} y={vy*TS} width={TS} height={TS} fill={city?"#1a0a2e":d.bg} stroke="#030810" strokeWidth=".4"/>
+            {t==='f'&&<text x={vx*TS+TS*.25} y={vy*TS+TS*.6} fontSize={TS*.35} opacity=".5">🌲</text>}
+            {t==='^'&&<text x={vx*TS+TS*.5} y={vy*TS+TS*.62} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.55}>⛰</text>}
+            {city&&<g>
+              <circle cx={vx*TS+TS*.5} cy={vy*TS+TS*.46} r={TS*.38} fill={`${gc2}44`} stroke={gc2} strokeWidth="1.4"/>
+              <text x={vx*TS+TS*.5} y={vy*TS+TS*.52} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.52}>{city.e}</text>
+              <text x={vx*TS+TS*.5} y={vy*TS+TS*.9} textAnchor="middle" fontSize="4" fill={gc2} fontFamily="M PLUS Rounded 1c,sans-serif">{city.name}</text>
+            </g>}
+          </g>);
+        }))}
+        {(()=>{const vx=pos.x-camX,vy=pos.y-camY;if(vx<0||vx>=VW||vy<0||vy>=VH)return null;return(<g><circle cx={vx*TS+TS*.5} cy={vy*TS+TS*.5} r={TS*.42} fill={gc} stroke="#fff" strokeWidth="2" style={{filter:`drop-shadow(0 0 5px ${gc})`}}/><text x={vx*TS+TS*.5} y={vy*TS+TS*.58} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.52}>{genre.e}</text></g>);})()}
+      </svg>
+      {/* ミニマップ */}
+      <div style={{position:"absolute",top:5,right:5,width:42,height:32,background:"rgba(0,0,0,.8)",borderRadius:4,border:"1px solid #2a2a4a",overflow:"hidden"}}>
+        <svg viewBox={`0 0 ${USA_W} ${USA_H}`} width="42" height="32">
+          {USA_WALK_CITIES.map(c=><circle key={c.id} cx={c.x} cy={c.y} r="1.8" fill={GENRES[c.g]?.c||"#888"}/>)}
+          <circle cx={pos.x} cy={pos.y} r="2.2" fill="#fff"/>
+        </svg>
+      </div>
+    </div>
+    {msg&&<div style={{margin:"0 4px 6px",padding:"8px 12px",background:BG2,borderRadius:6,fontSize:11,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{msg}</div>}
+    {cityAt&&!enc&&<div style={{margin:"0 4px 8px",padding:14,background:BG2,borderRadius:10,border:`2px solid ${GENRES[cityAt.g]?.c||gc}66`}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          <span style={{fontSize:32}}>{cityAt.e}</span>
+          <div><div style={{fontWeight:700,fontSize:16,color:GENRES[cityAt.g]?.c||gc,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{cityAt.name}</div>
+            <div style={{fontSize:10,color:TX3}}>{GENRES[cityAt.g]?.e}{GENRES[cityAt.g]?.jp}</div></div>
+        </div>
+        <button onClick={()=>setCityAt(null)} style={{color:TX3,fontSize:22,background:"none",border:"none",cursor:"pointer"}}>✕</button>
+      </div>
+      <Btn col={`${GENRES[cityAt.g]?.c||gc}22`} tc={GENRES[cityAt.g]?.c||gc} onClick={()=>{setCityMini(cityAt.id);}} full sx={{fontSize:13,fontWeight:700,padding:"12px"}}>
+        🏙 {cityAt.name}に入る
+      </Btn>
+    </div>}
+    {!cityAt&&!enc&&<div style={{textAlign:"center",fontSize:9,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>十字キーで移動 · 都市でAボタン</div>}
+    <DPad onMove={move}/>
+    {cityAt&&!enc&&<AButton onPress={()=>setCityMini(cityAt.id)} col={GENRES[cityAt.g]?.c||gc} sub="入る"/>}
+    {enc&&<AButton onPress={fightEnc} col="#ff4da6" sub="バトル！" disabled={char.energy<3}/>}
+  </div>);
+}
+
 const CITY_MINI_MAP=[
   "wwwwwwwwwwwwwwwwww",
   "w................w",
@@ -1594,8 +2659,8 @@ function JapanWalkClub({cityId,char,setChar,genre,onBack,pushNotif,addLog}){
     for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,_battleSpeed===2?380:1050));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
     const bossKey=`${cityId}_${boss.name}`;
     const{won,flags}=btl;
-    const eg=won?city.rw.exp:Math.floor(city.rw.exp*.2);
-    const coins=won?city.rw.coins:0;
+    const eg=won?city.rw.exp:Math.floor(city.rw.exp*.5);
+    const coins=won?city.rw.coins:Math.floor(city.rw.coins*.5);
     const gem=won&&!cleared[cityId]?3:0;
     // setChar内で最新stateを使って計算（stale closure回避）
     let gainedArts=[],prevMaxLv=99,newMaxLv=99,finalNt=null;
@@ -1707,7 +2772,7 @@ function JapanWalkMode({char,setChar,genre,onExit,pushNotif,addLog}){
     setBattle({phase:"seq",...btl,oppName:enc.name,step:0});
     setEnc(null);
     for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,_battleSpeed===2?350:900));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
-    const{won,flags}=btl;const eg=won?enc.rw.exp:Math.floor(enc.rw.exp*.2);const coins=won?enc.rw.coins:0;
+    const{won,flags}=btl;const eg=won?enc.rw.exp:Math.floor(enc.rw.exp*.5);const coins=won?enc.rw.coins:Math.floor(enc.rw.coins*.5);
     setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-3),mood:won?Math.min(100,c.mood+12):Math.max(0,c.mood-10),battlesWon:won?c.battlesWon+1:c.battlesWon}));
     setBattle({phase:"result",won,eg,coins,flags,myP:btl.myP,thP:btl.thP});
     if(won){
@@ -1825,11 +2890,28 @@ function MapTab({char,setChar,genre,pushNotif,addLog}){
   const[bStep,setBStep]=useState(0);
   const[traveling,setTraveling]=useState(null);
   const[walkJapan,setWalkJapan]=useState(false);
+  const[walkUSA,setWalkUSA]=useState(false);
+  const[walkASIA,setWalkASIA]=useState(false);
+  const[walkEUR,setWalkEUR]=useState(false);
+  const[walkIND,setWalkIND]=useState(false);
+  const[walkSAM,setWalkSAM]=useState(false);
+  const[walkAFR,setWalkAFR]=useState(false);
+  const[walkMoon,setWalkMoon]=useState(false);
+  const hasMichaelSet=["michael_glove","michael_loafer","michael_hat"].every(id=>(char.specialItems||[]).includes(id));
   const cleared=char.clearedCities||{};
   const wldOk=!!cleared["tokyo"]||!!W[char.hometown];
   const spaceOk=!!cleared["wf"];
+  const hasAirplane=(char.specialItems||[]).includes("airplane");
+  const hasFerry=(char.specialItems||[]).includes("ferry");
 
   if(walkJapan)return<JapanWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkJapan(false)} pushNotif={pushNotif} addLog={addLog}/>;
+  if(walkUSA)return<USAWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkUSA(false)} pushNotif={pushNotif} addLog={addLog}/>;
+  if(walkASIA)return<ASIAWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkASIA(false)} pushNotif={pushNotif} addLog={addLog}/>;
+  if(walkEUR)return<EUROPEWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkEUR(false)} pushNotif={pushNotif} addLog={addLog}/>;
+  if(walkIND)return<INDIAWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkIND(false)} pushNotif={pushNotif} addLog={addLog}/>;
+  if(walkSAM)return<SAMWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkSAM(false)} pushNotif={pushNotif} addLog={addLog}/>;
+  if(walkAFR)return<AFRICAWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkAFR(false)} pushNotif={pushNotif} addLog={addLog}/>;
+  if(walkMoon)return<MoonWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkMoon(false)} pushNotif={pushNotif} addLog={addLog}/>;
 
 
   function travel(city){
@@ -1875,7 +2957,7 @@ function MapTab({char,setChar,genre,pushNotif,addLog}){
     }
     // Finalize
     const{won,flags}=btl;
-    const eg=won?city.rw.exp:Math.floor(city.rw.exp*.2),coins=won?city.rw.coins:Math.floor(city.rw.coins*.05);
+    const eg=won?city.rw.exp:Math.floor(city.rw.exp*.5),coins=won?city.rw.coins:Math.floor(city.rw.coins*.5);
     const nt=won&&city.rw.title&&!char.titles?.includes(city.rw.title)?city.rw.title:null;
     const gemReward=won&&!cleared[city.id]?3:0; // 初回クリアで💎3
     setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,gems:(c.gems||0)+gemReward,energy:Math.max(0,c.energy-20),
@@ -1906,7 +2988,98 @@ function MapTab({char,setChar,genre,pushNotif,addLog}){
       ))}
     </div>
     {/* WALK JAPAN ボタン */}
-    <Btn onClick={()=>setWalkJapan(true)} col={`${genre.c}22`} tc={genre.c} full sx={{fontSize:12,border:`1px solid ${genre.c}66`,fontWeight:700,marginBottom:10,padding:"12px"}}>🚶 WALK JAPAN（鹿児島から札幌まで歩く）</Btn>
+    <Btn onClick={()=>setWalkJapan(true)} col={`${genre.c}22`} tc={genre.c} full sx={{fontSize:12,border:`1px solid ${genre.c}66`,fontWeight:700,marginBottom:8,padding:"12px"}}>🚶 WALK JAPAN（鹿児島から札幌まで歩く）</Btn>
+
+    {/* ASIA ボタン */}
+    {hasFerry?(
+      <Btn onClick={()=>setWalkASIA(true)} col="#001a00" tc="#b3ff00" full sx={{fontSize:12,border:"1px solid #b3ff0055",fontWeight:700,marginBottom:8,padding:"12px"}}>🌏 WALK ASIA（ソウル・上海・バンコク...）</Btn>
+    ):(
+      <div style={{background:"#001a00",border:"1px solid #b3ff0033",borderRadius:8,padding:12,marginBottom:8}}>
+        <div style={{fontSize:11,color:"#b3ff00",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:6}}>🌏 ASIA（ソウル・上海・バンコク...）</div>
+        <div style={{fontSize:10,color:TX3,marginBottom:8,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>🚢 フェリーチケットが必要！</div>
+        <div style={{display:"flex",gap:8}}>
+          <Btn disabled={char.coins<500000} col="#001a00" tc="#b3ff00" onClick={()=>{
+            if(char.coins<500000){pushNotif("¥500,000必要！","#ff5555");return;}
+            if(!window.confirm("🚢 フェリーチケット購入？¥500,000消費！"))return;
+            setChar(c=>({...c,coins:c.coins-500000,specialItems:[...(c.specialItems||[]),"ferry"]}));
+            pushNotif("🚢 フェリーチケット購入！ASIAが解放！","#b3ff00");
+          }} sx={{flex:1,fontSize:11}}>💰 ¥500,000</Btn>
+          <Btn disabled={(char.gems||0)<500} col="#001a00" tc="#ce93d8" onClick={()=>{
+            if((char.gems||0)<500){pushNotif("💎500必要！","#ff5555");return;}
+            if(!window.confirm("🚢 フェリーチケット購入？💎500消費！"))return;
+            setChar(c=>({...c,gems:(c.gems||0)-500,specialItems:[...(c.specialItems||[]),"ferry"]}));
+            pushNotif("🚢 フェリーチケット購入！ASIAが解放！","#b3ff00");
+          }} sx={{flex:1,fontSize:11}}>💎 500</Btn>
+        </div>
+      </div>
+    )}
+
+    {/* EUROPE ボタン */}
+    {hasAirplane?(
+      <Btn onClick={()=>setWalkEUR(true)} col="#1a0a00" tc="#ffd60a" full sx={{fontSize:12,border:"1px solid #ffd60a55",fontWeight:700,marginBottom:8,padding:"12px"}}>🌍 WALK EUROPE（パリ・ロンドン・フィレンツェ...）</Btn>
+    ):(
+      <div style={{background:"#1a0a00",border:"1px solid #ffd60a33",borderRadius:8,padding:12,marginBottom:8}}>
+        <div style={{fontSize:11,color:"#ffd60a",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>🌍 EUROPE（バレエ発祥・フィレンツェへ...）</div>
+        <div style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✈️ 飛行機チケットが必要！</div>
+      </div>
+    )}
+
+    {/* INDIA ボタン */}
+    {hasAirplane?(
+      <Btn onClick={()=>setWalkIND(true)} col="#1a0a1a" tc="#ff9ec4" full sx={{fontSize:12,border:"1px solid #ff9ec455",fontWeight:700,marginBottom:8,padding:"12px"}}>🇮🇳 WALK INDIA（ムンバイ・デリー・チェンナイ...）</Btn>
+    ):(
+      <div style={{background:"#1a0a1a",border:"1px solid #ff9ec433",borderRadius:8,padding:12,marginBottom:8}}>
+        <div style={{fontSize:11,color:"#ff9ec4",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>🇮🇳 INDIA（ボリウッド・バラタナティアム...）</div>
+        <div style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✈️ 飛行機チケットが必要！</div>
+      </div>
+    )}
+
+    {/* SOUTH AMERICA ボタン */}
+    {hasAirplane?(
+      <Btn onClick={()=>setWalkSAM(true)} col="#1a1000" tc="#ffd60a" full sx={{fontSize:12,border:"1px solid #ffd60a55",fontWeight:700,marginBottom:8,padding:"12px"}}>🌎 WALK S.AMERICA（リオ・サンパウロ・ブエノスアイレス...）</Btn>
+    ):(
+      <div style={{background:"#1a1000",border:"1px solid #ffd60a33",borderRadius:8,padding:12,marginBottom:8}}>
+        <div style={{fontSize:11,color:"#ffd60a",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>🌎 S.AMERICA（カポエイラ・タンゴ・サルサ...）</div>
+        <div style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✈️ 飛行機チケットが必要！</div>
+      </div>
+    )}
+
+    {/* AFRICA ボタン */}
+    {hasAirplane?(
+      <Btn onClick={()=>setWalkAFR(true)} col="#1a0800" tc="#ff9900" full sx={{fontSize:12,border:"1px solid #ff990055",fontWeight:700,marginBottom:8,padding:"12px"}}>🌍 WALK AFRICA（ラゴス・カイロ・ヨハネスブルグ...）</Btn>
+    ):(
+      <div style={{background:"#1a0800",border:"1px solid #ff990033",borderRadius:8,padding:12,marginBottom:8}}>
+        <div style={{fontSize:11,color:"#ff9900",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>🌍 AFRICA（Afrobeat・サバール・パンツラ...）</div>
+        <div style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✈️ 飛行機チケットが必要！</div>
+      </div>
+    )}
+
+    {/* 月へ（マイケル3点セット所持で出現・ヒントなし） */}
+    {hasMichaelSet&&<Btn onClick={()=>setWalkMoon(true)} col="#050510" tc="#c0c0ff" full sx={{fontSize:12,border:"1px solid #c0c0ff44",fontWeight:700,marginBottom:8,padding:"12px",letterSpacing:2}}>🌙 ...</Btn>}
+
+    {/* USA ボタン */}
+    {hasAirplane?(
+      <Btn onClick={()=>setWalkUSA(true)} col="#001a33" tc="#00e5ff" full sx={{fontSize:12,border:"1px solid #00e5ff55",fontWeight:700,marginBottom:8,padding:"12px"}}>🇺🇸 WALK USA（NY・LA・Atlanta...）</Btn>
+    ):(
+      <div style={{background:"#001a33",border:"1px solid #00e5ff33",borderRadius:8,padding:12,marginBottom:8}}>
+        <div style={{fontSize:11,color:"#00e5ff",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:6}}>🇺🇸 USA（ブロンクス・LA・Atlanta...）</div>
+        <div style={{fontSize:10,color:TX3,marginBottom:8,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✈️ 飛行機チケットが必要！</div>
+        <div style={{display:"flex",gap:8}}>
+          <Btn disabled={char.coins<1000000} col="#001a33" tc="#00e5ff" onClick={()=>{
+            if(char.coins<1000000){pushNotif("¥1,000,000必要！","#ff5555");return;}
+            if(!window.confirm("✈️ 飛行機チケット購入？¥1,000,000消費！"))return;
+            setChar(c=>({...c,coins:c.coins-1000000,specialItems:[...(c.specialItems||[]),"airplane"]}));
+            pushNotif("✈️ 飛行機チケット購入！USA・欧州が解放！","#00e5ff");
+          }} sx={{flex:1,fontSize:11,border:"1px solid #00e5ff44"}}>💰 ¥1,000,000</Btn>
+          <Btn disabled={(char.gems||0)<1000} col="#001a33" tc="#ce93d8" onClick={()=>{
+            if((char.gems||0)<1000){pushNotif("💎1,000必要！","#ff5555");return;}
+            if(!window.confirm("✈️ 飛行機チケット購入？💎1,000消費！"))return;
+            setChar(c=>({...c,gems:(c.gems||0)-1000,specialItems:[...(c.specialItems||[]),"airplane"]}));
+            pushNotif("✈️ 飛行機チケット購入！USA・欧州が解放！","#00e5ff");
+          }} sx={{flex:1,fontSize:11,border:"1px solid #ce93d844"}}>💎 1,000</Btn>
+        </div>
+      </div>
+    )}
     <div style={{border:`1px solid ${BD}`,borderRadius:10,overflow:"hidden",marginBottom:10}}>
       <MapSVG region={region} char={char} selected={selected} onSelect={setSelected} traveling={traveling}/>
     </div>
@@ -2370,8 +3543,16 @@ function BattleTab({char,setChar,genre,pushNotif,addLog}){
     if(opp.requireItems&&opp.requireItems.length>0){
       const missing=opp.requireItems.filter(id=>!(char.specialItems||[]).includes(id));
       if(missing.length>0){
-        const names={"michael_glove":"🧤手袋","michael_loafer":"👞ローファー","michael_hat":"🎩ハット"};
-        pushNotif(`必要：${missing.map(id=>names[id]||id).join("・")}（ショップ→👑伝説）`,"#ffd60a");
+        // 月の石だけ欠けてる場合は謎のヒントのみ
+        const missingOnlyMoon=missing.length===1&&missing[0]==="moon_stone";
+        const missingMichaelItems=missing.filter(id=>id!=="moon_stone");
+        if(missingMichaelItems.length>0){
+          const names={"michael_glove":"🧤手袋","michael_loafer":"👞ローファー","michael_hat":"🎩ハット"};
+          pushNotif(`必要：${missingMichaelItems.map(id=>names[id]||id).join("・")}（ショップ→👑伝説）`,"#ffd60a");
+        }else if(missingOnlyMoon||missing[0]==="moon_stone"){
+          // 謎のヒント
+          pushNotif(opp.requireHint||"何かが足りない..."  ,"#c0c0ff");
+        }
         return;
       }
     }
@@ -2388,7 +3569,7 @@ function BattleTab({char,setChar,genre,pushNotif,addLog}){
     setBattle({phase:"seq",...btl,oppName:opp.name,step:0});
     for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,_battleSpeed===2?380:1100));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
     const{won,flags}=btl;
-    const eg=won?opp.rw.exp:Math.floor(opp.rw.exp*.25),coins=won?opp.rw.coins:Math.floor(opp.rw.coins*.1);
+    const eg=won?opp.rw.exp:Math.floor(opp.rw.exp*.5),coins=won?opp.rw.coins:Math.floor(opp.rw.coins*.5);
     const nt=won&&opp.rw.title&&!char.titles?.includes(opp.rw.title)?opp.rw.title:null;
     setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-7),mood:won?Math.min(100,c.mood+18):Math.max(0,c.mood-12),battlesWon:won?c.battlesWon+1:c.battlesWon,titles:nt?[...(c.titles||[]),nt]:c.titles||[]}));
     setBattle({phase:"result",won,eg,coins,title:nt,flags,myP:btl.myP,thP:btl.thP});
@@ -2469,7 +3650,7 @@ function BattleTab({char,setChar,genre,pushNotif,addLog}){
       </div>
       {/* ジャンル表示 */}
       {char.genre2&&<div style={{background:BG3,borderRadius:6,padding:"6px 10px",marginBottom:8,fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",color:"#ce93d8"}}>
-        {genre.e}{genre.jp} ＋ {GENRES[char.genre2]?.e}{GENRES[char.genre2]?.jp} → 相性有利な方を自動選択！
+        {genre.e}{genre.jp}{char.genre2?` ＋ ${GENRES[char.genre2]?.e}${GENRES[char.genre2]?.jp}`:""}{char.genre3?` ＋ ${GENRES[char.genre3]?.e}${GENRES[char.genre3]?.jp}`:""} → 最有利ジャンルを自動選択！
       </div>}
       {QOPPS.map(opp=>{
         const diff=opp.pw<mp-100?"easy":opp.pw>mp+100?"hard":"fair";
@@ -2535,6 +3716,7 @@ function HomeTab({char,genre,log,onRest,onEat,onTrain,onUseHeart}){
   const bs=Object.entries(eb).map(([k,v])=>`${SM[k].jp}+${v}`).join(" · ");
   const[trainGenre,setTrainGenre]=useState(char.genre); // メイン or サブ
   const genre2=char.genre2;
+  const genre3=char.genre3;
   const moves=[...(MOVES[trainGenre]||[]),...CMOVES];
   return(<div>
     <div style={{textAlign:"center",padding:"14px 0 10px",background:`radial-gradient(circle at 50% 60%,${genre.c}20,transparent 70%)`,borderRadius:12,marginBottom:12,border:`1px solid ${genre.c}30`}}>
@@ -2558,13 +3740,16 @@ function HomeTab({char,genre,log,onRest,onEat,onTrain,onUseHeart}){
     </div>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,marginTop:14}}>
       <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3}}>TRAINING ⚡{char.energy}</div>
-      {genre2&&<div style={{display:"flex",gap:6}}>
+      {(genre2||genre3)&&<div style={{display:"flex",gap:6}}>
         <button onClick={()=>setTrainGenre(char.genre)} style={{padding:"4px 10px",borderRadius:6,fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:trainGenre===char.genre?`${GENRES[char.genre]?.c}33`:"none",color:trainGenre===char.genre?GENRES[char.genre]?.c:TX3,border:`1px solid ${trainGenre===char.genre?GENRES[char.genre]?.c:BD}`,cursor:"pointer"}}>
           {GENRES[char.genre]?.e} メイン
         </button>
-        <button onClick={()=>setTrainGenre(genre2)} style={{padding:"4px 10px",borderRadius:6,fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:trainGenre===genre2?`${GENRES[genre2]?.c}33`:"none",color:trainGenre===genre2?GENRES[genre2]?.c:TX3,border:`1px solid ${trainGenre===genre2?GENRES[genre2]?.c:BD}`,cursor:"pointer"}}>
-          {GENRES[genre2]?.e} サブ
-        </button>
+        {genre2&&<button onClick={()=>setTrainGenre(genre2)} style={{padding:"4px 10px",borderRadius:6,fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:trainGenre===genre2?`${GENRES[genre2]?.c}33`:"none",color:trainGenre===genre2?GENRES[genre2]?.c:TX3,border:`1px solid ${trainGenre===genre2?GENRES[genre2]?.c:BD}`,cursor:"pointer"}}>
+          {GENRES[genre2]?.e} サブ1
+        </button>}
+        {genre3&&<button onClick={()=>setTrainGenre(genre3)} style={{padding:"4px 10px",borderRadius:6,fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:trainGenre===genre3?`${GENRES[genre3]?.c}33`:"none",color:trainGenre===genre3?GENRES[genre3]?.c:TX3,border:`1px solid ${trainGenre===genre3?GENRES[genre3]?.c:BD}`,cursor:"pointer"}}>
+          {GENRES[genre3]?.e} サブ2
+        </button>}
       </div>}
     </div>
     {moves.map(move=>{
@@ -2906,24 +4091,32 @@ function StatusTab({char,lv,rnk,genre,setChar,user,onAuthChange,lightMode,toggle
           <div style={{fontSize:9,color:GENRES[char.genre]?.c,fontWeight:700}}>{GENRES[char.genre]?.jp}</div>
         </div>
         {char.genre2&&<div style={{textAlign:"center",flex:1,borderLeft:`1px solid ${BD}`,paddingLeft:8}}>
-          <div style={{fontSize:9,color:TX3,marginBottom:2}}>サブ</div>
+          <div style={{fontSize:9,color:TX3,marginBottom:2}}>サブ1</div>
           <span style={{fontSize:20}}>{GENRES[char.genre2]?.e}</span>
           <div style={{fontSize:9,color:GENRES[char.genre2]?.c,fontWeight:700}}>{GENRES[char.genre2]?.jp}</div>
         </div>}
+        {char.genre3&&<div style={{textAlign:"center",flex:1,borderLeft:`1px solid ${BD}`,paddingLeft:8}}>
+          <div style={{fontSize:9,color:TX3,marginBottom:2}}>サブ2</div>
+          <span style={{fontSize:20}}>{GENRES[char.genre3]?.e}</span>
+          <div style={{fontSize:9,color:GENRES[char.genre3]?.c,fontWeight:700}}>{GENRES[char.genre3]?.jp}</div>
+        </div>}
       </div>
       <div style={{fontSize:10,color:TX2,marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
-        選択したジャンルがメインに。旧メインはサブへ移動（最大2ジャンル）。相性有利でバトル+20%！
+        最大3ジャンル。バトルで3つから最も相性のいいジャンルを自動選択！
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
-        {Object.entries(GENRES).filter(([k])=>k!==char.genre&&k!==char.genre2).map(([key,g])=>{
+        {Object.entries(GENRES).filter(([k])=>k!==char.genre&&k!==char.genre2&&k!==char.genre3).map(([key,g])=>{
           const cb=compatBonus(key,char.genre);
           return(<button key={key} onClick={()=>{
             if(char.coins<5000){alert("コインが足りない！¥5,000必要");return;}
-            if(!window.confirm(`${g.jp}をメインに変更？¥5,000消費。旧メインはサブへ。`))return;
+            const slots=[char.genre,char.genre2,char.genre3].filter(Boolean);
+            const label=slots.length>=3?"3ジャンル目は旧サブが消えます。":"旧メインはサブへ移動。";
+            if(!window.confirm(`${g.jp}をメインに変更？¥5,000消費。${label}`))return;
             const ns={};
             Object.entries(char.stats).forEach(([k,v])=>{ns[k]=Math.floor(v/2);});
             Object.entries(BASE[key]).forEach(([k,v])=>{ns[k]=(ns[k]||0)+v;});
-            setChar(c=>({...c,genre:key,genre2:c.genre,coins:c.coins-5000,stats:ns}));
+            // ローリング：新→main, 旧main→genre2, 旧genre2→genre3, 旧genre3は消える
+            setChar(c=>({...c,genre:key,genre2:c.genre,genre3:c.genre2||null,coins:c.coins-5000,stats:ns}));
           }} style={{padding:"8px 6px",borderRadius:7,background:BG3,border:`1px solid ${g.c}55`,cursor:"pointer",textAlign:"left"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
               <span style={{fontSize:16}}>{g.e}</span>
@@ -3410,6 +4603,7 @@ function migrateChar(raw){
     titles:[], battlesWon:0, showsDone:0,
     clearedCities:{}, lastLoginDate:"",
     genre2: null,
+    genre3: null,
     artifacts:[],
     bossDefeats:{},
     specialItems:[],
