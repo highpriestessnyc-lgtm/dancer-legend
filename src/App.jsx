@@ -573,7 +573,9 @@ const xpL=lv=>{
   if(lv<=99)return Math.floor(Math.pow(lv-1,1.75)*130);
   return xpL(99)+Math.floor((lv-99)*8000*Math.pow(lv-98,1.2)); // 99以降はめちゃ重い
 };
-function getLv(xp){let lv=1;while(xpL(lv+1)<=xp)lv++;return Math.min(lv,99);}
+function getLv(xp){let lv=1;while(xpL(lv+1)<=xp)lv++;return lv;}
+function getLvCapped(xp,artifacts){return Math.min(getLv(xp),getMaxLv(artifacts||[]));}
+
 function calcPow(s){return Object.values(s).reduce((a,b)=>a+b,0)*3;}
 function rnkOf(lv){let r=RANKS[0];RANKS.forEach(k=>{if(lv>=k.lv)r=k;});return r;}
 function faceOf(mood,energy){if(energy<10)return"dizzy";if(mood>75)return"happy";if(mood>45)return"ok";if(mood>20)return"sad";return"cry";}
@@ -2531,7 +2533,9 @@ function HomeTab({char,genre,log,onRest,onEat,onTrain,onUseHeart}){
   const curCity=allC()[char.currentCity];
   const eb=eqBonus(char.equipped||{});
   const bs=Object.entries(eb).map(([k,v])=>`${SM[k].jp}+${v}`).join(" · ");
-  const moves=[...(MOVES[char.genre]||[]),...CMOVES];
+  const[trainGenre,setTrainGenre]=useState(char.genre); // メイン or サブ
+  const genre2=char.genre2;
+  const moves=[...(MOVES[trainGenre]||[]),...CMOVES];
   return(<div>
     <div style={{textAlign:"center",padding:"14px 0 10px",background:`radial-gradient(circle at 50% 60%,${genre.c}20,transparent 70%)`,borderRadius:12,marginBottom:12,border:`1px solid ${genre.c}30`}}>
       <div style={{display:"inline-block",animation:"fl 3.5s ease-in-out infinite"}}><DancerSVG genre={char.genre} mood={char.mood} energy={char.energy} equipped={char.equipped} size={112}/></div>
@@ -2552,7 +2556,17 @@ function HomeTab({char,genre,log,onRest,onEat,onTrain,onUseHeart}){
       <Btn col="#0a1828" tc="#00e5ff" onClick={onRest} sx={{border:"1px solid #1a4870"}}>😴 休息（気分回復）</Btn>
       <Btn col="#1a0a2a" tc="#ff9ec4" onClick={onEat} sx={{border:"1px solid #4a1a6a"}}>🍱 食事（お腹回復）</Btn>
     </div>
-    <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10,marginTop:14}}>TRAINING ⚡{char.energy}</div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,marginTop:14}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3}}>TRAINING ⚡{char.energy}</div>
+      {genre2&&<div style={{display:"flex",gap:6}}>
+        <button onClick={()=>setTrainGenre(char.genre)} style={{padding:"4px 10px",borderRadius:6,fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:trainGenre===char.genre?`${GENRES[char.genre]?.c}33`:"none",color:trainGenre===char.genre?GENRES[char.genre]?.c:TX3,border:`1px solid ${trainGenre===char.genre?GENRES[char.genre]?.c:BD}`,cursor:"pointer"}}>
+          {GENRES[char.genre]?.e} メイン
+        </button>
+        <button onClick={()=>setTrainGenre(genre2)} style={{padding:"4px 10px",borderRadius:6,fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:trainGenre===genre2?`${GENRES[genre2]?.c}33`:"none",color:trainGenre===genre2?GENRES[genre2]?.c:TX3,border:`1px solid ${trainGenre===genre2?GENRES[genre2]?.c:BD}`,cursor:"pointer"}}>
+          {GENRES[genre2]?.e} サブ
+        </button>
+      </div>}
+    </div>
     {moves.map(move=>{
       const can=char.energy>=move.cost;
       return(<div key={move.id} style={{background:BG2,border:`1px solid ${BD}`,borderRadius:8,padding:"11px 13px",marginBottom:9,opacity:can?1:.5}}>
@@ -2933,7 +2947,11 @@ function Game({char,setChar,onTitle,user,onLogout,onAuthChange,manualSave,saveSt
   const[muted,setMuted]=useState(false);
   const[unread,setUnread]=useState(0);
   const[showInbox,setShowInbox]=useState(false);
-  const genre=GENRES[char.genre];const lv=getLv(char.exp);const rnk=rnkOf(lv);
+  const genre=GENRES[char.genre];
+  const lv=getLvCapped(char.exp,char.artifacts);
+  const rawLv=getLv(char.exp);
+  const maxLv=getMaxLv(char.artifacts||[]);
+  const rnk=rnkOf(lv);
   const xpC=char.exp-xpL(lv),xpN=xpL(lv+1)-xpL(lv),xpP=Math.min(100,Math.round((xpC/xpN)*100));
 
   // 未読メッセージ数を30秒ごとにチェック
@@ -3020,7 +3038,10 @@ function Game({char,setChar,onTitle,user,onLogout,onAuthChange,manualSave,saveSt
           <div><div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:genre.c,letterSpacing:1}}>{genre.name}</div><div style={{fontSize:16,fontWeight:900,color:TX}}>{char.name}</div></div>
         </div>
         <div style={{textAlign:"right"}}>
-          <div style={{fontSize:10,color:rnk.c,fontWeight:700}}>Lv.{lv} {rnk.jp}</div>
+          <div style={{fontSize:10,color:rnk.c,fontWeight:700}}>
+            Lv.{lv} {rnk.jp}
+            {lv>=maxLv&&rawLv>=maxLv&&<span style={{fontSize:8,color:"#ffd60a",marginLeft:4}}>🔒MAX</span>}
+          </div>
           <div style={{display:"flex",gap:8}}>
             <span style={{fontSize:10,color:"#b3ff00",fontWeight:700}}>{fc(char.coins)}</span>
             <span style={{fontSize:10,color:"#88eeff",fontWeight:700}}>💎{char.gems||0}</span>
