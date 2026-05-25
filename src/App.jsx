@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import QRCode from 'qrcode';
+import jsQR from 'jsqr';
 import { createClient } from '@supabase/supabase-js';
 
 let supabase = null;
@@ -10,6 +11,74 @@ try{
     supabase=createClient(url,key);
   }
 }catch(e){console.error('Supabase init failed:',e);}
+
+/* ── AUTH HELPERS ── */
+async function signUp(email,password){
+  if(!supabase)throw new Error("Supabase未接続");
+  const{data,error}=await supabase.auth.signUp({email,password});
+  if(error)throw error;
+  return data.user;
+}
+async function signIn(email,password){
+  if(!supabase)throw new Error("Supabase未接続");
+  const{data,error}=await supabase.auth.signInWithPassword({email,password});
+  if(error)throw error;
+  return data.user;
+}
+async function signOut(){
+  if(!supabase)return;
+  await supabase.auth.signOut();
+}
+async function getUser(){
+  if(!supabase)return null;
+  const{data}=await supabase.auth.getUser();
+  return data?.user||null;
+}
+async function saveCharToCloud(user,char){
+  if(!supabase||!user||!char)return false;
+  const{error}=await supabase.from('characters').upsert({id:user.id,data:char,updated_at:new Date().toISOString()});
+  if(error)console.error("☁️ saveCharToCloud ERROR:",error.message,error);
+  else console.log("☁️ saveCharToCloud OK:",char.name,"exp:",char.exp);
+  return!error;
+}
+async function loadCharFromCloud(user){
+  if(!supabase||!user)return null;
+  const{data}=await supabase.from('characters').select('data').eq('id',user.id).single();
+  return data?.data||null;
+}
+
+/* ── メッセージ機能 ── */
+async function sendMsg(fromName,toName,body){
+  if(!supabase)return{ok:false,err:"Supabase未接続"};
+  if(!fromName||!toName||!body.trim())return{ok:false,err:"名前またはメッセージが空"};
+  const{error}=await supabase.from('messages').insert({from_name:fromName,to_name:toName,body:body.trim()});
+  if(error)console.error("sendMsg error:",error);
+  return{ok:!error,err:error?.message||""};
+}
+async function fetchInbox(myName){
+  if(!supabase||!myName)return[];
+  const{data}=await supabase.from('messages')
+    .select('*').eq('to_name',myName)
+    .order('created_at',{ascending:false}).limit(50);
+  return data||[];
+}
+async function fetchThread(myName,otherName){
+  if(!supabase)return[];
+  const{data}=await supabase.from('messages')
+    .select('*')
+    .or(`and(from_name.eq.${myName},to_name.eq.${otherName}),and(from_name.eq.${otherName},to_name.eq.${myName})`)
+    .order('created_at',{ascending:true}).limit(100);
+  return data||[];
+}
+async function markRead(myName,fromName){
+  if(!supabase)return;
+  await supabase.from('messages').update({read:true}).eq('to_name',myName).eq('from_name',fromName).eq('read',false);
+}
+async function countUnread(myName){
+  if(!supabase||!myName)return 0;
+  const{count}=await supabase.from('messages').select('*',{count:'exact',head:true}).eq('to_name',myName).eq('read',false);
+  return count||0;
+}
 (function(){
   if(document.getElementById("dl5"))return;
   const l=document.createElement("link");l.rel="stylesheet";
@@ -62,19 +131,20 @@ const BASE={
 
 /* ── BATTLE COMMENTS (AI不要・ジャンルごと) ── */
 const BC={
-  ballet:["グランジュテで宙を舞う！✨","完璧なピルエット7回転！","アラベスクで空間を支配する","ポアントに全魂を集中！","クラシックの女神が降臨！"],
-  contemporary:["魂のインプロビゼーション！","フロアワークで大地を掌握","感情が爆発する全身表現！","重力を無視した動き！","コンタクトで一体化する"],
-  house:["パドルステップが止まらない！🕺","ジャックムーブで会場が沸騰","フットワークが神速！","ロフティングで頂点へ！","グルーヴが伝染していく","三連のビートが会場を唸らす！","スムースなフロアムーブが決まった！","オリジナルのニューステップが炸裂！","アクロバットが空を切り裂く！","オリジネーターさながらのリズム！","奥義！ピーターポール炸裂！！"],
-  hiphop:["オリジナルムーブ炸裂！🎤","スムースなフロアムーブが決まった！","ニューステップが大地を切り裂く！","タットの数々！","驚愕のミュージカリティ！","キートみたい！","ランニングマンが炸裂！","キャバレッジパッチで会場沸騰！","圧倒的なリズム感！","ヒップホップの魂が爆発する！"],
-  lock:["ロック！電光石火の急停止！🔒","ポイントで観客を射抜く！","スクービードゥーが炸裂！","ファンクの魂が爆発する","ダブルロックが大地を揺らす！","軽快なウィッチウェイ！","GET DOWN !!!!!!!!","華麗なJB'Sステップ！","なんだそのリズムは！"],
-  popping:["フレックスが電撃のよう！⚡","ウェーブが全身を伝う！","タットで幾何学模様を描く","グライドで床を滑走！","ポッピングが止まらない！","ストロボが炸裂！","コブラムーブが炸裂！"],
-  breaking:["トップロックで場を制圧！🌀","6ステップが轟く！","フリーズで時間が凍る！","スレッドが炸裂！","重力を無視したパワームーブ"],
-  waacking:["アームスウィングが閃光！💃","ポーズが完璧に決まった！","ワックが空気を切り裂く！","キャットウォークで魅了","ディスコの女神が降臨"],
-  jazz:["ジャズスクエアが流れる🎷","ピルエットでスウィング！","ジャズランで疾走！","スプリットリープで飛翔","リズムが体から溢れる！"],
+  ballet:["完璧なピルエット！","アントルラッセで宙を舞う！","シャンジュマンが決まった！","アッサンブレで魅せる！","シスで空間を支配！","グリッサードが流れるように！"],
+  contemporary:["魂のインプロ！","フロアワークで大地を掌握","呼吸が爆発する！","リリースで重力を無視！","コンタクトで一体化！"],
+  house:["シャッフルが炸裂！🕺","ルースレッグが止まらない！","２STEPでリズムを刻む！","ピーターポール炸裂！！","スウォルで会場が震える！","トレインが走る！"],
+  hiphop:["グルーヴが止まらない！🎤","シルエットで魅せる！","プランサーみたいに決めた！","バイブスがヤバい！","ミュージカリティ全開！","ダウンがキレキレ！","リズムが体に宿る！","フリースタイルが炸裂！"],
+  lock:["トゥエルが炸裂！🔒","ポイントで観客を射抜く！","スクーバーが決まった！","ロック！電光石火！","ウィッチウェイで翻弄！","クロスハンドが鮮やか！","GET DOWN !!!!!!!!"],
+  popping:["フレズノが炸裂！⚡","ティッキングが止まらない！","ストロボが炸裂！","ウェーブが全身に！","ヒット！会場に衝撃！","ダイムストップ！時が止まる！","マペットが観客を魅了！"],
+  breaking:["フリーズで時間が凍る！🌀","チェアーが決まった！","６歩が轟く！","３歩のリズムが光る！","トーマス！重力を無視！","エアーで会場が沸く！","スレッドが炸裂！","トップロックで場を制圧！"],
+  waacking:["アームスウィングが閃光！💃","プリエが決まった！","ポーズが完璧！","ワックが空気を切る！","キャットウォークで魅了！"],
+  jazz:["プリエが流れる！🎷","ジャンプで跳躍！","ジャズウォークが決まった！","イリュージョンで魅了！","アクセルターン炸裂！","ジャズハンドが光る！","シミーで会場を魅了！"],
 };
 const OBC={ // 相手のコメント
   popping:["電撃のようなポッピング！","ウェーブが伝わってくる","まるで電流が走るよう","止まらないポップ！"],
   house:["グルーヴが止まらない！","フットワークが神速！","会場が揺れてる","本場のハウスムーブ"],
+  hiphop:["グルーヴが止まらない！","シルエットが!!","プランサーみたい!!","ミュージカリティが半端ない！","リズムの取り方がヤバい！","ダウンがキレキレ！","フリースタイルが炸裂！","バイブスが会場を包む！","ウォームアップから本気！","フロアが揺れてる！","トップがナチュラル！","アイソレが鋭い！"],
   breaking:["パワーの嵐！","回転が止まらない","重力を無視した動き","フリーズが完璧！"],
   lock:["ファンクが炸裂！","ロックが冴え渡る","ポイントが鋭い！","スクービーが炸裂"],
   ballet:["優雅さが際立つ！","技術の極致！","クラシックの美しさ","ポアントが完璧！"],
@@ -147,21 +217,85 @@ const SHOP={
     {id:"protein", n:"プロテインシェイク", lv:8, p:5,  energy:15, desc:"スタミナ+3も！",bonus:{stamina:3}},
     {id:"medial",  n:"メディカルドリンク", lv:20,p:10, energy:50, desc:"完全回復！"},
   ],
+  legend:[
+    {id:"michael_glove", n:"マイケルの手袋", lv:50, p:500000, pg:500, e:"🧤", b:{charisma:10,style:8}, desc:"フリースタイルの神が残した伝説の白い手袋。宇宙の扉を開く", require:null},
+    {id:"michael_loafer",n:"マイケルのローファー",lv:50,p:500000,pg:500,e:"👞",b:{rhythm:10,technique:8},desc:"ムーンウォークを生んだ伝説の靴。月面を踏んだ者だけが履ける",require:null},
+    {id:"michael_hat",   n:"マイケルのハット",   lv:50, p:500000, pg:500, e:"🎩", b:{charisma:8,style:10},desc:"ステージを支配した黒いフェドーラ。これを被る者は伝説となる",require:null},
+  ],
 };
 
 /* ── STAT META ── */
 const SM={technique:{jp:"テクニック",c:"#4fc3f7"},rhythm:{jp:"リズム",c:"#b3ff00"},style:{jp:"スタイル",c:"#ff9ec4"},stamina:{jp:"スタミナ",c:"#ff7c3a"},charisma:{jp:"カリスマ",c:"#ffd60a"}};
-const RANKS=[{n:"Rookie",jp:"ルーキー",lv:1,c:"#9090b0"},{n:"Amateur",jp:"アマチュア",lv:5,c:"#4fc3f7"},{n:"Pro",jp:"プロ",lv:12,c:"#81c784"},{n:"Expert",jp:"エキスパート",lv:22,c:"#ce93d8"},{n:"Master",jp:"マスター",lv:38,c:"#ffcc02"},{n:"Legend",jp:"レジェンド",lv:55,c:"#ff6b6b"},{n:"Galaxy",jp:"ギャラクシー",lv:70,c:"#00ffff"}];
+const RANKS=[{n:"Rookie",jp:"ルーキー",lv:1,c:"#9090b0"},{n:"Amateur",jp:"アマチュア",lv:5,c:"#4fc3f7"},{n:"Pro",jp:"プロ",lv:12,c:"#81c784"},{n:"Expert",jp:"エキスパート",lv:22,c:"#ce93d8"},{n:"Master",jp:"マスター",lv:38,c:"#ffcc02"},{n:"Legend",jp:"レジェンド",lv:55,c:"#ff6b6b"},{n:"Galaxy",jp:"ギャラクシー",lv:70,c:"#00ffff"},{n:"GOD",jp:"神話",lv:100,c:"#ff4da6"},{n:"LEGEND",jp:"伝説",lv:150,c:"#ffffff"}];
+
+/* ── 秘宝システム（レベル上限解放） ── */
+const ARTIFACTS=[
+  {id:"lava",    e:"🌋",name:"溶岩の魂",    desc:"鹿児島の火山が宿す古代の魂",  hint:"鹿児島のBOSS全員を倒せ",    city:"kagoshima", need:["Minoda","Su"]},
+  {id:"dragon",  e:"🐉",name:"龍の鱗",      desc:"小倉の龍が落とした黄金の鱗",  hint:"小倉のBOSS全員を倒せ",      city:"kokura",    need:["TAKAFUMI","RYU"]},
+  {id:"flame",   e:"🔥",name:"博多の炎",    desc:"博多のクラブで燃え続ける情熱",hint:"博多のBOSS全員を倒せ",      city:"hakata",    need:["Yoshibow","SO"]},
+  {id:"dove",    e:"🕊",name:"瀬戸内の証",  desc:"瀬戸内の海に眠る平和の宝",    hint:"広島を制覇",                 cities:["hiroshima"]},
+  {id:"blossom", e:"🌸",name:"古都の証",    desc:"千年の都が認めし踊り手の証",  hint:"大阪と京都を両方制覇",       cities:["osaka","kyoto"]},
+  {id:"gear",    e:"⚙️",name:"産業の心臓",  desc:"名古屋の産業が生んだ機械の魂",hint:"名古屋を制覇",               cities:["nagoya"]},
+  {id:"thunder", e:"⚡",name:"東京の雷",    desc:"東京の夜空に落ちた雷の結晶",  hint:"東京を制覇",                 cities:["tokyo"]},
+  {id:"moon",    e:"🌙",name:"北の月",      desc:"北海道の夜空に輝く月の欠片",  hint:"仙台と札幌を両方制覇",       cities:["sendai","sapporo"]},
+  {id:"key",     e:"🔑",name:"伝説の鍵",    desc:"最強の者だけが手にできる伝説の鍵",hint:"強敵を倒し続けよ（超レア）",rare:true,dropRate:.03},
+];
+
+function getMaxLv(artifacts){
+  const n=(artifacts||[]).length;
+  if(n>=9)return 199;if(n>=7)return 175;if(n>=5)return 150;
+  if(n>=3)return 130;if(n>=1)return 110;return 99;
+}
+
+function computeArtifacts(char,bossDefeats,justClearedCity){
+  const existing=char.artifacts||[];
+  const cleared={...(char.clearedCities||{}),[justClearedCity]:true};
+  const result=[...existing];
+  ARTIFACTS.forEach(art=>{
+    if(result.includes(art.id))return;
+    let earned=false;
+    if(art.need&&art.city){
+      earned=art.need.every(name=>bossDefeats[`${art.city}_${name}`]);
+    }else if(art.cities){
+      earned=art.cities.every(c=>cleared[c]);
+    }
+    if(earned)result.push(art.id);
+  });
+  return result;
+}
+
+/* ── ジャンル相性チャート ── */
+const COMPAT={
+  house:       ["breaking","jazz"],
+  lock:        ["hiphop","waacking"],
+  hiphop:      ["house","contemporary"],
+  breaking:    ["ballet","lock"],
+  popping:     ["breaking","jazz"],
+  waacking:    ["popping","contemporary"],
+  ballet:      ["jazz","waacking"],
+  contemporary:["ballet","lock"],
+  jazz:        ["hiphop","popping"],
+};
+function compatBonus(playerGenre,oppGenre){
+  if(!playerGenre||!oppGenre)return{bonus:1,label:""};
+  const beats=COMPAT[playerGenre]||[];
+  if(beats.includes(oppGenre))return{bonus:1.2,label:"相性有利 ⚡+20%",col:"#b3ff00"};
+  const oppBeats=COMPAT[oppGenre]||[];
+  if(oppBeats.includes(playerGenre))return{bonus:0.85,label:"相性不利 ⬇-15%",col:"#ff5555"};
+  return{bonus:1,label:"互角",col:"#ffcc02"};
+}
 const AG={chain:"neck",sunglass:"face",bandana:"forehead",cap:"head",beanie:"head",durag:"head",fan:"hand",goldring:"hand"};
 
 /* ── TRAINING MOVES ── */
 const MOVES={
   ballet:[
-    {id:"pl", name:"プリエ",       cost:8,  g:{technique:2,stamina:1},      exp:14},
-    {id:"tn", name:"タンジュ",     cost:14, g:{technique:2,style:1},         exp:26},
-    {id:"fo", name:"フォンデュ",   cost:14, g:{technique:3,style:1},         exp:28},
-    {id:"pi", name:"ピルエット",   cost:18, g:{technique:2,rhythm:2},        exp:36},
-    {id:"gj", name:"グランジュテ", cost:24, g:{stamina:2,charisma:2,style:2},exp:52},
+    {id:"pi", name:"ピルエット",         cost:10, g:{technique:3,style:2},          exp:26},
+    {id:"jm", name:"ジャンプ",           cost:8,  g:{stamina:2,style:1},            exp:18},
+    {id:"en", name:"アントルラッセ",     cost:14, g:{technique:3,stamina:2},        exp:32},
+    {id:"si", name:"シス",               cost:8,  g:{technique:2,style:1},          exp:16},
+    {id:"ch", name:"シャンジュマン",     cost:12, g:{stamina:2,technique:2},        exp:28},
+    {id:"gl", name:"グリッサードサード", cost:16, g:{style:3,technique:2},          exp:36},
+    {id:"as", name:"アッサンブレ",       cost:20, g:{stamina:2,charisma:2,style:2}, exp:44},
   ],
   contemporary:[
     {id:"fl", name:"フロアワーク", cost:9,  g:{style:2,technique:1},         exp:15},
@@ -171,52 +305,63 @@ const MOVES={
     {id:"co", name:"コンタクト",   cost:22, g:{charisma:3,style:2},           exp:50},
   ],
   house:[
-    {id:"pb", name:"パドブレ",     cost:8,  g:{rhythm:2,style:1},             exp:14},
-    {id:"ll", name:"ルースレッグ", cost:8,  g:{rhythm:2,stamina:1},           exp:14},
-    {id:"jk", name:"ジャッキング", cost:11, g:{rhythm:3,stamina:1},           exp:22},
-    {id:"fw", name:"フットワーク", cost:18, g:{rhythm:2,technique:2,stamina:1},exp:38},
-    {id:"lo", name:"ロフティング", cost:22, g:{charisma:2,style:2,rhythm:1},  exp:46},
+    {id:"sf", name:"シャッフル",   cost:8,  g:{rhythm:2,style:1},            exp:14},
+    {id:"ll", name:"ルースレッグ", cost:8,  g:{rhythm:2,stamina:1},          exp:14},
+    {id:"ts", name:"２STEP",       cost:10, g:{rhythm:2,style:2},            exp:20},
+    {id:"pp", name:"ピーターポール",cost:18,g:{charisma:3,rhythm:3},         exp:42},
+    {id:"sw", name:"スウォル",     cost:14, g:{rhythm:3,stamina:2},          exp:32},
+    {id:"tr", name:"トレイン",     cost:22, g:{stamina:3,rhythm:2,style:1},  exp:48},
   ],
   hiphop:[
-    {id:"rm", name:"ランニングマン",     cost:8,  g:{rhythm:2,stamina:1},          exp:14},
-    {id:"cp", name:"キャバレッジパッチ", cost:10, g:{rhythm:2,charisma:1},         exp:18},
-    {id:"kp", name:"キドNプレイ",        cost:12, g:{rhythm:3,charisma:1},         exp:24},
-    {id:"rw", name:"リーンウィズイット", cost:14, g:{charisma:2,style:2},          exp:28},
-    {id:"sm", name:"スネークムーブ",     cost:18, g:{style:3,rhythm:2},            exp:38},
+    {id:"tl", name:"トゥループ",     cost:10, g:{charisma:2,rhythm:2},       exp:20},
+    {id:"rb", name:"ロボコップ",     cost:12, g:{technique:3,style:2},       exp:28},
+    {id:"mt", name:"マイクタイソン", cost:18, g:{charisma:4,rhythm:2},       exp:40},
+    {id:"pm", name:"パーティマシン", cost:14, g:{charisma:3,style:2},        exp:30},
+    {id:"wv", name:"ウェーブ",       cost:10, g:{technique:2,style:2},       exp:22},
+    {id:"tt", name:"タット",         cost:16, g:{technique:3,charisma:1},    exp:34},
   ],
   lock:[
-    {id:"lk", name:"ロック",           cost:8,  g:{charisma:2,rhythm:1},      exp:14},
-    {id:"pt", name:"ポイント",         cost:9,  g:{charisma:2,style:1},        exp:17},
-    {id:"tw", name:"トゥエル",         cost:9,  g:{style:2,technique:1},       exp:18},
-    {id:"sg", name:"ストップアンドゴー",cost:18, g:{rhythm:2,stamina:2},       exp:36},
-    {id:"sc", name:"スクービードゥー", cost:13, g:{charisma:3,rhythm:2},       exp:28},
+    {id:"tw", name:"トゥエル",       cost:9,  g:{style:2,technique:1},       exp:18},
+    {id:"pt", name:"ポイント",       cost:8,  g:{charisma:3,style:1},        exp:16},
+    {id:"sc", name:"スクーバー",     cost:14, g:{stamina:2,charisma:2},      exp:30},
+    {id:"lk", name:"ロック",         cost:10, g:{charisma:2,rhythm:2},       exp:20},
+    {id:"ww", name:"ウィッチウェイ", cost:12, g:{style:3,charisma:2},        exp:28},
+    {id:"cr", name:"クロスハンド",   cost:16, g:{technique:3,style:2},       exp:36},
   ],
   popping:[
-    {id:"fx", name:"フレックス",   cost:8,  g:{technique:2,style:1},          exp:14},
-    {id:"wv", name:"ウェーブ",     cost:13, g:{technique:2,style:2},          exp:28},
-    {id:"sb", name:"ストロボ",     cost:18, g:{technique:3,rhythm:1},         exp:38},
-    {id:"tt", name:"タット",       cost:22, g:{technique:3,style:2},          exp:46},
-    {id:"cb", name:"コブラ",       cost:16, g:{style:3,charisma:1,technique:1},exp:34},
+    {id:"fr", name:"フレズノ",       cost:10, g:{technique:2,rhythm:2},      exp:22},
+    {id:"tk", name:"ティッキング",   cost:8,  g:{technique:3,style:1},       exp:18},
+    {id:"sb", name:"ストロボ",       cost:16, g:{technique:3,style:2},       exp:36},
+    {id:"wv", name:"ウェーブ",       cost:10, g:{technique:2,style:2},       exp:22},
+    {id:"ht", name:"ヒット",         cost:12, g:{technique:3,stamina:1},     exp:26},
+    {id:"ds", name:"ダイムストップ", cost:20, g:{technique:4,charisma:1},    exp:44},
+    {id:"mp", name:"マペット",       cost:14, g:{style:3,charisma:2},        exp:32},
   ],
   breaking:[
-    {id:"tr", name:"トップロック", cost:8,  g:{stamina:2,charisma:1},         exp:14},
-    {id:"ss", name:"6ステップ",    cost:13, g:{stamina:2,technique:2},        exp:28},
-    {id:"fr", name:"フリーズ",     cost:22, g:{technique:3,stamina:2},        exp:48},
-    {id:"th", name:"スレッド",     cost:28, g:{stamina:3,technique:2,style:1},exp:58},
+    {id:"fz", name:"フリーズ",       cost:20, g:{technique:3,stamina:2},     exp:46},
+    {id:"ch", name:"チェアー",       cost:16, g:{technique:3,stamina:2},     exp:36},
+    {id:"ss", name:"６歩",           cost:12, g:{stamina:2,rhythm:2},        exp:26},
+    {id:"ts", name:"３歩",           cost:10, g:{rhythm:2,technique:2},      exp:22},
+    {id:"th", name:"トーマス",       cost:28, g:{stamina:4,technique:2},     exp:60},
+    {id:"ar", name:"エアー",         cost:24, g:{stamina:3,charisma:2},      exp:52},
+    {id:"sl", name:"スレッド",       cost:18, g:{technique:3,stamina:2},     exp:40},
+    {id:"tl", name:"トップロック",   cost:8,  g:{charisma:2,rhythm:2},       exp:18},
   ],
   waacking:[
-    {id:"sw", name:"アームスウィング",cost:8,  g:{charisma:2,style:1},        exp:14},
-    {id:"wp", name:"プリエ",          cost:8,  g:{style:2,technique:1},       exp:14},
-    {id:"po", name:"ポーズ",          cost:9,  g:{charisma:2,style:2},        exp:19},
-    {id:"wh", name:"ワック",          cost:18, g:{charisma:3,rhythm:2},       exp:38},
-    {id:"cw", name:"キャットウォーク",cost:13, g:{style:3,charisma:1},        exp:28},
+    {id:"sw", name:"アームスウィング",cost:8,  g:{charisma:2,style:1},       exp:14},
+    {id:"wp", name:"プリエ",          cost:8,  g:{style:2,technique:1},      exp:14},
+    {id:"po", name:"ポーズ",          cost:9,  g:{charisma:2,style:2},       exp:19},
+    {id:"wh", name:"ワック",          cost:18, g:{charisma:3,rhythm:2},      exp:38},
+    {id:"cw", name:"キャットウォーク",cost:13, g:{style:3,charisma:1},       exp:28},
   ],
   jazz:[
-    {id:"st", name:"ストレッチ",   cost:8,  g:{stamina:1,style:1},            exp:14},
-    {id:"jp", name:"プリエ",       cost:10, g:{technique:2,style:1},          exp:18},
-    {id:"jt", name:"タンジュ",     cost:13, g:{rhythm:2,technique:1},         exp:24},
-    {id:"pi", name:"ピルエット",   cost:18, g:{technique:2,style:2},          exp:36},
-    {id:"gj", name:"グランジュテ", cost:18, g:{stamina:2,style:2,charisma:1}, exp:38},
+    {id:"jp", name:"プリエ",         cost:8,  g:{technique:2,style:1},       exp:16},
+    {id:"jm", name:"ジャンプ",       cost:10, g:{stamina:2,style:1},         exp:20},
+    {id:"jw", name:"ジャズウォーク", cost:10, g:{charisma:2,style:2},        exp:22},
+    {id:"il", name:"イリュージョン", cost:18, g:{style:3,charisma:2},        exp:38},
+    {id:"at", name:"アクセルターン", cost:14, g:{technique:2,rhythm:2},      exp:30},
+    {id:"jh", name:"ジャズハンド",   cost:8,  g:{charisma:3,style:1},        exp:18},
+    {id:"sm", name:"シミー",         cost:12, g:{charisma:2,rhythm:2},       exp:26},
   ],
 };
 const CMOVES=[{id:"st",name:"ストレッチ",cost:4,g:{stamina:1,style:1},exp:8},{id:"im2",name:"イメトレ",cost:3,g:{technique:1},exp:6},{id:"vd",name:"ビデオ研究",cost:2,g:{style:1,charisma:1},exp:7}];
@@ -231,8 +376,8 @@ const QOPPS=[
   {id:"q6",name:"バレエの女王Bea", style:"ballet",   e:"👸",lv:22, pw:3000, rw:{exp:900, coins:3000, title:"テクニシャン"}},
   {id:"q7",name:"ストリート王者Shin",style:"breaking",e:"⚡",lv:32, pw:5500, rw:{exp:1800,coins:6000, title:"ストリートの王者"}},
   {id:"q8",name:"ワールドスターYuki",style:"contemporary",e:"🌟",lv:48,pw:9000, rw:{exp:3000,coins:12000,title:"ワールドクラス"}},
-  {id:"q9",name:"レジェンド・GOAT", style:"all",      e:"👑",lv:60, pw:15000, rw:{exp:6000,coins:30000,title:"GOAT"}},
-  {id:"q10",name:"宇宙人ダンサー",  style:"all",      e:"👽",lv:70, pw:25000, rw:{exp:12000,coins:80000,title:"GALAXY DANCER"}},
+  {id:"q9", name:"レジェンド・GOAT", style:"popping",  e:"👑",lv:60, pw:15000, rw:{exp:6000, coins:30000,title:"GOAT"}, requireItems:["michael_glove","michael_hat"]},
+  {id:"q10",name:"宇宙人ダンサー",  style:"breaking", e:"👽",lv:70, pw:25000, rw:{exp:12000,coins:80000,title:"GALAXY DANCER"}, requireItems:["michael_glove","michael_loafer","michael_hat"]},
 ];
 
 /* ── SHOWS ── */
@@ -247,7 +392,13 @@ const SHOWS=[
 
 /* ── JAPAN MAP ── */
 const J={
-  kagoshima:{id:"kagoshima",name:"鹿児島",x:152,y:408,g:"house",lv:1,cn:["kumamoto","miyazaki"],ch:{name:"溶岩ハウサー・ケン",e:"🌋",pw:150},rw:{exp:160,coins:400,title:"鹿児島の王"},desc:"火山の島から生まれたHOUSEの聖地",food:[
+  kagoshima:{id:"kagoshima",name:"鹿児島",x:152,y:408,g:"house",lv:1,cn:["kumamoto","miyazaki"],
+    ch:{name:"Minoda",e:"🌋",pw:220},
+    bosses:[
+      {name:"Minoda",e:"🌋",pw:220,style:"house",intro:"鹿児島の溶岩を纏うHOUSEの使い手！"},
+      {name:"Su",    e:"🔥",pw:280,style:"hiphop",intro:"炎のリズムで迫り来る！"},
+    ],
+    rw:{exp:160,coins:400,title:"鹿児島の王"},desc:"火山の島から生まれたHOUSEの聖地",food:[
     {n:"油そば専門 兎",p:900,e:15,h:40,desc:"鹿児島発！自分好みにカスタムする油そば"},
     {n:"うなぎの松重",p:2500,e:25,h:45,desc:"鹿児島名物！ふっくら肉厚のうなぎ蒲焼き"},
     {n:"爾今のそば",p:1200,e:12,h:35,desc:"手打ちそばの名店。落ち着いた一杯"},
@@ -257,32 +408,63 @@ const J={
     {n:"おらが村 地鶏炭火焼き",p:1800,e:20,h:40,desc:"宮崎地鶏を炭火でじっくり。ワイルドな旨さ"},
     {n:"戸隠本店 冷や汁",p:800,e:10,h:30,desc:"宮崎の郷土料理。夏に最高の冷たい汁かけ飯"},
   ]},
-  nagasaki:{id:"nagasaki",name:"長崎",x:86,y:316,g:"waacking",lv:5,cn:["kumamoto","hakata"],ch:{name:"海の女神・マリア",e:"⛵",pw:500},rw:{exp:300,coins:800,title:"長崎ソウルクイーン"},desc:"港町の哀愁を纏うSOUL & WAACKING",food:[
+  nagasaki:{id:"nagasaki",name:"長崎",x:86,y:316,g:"waacking",lv:5,cn:["kumamoto","hakata"],
+    ch:{name:"Uchikawa",e:"⛵",pw:520},
+    bosses:[
+      {name:"Uchikawa",e:"⛵",pw:520,style:"waacking",intro:"長崎の海風を切るWAACKING！"},
+      {name:"Kosuke",  e:"🌊",pw:600,style:"contemporary",intro:"港町の詩人。圧倒的なCONTEMPORARY！"},
+    ],
+    rw:{exp:300,coins:800,title:"長崎ソウルクイーン"},desc:"港町の哀愁を纏うSOUL & WAACKING",food:[
     {n:"新地中華街 角煮まん",p:600,e:12,h:30,desc:"日本三大中華街！とろとろ角煮がたまらない"},
     {n:"四海楼のちゃんぽん",p:1200,e:18,h:45,desc:"ちゃんぽん発祥の店！野菜たっぷり濃厚スープ"},
     {n:"トルコライス",p:900,e:15,h:40,desc:"長崎名物のハイカラ飯。ピラフ＋カツ＋スパゲティ"},
   ]},
-  kumamoto:{id:"kumamoto",name:"熊本",x:148,y:330,g:"lock",lv:5,cn:["kagoshima","miyazaki","oita","nagasaki","hakata"],ch:{name:"熊本城ロッカー・Tomo",e:"🏯",pw:480},rw:{exp:290,coins:750,title:"熊本ロックダウン"},desc:"お城の麓で炸裂するLOCK",food:[
+  kumamoto:{id:"kumamoto",name:"熊本",x:148,y:330,g:"lock",lv:5,cn:["kagoshima","miyazaki","oita","nagasaki","hakata"],
+    ch:{name:"Issei",e:"🏯",pw:540},
+    bosses:[
+      {name:"Issei",e:"🏯",pw:540,style:"lock",intro:"熊本城の番人！鉄壁のLOCK！"},
+    ],
+    rw:{exp:290,coins:750,title:"熊本ロックダウン"},desc:"お城の麓で炸裂するLOCK",food:[
     {n:"馬刺し（上赤身）",p:1500,e:20,h:35,desc:"熊本名物！甘口醤油で食べる最高の馬刺し"},
     {n:"太平燕（たいぴーえん）",p:800,e:12,h:35,desc:"熊本だけの春雨鍋料理。ヘルシーで旨い"},
     {n:"辛子蓮根",p:500,e:8,h:20,desc:"熊本の郷土料理。ピリ辛の味噌が蓮根に最高"},
   ]},
-  oita:{id:"oita",name:"大分",x:200,y:298,g:"jazz",lv:7,cn:["miyazaki","kumamoto","kokura"],ch:{name:"温泉ジャズマン・Hiro",e:"♨",pw:680},rw:{exp:360,coins:900,title:"大分スウィング"},desc:"湯けむりの中に流れるJAZZ",food:[
+  oita:{id:"oita",name:"大分",x:200,y:298,g:"jazz",lv:7,cn:["miyazaki","kumamoto","kokura"],
+    ch:{name:"Hirossy",e:"♨",pw:740},
+    bosses:[
+      {name:"Hirossy",e:"♨",pw:740,style:"jazz",intro:"温泉の湯けむりの中に生きるJAZZの魂！"},
+    ],
+    rw:{exp:360,coins:900,title:"大分スウィング"},desc:"湯けむりの中に流れるJAZZ",food:[
     {n:"炎の中華",p:1000,e:15,h:35,desc:"大分の名中華料理店。本格的な一皿"},
     {n:"大納言のとり天定食",p:1100,e:18,h:40,desc:"大分名物とり天！サクサクのもも肉天ぷら"},
     {n:"だご汁定食",p:800,e:12,h:35,desc:"大分の郷土料理。平打ち麺が入った味噌汁"},
   ]},
-  hakata:{id:"hakata",name:"博多",x:136,y:296,g:"lock",lv:8,cn:["nagasaki","kumamoto","kokura"],ch:{name:"屋台ロックキング・Shin",e:"🍜",pw:820},rw:{exp:400,coins:1100,title:"博多の王者"},desc:"熱い男たちのLOCKが博多の夜を揺らす",food:[
+  hakata:{id:"hakata",name:"博多",x:136,y:296,g:"lock",lv:8,cn:["nagasaki","kumamoto","kokura"],
+    ch:{name:"Yoshibow",e:"🦝",pw:900},
+    bosses:[
+      {name:"Yoshibow",e:"🦝",pw:900, style:"lock",  intro:"博多の夜を支配するLOCKの番人！"},
+      {name:"SO",      e:"⚡",pw:1000,style:"hiphop", intro:"電光石火のHIPHOPで会場を制圧！"},
+    ],
+    rw:{exp:400,coins:1100,title:"博多の王者"},desc:"熱い男たちのLOCKが博多の夜を揺らす",food:[
     {n:"水炊き いろは",p:3500,e:25,h:50,desc:"昭和28年創業の名店！コラーゲンたっぷり水炊き"},
     {n:"元祖長浜屋のラーメン",p:700,e:18,h:40,desc:"長浜ラーメン発祥の店。極細麺と豚骨スープ"},
     {n:"博多もつ鍋",p:2000,e:22,h:45,desc:"コラーゲン満点のもつ鍋。〆はちゃんぽん麺"},
   ]},
-  kokura:{id:"kokura",name:"小倉",x:166,y:284,g:"house",lv:9,cn:["hakata","oita","hiroshima"],ch:{name:"鉄の街ハウサー・Masa",e:"🏭",pw:1000},rw:{exp:450,coins:1300,title:"小倉HouseChamp"},desc:"鉄の街のHOUSEスタイル",food:[
+  kokura:{id:"kokura",name:"小倉",x:166,y:284,g:"house",lv:9,cn:["hakata","oita","hiroshima"],
+    ch:{name:"TAKAFUMI",e:"🐉",pw:1100},
+    bosses:[
+      {name:"TAKAFUMI",e:"🔱",pw:1100,style:"house",  intro:"小倉を制する者が九州を制す！HOUSEの絶対王者！"},
+      {name:"RYU",     e:"🐉",pw:1200,style:"breaking",intro:"龍の如く舞う！BREAKINGの伝説！"},
+    ],
+    rw:{exp:450,coins:1300,title:"小倉HouseChamp"},desc:"鉄の街のHOUSEスタイル",food:[
     {n:"娘娘（にゃんにゃん）肉やきめし",p:800,e:15,h:40,desc:"テレビで話題！豚コマ肉をのせた小倉名物焼き飯"},
     {n:"だるま堂の焼きうどん",p:700,e:12,h:35,desc:"焼きうどん発祥のお店！乾麺ならではの食感"},
     {n:"サバのぬか炊き",p:600,e:10,h:25,desc:"小倉の郷土料理。骨まで柔らか甘辛風味"},
   ]},
-  hiroshima:{id:"hiroshima",name:"広島",x:148,y:252,g:"contemporary",lv:11,cn:["kokura","kobe"],ch:{name:"平和の踊り子・Nana",e:"🕊",pw:1300},rw:{exp:520,coins:1600,title:"広島コンテポラリー"},desc:"平和への祈りを込めたCONTEMPORARY",food:[
+  hiroshima:{id:"hiroshima",name:"広島",x:148,y:252,g:"contemporary",lv:11,cn:["kokura","kobe"],
+    ch:{name:"TAKA",e:"🕊",pw:1400},
+    bosses:[{name:"TAKA",e:"🕊",pw:1400,style:"contemporary",intro:"広島の魂を纏うCONTEMPORARY！瀬戸内の風が吹く！"}],
+    rw:{exp:520,coins:1600,title:"広島コンテポラリー"},desc:"平和への祈りを込めたCONTEMPORARY",food:[
     {n:"広島風お好み焼き",p:1000,e:15,h:45,desc:"そば入り！重ねて焼く本場の広島スタイル"},
     {n:"牡蠣フライ定食",p:1200,e:18,h:40,desc:"広島産の新鮮な牡蠣。外カリ中トロ！"},
     {n:"汁なし担々麺",p:900,e:12,h:35,desc:"広島で人気の辛旨まぜそば"},
@@ -292,7 +474,10 @@ const J={
     {n:"神戸プリン",p:400,e:8,h:20,desc:"港町スイーツの定番。濃厚で上品な甘さ"},
     {n:"ケバブサンド（北野）",p:600,e:10,h:25,desc:"異人館の街・北野の本格トルコケバブ"},
   ]},
-  osaka:{id:"osaka",name:"大阪",x:208,y:224,g:"popping",lv:13,cn:["kobe","kyoto"],ch:{name:"難波POPPINキング・Taka",e:"🐡",pw:2000},rw:{exp:600,coins:2000,title:"大阪の帝王"},desc:"ど派手なPOPPINGが大阪を沸かせる！",food:[
+  osaka:{id:"osaka",name:"大阪",x:208,y:224,g:"popping",lv:13,cn:["kobe","kyoto"],
+    ch:{name:"DAN",e:"🐡",pw:2100},
+    bosses:[{name:"DAN",e:"🐡",pw:2100,style:"popping",intro:"難波を震わせるPOPPINGの鬼神！DAN参上！"}],
+    rw:{exp:600,coins:2000,title:"大阪の帝王"},desc:"ど派手なPOPPINGが大阪を沸かせる！",food:[
     {n:"象屋（ぞうや）お好み焼き",p:1000,e:15,h:45,desc:"玉出の百名店！厚切り豚が覆うカリふわ焼き"},
     {n:"たこ焼き（道頓堀）",p:400,e:8,h:25,desc:"外カリ中トロ！これが本場の味やで"},
     {n:"串カツ（新世界）",p:700,e:12,h:30,desc:"二度漬け禁止！衣サクサクのソース串カツ"},
@@ -312,7 +497,13 @@ const J={
     {n:"崎陽軒のシウマイ",p:500,e:8,h:20,desc:"横浜を代表する名物。冷めても旨いシウマイ"},
     {n:"中華街の北京ダック",p:3000,e:25,h:40,desc:"日本最大の中華街で食べる本格北京ダック"},
   ]},
-  tokyo:{id:"tokyo",name:"東京",x:294,y:172,g:"popping",lv:22,cn:["yokohama","sendai"],ch:{name:"東京ゴッド・ZERO",e:"🏙",pw:6000},rw:{exp:1000,coins:5000,title:"東京の覇者"},desc:"全スタイルが集結する日本の聖地",food:[
+  tokyo:{id:"tokyo",name:"東京",x:294,y:172,g:"popping",lv:22,cn:["yokohama","sendai"],
+    ch:{name:"SAM",e:"🏙",pw:6500},
+    bosses:[
+      {name:"SAM",   e:"🏙",pw:6500,style:"hiphop",  intro:"東京を制する者が日本を制す！HIPHOPの王！"},
+      {name:"SAKUMA",e:"⚡",pw:7200,style:"popping",intro:"POPPINGで東京の夜を爆破する！SAKUMA降臨！"},
+    ],
+    rw:{exp:1000,coins:5000,title:"東京の覇者"},desc:"全スタイルが集結する日本の聖地",food:[
     {n:"築地の海鮮丼",p:2000,e:25,h:50,desc:"新鮮なネタが輝く！築地場外の本物を食らえ"},
     {n:"もんじゃ焼き（月島）",p:1200,e:12,h:35,desc:"下町の味！おこげが美味しい月島スタイル"},
     {n:"高級寿司（銀座）",p:8000,e:30,h:45,desc:"江戸前の真髄。口に入れた瞬間にとろける"},
@@ -322,7 +513,13 @@ const J={
     {n:"ずんだ餅",p:400,e:6,h:20,desc:"枝豆の甘さが絶品！仙台の定番スイーツ"},
     {n:"冷やし中華（発祥の地）",p:800,e:10,h:30,desc:"冷やし中華は仙台発祥！夏の名物"},
   ]},
-  sapporo:{id:"sapporo",name:"札幌",x:272,y:50,g:"jazz",lv:30,cn:["sendai"],ch:{name:"雪のジャズダンサー・Miku",e:"❄",pw:11000},rw:{exp:1300,coins:8000,title:"北の王者"},desc:"雪と氷の中に咲くJAZZ",food:[
+  sapporo:{id:"sapporo",name:"札幌",x:272,y:50,g:"jazz",lv:30,cn:["sendai"],
+    ch:{name:"NAOYA",e:"❄",pw:12000},
+    bosses:[
+      {name:"NAOYA",e:"❄",pw:12000,style:"jazz",   intro:"北海道の極寒の中に咲くJAZZの魂！"},
+      {name:"K-SK", e:"🌨",pw:13500,style:"hiphop",intro:"雪原を駆けるHIPHOPの嵐！K-SK参上！"},
+    ],
+    rw:{exp:1300,coins:8000,title:"北の王者"},desc:"雪と氷の中に咲くJAZZ",food:[
     {n:"味噌ラーメン（すみれ）",p:1100,e:20,h:45,desc:"北海道味噌！バターコーン入りの濃厚スープ"},
     {n:"ジンギスカン（だるま）",p:2500,e:25,h:50,desc:"北海道の大地の恵み！豪快に焼いて食らえ"},
     {n:"スープカレー（奥芝商店）",p:1400,e:18,h:40,desc:"野菜たっぷりスパイシー！スープカレー発祥の地"},
@@ -371,7 +568,11 @@ const HT=[
 ];
 
 /* ── HELPERS ── */
-const xpL=lv=>lv<=1?0:Math.floor(Math.pow(lv-1,1.75)*130);
+const xpL=lv=>{
+  if(lv<=1)return 0;
+  if(lv<=99)return Math.floor(Math.pow(lv-1,1.75)*130);
+  return xpL(99)+Math.floor((lv-99)*8000*Math.pow(lv-98,1.2)); // 99以降はめちゃ重い
+};
 function getLv(xp){let lv=1;while(xpL(lv+1)<=xp)lv++;return Math.min(lv,99);}
 function calcPow(s){return Object.values(s).reduce((a,b)=>a+b,0)*3;}
 function rnkOf(lv){let r=RANKS[0];RANKS.forEach(k=>{if(lv>=k.lv)r=k;});return r;}
@@ -676,8 +877,13 @@ function HeartBar({char,onUseHeart}){
   </div>);
 }
 
+/* ── バトル速度 ── */
+let _battleSpeed=1; // 1 or 2
+
 /* ── 4MOVE BATTLE OVERLAY ── */
 function BattleOverlay({state,gc,onClose}){
+  const[,setTick]=useState(0);
+  const toggleSpeed=()=>{_battleSpeed=_battleSpeed===1?2:1;setTick(t=>t+1);};
   const px={fontFamily:"'Press Start 2P',monospace"};
   const base={position:"fixed",inset:0,background:"rgba(5,5,18,.96)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",zIndex:900,padding:24,textAlign:"center"};
 
@@ -685,7 +891,18 @@ function BattleOverlay({state,gc,onClose}){
     const{moves,step}=state;
     const shown=moves.slice(0,step+1);
     return(<div style={base}>
+      <div style={{position:"absolute",top:16,right:16}}>
+        <button onClick={toggleSpeed} style={{fontSize:11,padding:"5px 12px",borderRadius:6,background:_battleSpeed===2?"#b3ff00":"#1a1a30",color:_battleSpeed===2?"#000":"#b3ff00",border:`1px solid ${_battleSpeed===2?"#b3ff00":"#3a3a50"}`,cursor:"pointer",fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700}}>
+          {_battleSpeed===2?"▶ 通常":"⚡ 2x"}
+        </button>
+      </div>
       <div style={{...px,fontSize:9,color:"#ff6b6b",letterSpacing:2,marginBottom:16}}>⚔️ DANCE BATTLE ⚔️</div>
+      {state.compat&&state.compat.label&&(
+        <div style={{fontSize:11,color:state.compat.col||"#ffcc02",marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif",textAlign:"center",fontWeight:700}}>
+          {GENRES[state.usedGenre]?.e} {GENRES[state.usedGenre]?.jp} で挑む！{state.compat.label}
+          {state.useGenre2&&<span style={{fontSize:9,color:"#ce93d8",display:"block",marginTop:2}}>サブジャンルで相性有利！</span>}
+        </div>
+      )}
       <div style={{width:"100%",maxWidth:340}}>
         {shown.map((m,i)=>(
           <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:10,animation:"fd .4s ease",textAlign:"left"}}>
@@ -737,46 +954,56 @@ function BattleOverlay({state,gc,onClose}){
 
 /* ── BATTLE LOGIC ── */
 function buildBattle(char,oppStyle,oppPow){
-  const playerGenre=char.genre;
   const eb=eqBonus(char.equipped||{});const ts={};
   Object.entries(char.stats).forEach(([k,v])=>{ts[k]=v+(eb[k]||0);});
   let myP=calcPow(ts);
 
-  // 気分補正（ご飯・休息で上がる）
+  // 気分補正
   const mood=char.mood||0;
-  if(mood>=90)myP=Math.floor(myP*1.18);      // 最高の気分！
-  else if(mood>=75)myP=Math.floor(myP*1.10); // いい感じ
-  else if(mood>=50)myP=Math.floor(myP*1.0);  // 普通
-  else if(mood>=25)myP=Math.floor(myP*0.88); // テンション低い
-  else myP=Math.floor(myP*0.75);             // 最悪の状態
+  if(mood>=90)myP=Math.floor(myP*1.18);
+  else if(mood>=75)myP=Math.floor(myP*1.10);
+  else if(mood>=50)myP=Math.floor(myP*1.0);
+  else if(mood>=25)myP=Math.floor(myP*0.88);
+  else myP=Math.floor(myP*0.75);
 
-  // お腹補正（ご飯を食べてると強い！）
+  // お腹補正
   const hunger=char.hunger||0;
-  if(hunger>=80)myP=Math.floor(myP*1.08);    // お腹満タン！
-  else if(hunger>=50)myP=Math.floor(myP*1.0);// 普通
-  else if(hunger>=30)myP=Math.floor(myP*0.92);// 少し空腹
-  else myP=Math.floor(myP*0.78);             // 空腹で動けない！
+  if(hunger>=80)myP=Math.floor(myP*1.08);
+  else if(hunger>=50)myP=Math.floor(myP*1.0);
+  else if(hunger>=30)myP=Math.floor(myP*0.92);
+  else myP=Math.floor(myP*0.78);
+
+  // 相性チェック（2ジャンルある場合は有利な方を自動選択）
+  const cb1=compatBonus(char.genre,oppStyle);
+  const cb2=char.genre2?compatBonus(char.genre2,oppStyle):{bonus:0,label:""};
+  const useGenre2=char.genre2&&cb2.bonus>cb1.bonus;
+  const usedGenre=useGenre2?char.genre2:char.genre;
+  const compat=useGenre2?cb2:cb1;
+  myP=Math.floor(myP*compat.bonus);
 
   myP+=Math.floor(Math.random()*50);
   const thP=oppPow+Math.floor(Math.random()*40);
   const won=myP>=thP;
-  const pComments=BC[playerGenre]||BC.jazz;
+  const pComments=BC[usedGenre]||BC.jazz;
   const oComments=OBC[oppStyle]||OBC.house;
+
+  // 2ジャンルの場合はサブジャンルの台詞も混ぜる
+  const p2Comments=char.genre2&&useGenre2?BC[char.genre2]:null;
   const moves=[
-    {isPlayer:true,  comment:pick(pComments)},
-    {isPlayer:false, comment:pick(oComments)},
-    {isPlayer:true,  comment:pick(pComments)},
-    {isPlayer:false, comment:pick(oComments)},
+    {isPlayer:true,  comment:pick(pComments), genre:usedGenre},
+    {isPlayer:false, comment:pick(oComments), genre:oppStyle},
+    {isPlayer:true,  comment:pick(p2Comments||pComments), genre:usedGenre},
+    {isPlayer:false, comment:pick(oComments), genre:oppStyle},
   ];
   const flags=Array.from({length:5}).map((_,i)=>{
     if(won)return i<3||Math.random()<0.6?"blue":"red";
     return i>=3||Math.random()<0.6?"red":"blue";
   });
-  return{moves,flags,won,myP,thP,playerGenre};
+  return{moves,flags,won,myP,thP,playerGenre:usedGenre,usedGenre,compat,useGenre2};
 }
 
 /* ── MAP SVG ── */
-function MapSVG({region,char,selected,onSelect}){
+function MapSVG({region,char,selected,onSelect,traveling}){
   const cities=region==="japan"?J:region==="world"?W:SP;
   const edges=region==="japan"?JE:region==="space"?SPE:WE;
   const vb=region==="japan"?"0 0 340 440":region==="world"?"0 0 380 230":"0 0 380 200";
@@ -819,6 +1046,28 @@ function MapSVG({region,char,selected,onSelect}){
         {lk&&<g><rect x={city.x-15} y={city.y+17} width="30" height="11" rx="3" fill="#12122a" stroke="#2a2a48" strokeWidth=".8"/><text x={city.x} y={city.y+25} textAnchor="middle" fontSize="7" fill="#5050a0" fontFamily="M PLUS Rounded 1c,sans-serif">Lv.{city.lv}</text></g>}
       </g>);
     })}
+    {/* 移動アニメーション */}
+    {traveling&&(()=>{
+      const ease=t=>t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+      const p=ease(traveling.prog);
+      const cx=traveling.fx+(traveling.tx-traveling.fx)*p;
+      const cy=traveling.fy+(traveling.ty-traveling.fy)*p;
+      // 軌跡
+      const trailCount=6;
+      return(<g>
+        {Array.from({length:trailCount}).map((_,i)=>{
+          const tp=Math.max(0,p-(i+1)*0.06);
+          const ep=ease(Math.min(tp,1));
+          const tx2=traveling.fx+(traveling.tx-traveling.fx)*ep;
+          const ty2=traveling.fy+(traveling.ty-traveling.fy)*ep;
+          return<circle key={i} cx={tx2} cy={ty2} r={5-i*0.7} fill="#ffffff" opacity={(1-i/trailCount)*0.25}/>;
+        })}
+        <circle cx={cx} cy={cy} r="14" fill="rgba(0,0,0,0.4)"/>
+        <circle cx={cx} cy={cy} r="12" fill="#ff4da6" opacity="0.9"/>
+        <circle cx={cx} cy={cy} r="10" fill="#ff4da6"/>
+        <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize="12">{traveling.emoji}</text>
+      </g>);
+    })()}
   </svg>);
 }
 
@@ -892,19 +1141,725 @@ function CityPanel({city,char,region,cleared,gc2,onClose,onTravel,onBattle,onEat
 }
 
 /* ── MAP TAB ── */
+/* ══════════════════════════════════════
+   🚶 JAPAN WALK MODE（伊能忠敬スタイル）
+   24×90タイルの巨大日本マップ
+══════════════════════════════════════ */
+const WK_W=26,WK_H=90,VW=16,VH=12,TS=22;
+
+const WALK_CITIES=[
+  {id:"kagoshima",x:6, y:83,name:"鹿児島",e:"🌋",g:"house"},
+  {id:"miyazaki", x:13,y:79,name:"宮崎",  e:"🏄",g:"breaking"},
+  {id:"nagasaki", x:3, y:75,name:"長崎",  e:"⛵",g:"waacking"},
+  {id:"kumamoto", x:7, y:73,name:"熊本",  e:"🏯",g:"lock"},
+  {id:"oita",     x:13,y:70,name:"大分",  e:"♨", g:"jazz"},
+  {id:"hakata",   x:6, y:67,name:"博多",  e:"🍜",g:"lock"},
+  {id:"kokura",   x:9, y:63,name:"小倉",  e:"🏭",g:"house"},
+  // ↑小倉から斜め右上（本州）
+  {id:"hiroshima",x:12,y:57,name:"広島",  e:"🕊",g:"contemporary"},
+  {id:"kobe",     x:15,y:51,name:"神戸",  e:"⚓",g:"waacking"},
+  {id:"osaka",    x:16,y:49,name:"大阪",  e:"🐡",g:"popping"},
+  {id:"kyoto",    x:15,y:47,name:"京都",  e:"🏮",g:"ballet"},
+  {id:"nagoya",   x:19,y:42,name:"名古屋",e:"☕",g:"breaking"},
+  {id:"tokyo",    x:23,y:33,name:"東京",  e:"🏙",g:"popping"},
+  {id:"sendai",   x:23,y:23,name:"仙台",  e:"🎋",g:"lock"},
+  {id:"sapporo",  x:20,y:8, name:"札幌",  e:"❄", g:"jazz"},
+];
+
+function buildWalkMap(){
+  const G=Array.from({length:WK_H},()=>new Array(WK_W).fill('~'));
+  const s=(x,y,t)=>{if(y>=0&&y<WK_H&&x>=0&&x<WK_W)G[y][x]=t;};
+  const rect=(x1,y1,x2,y2,t)=>{for(let y=Math.min(y1,y2);y<=Math.max(y1,y2);y++)for(let x=Math.min(x1,x2);x<=Math.max(x1,x2);x++)s(x,y,t);};
+  const road=(x1,y1,x2,y2)=>{let x=x1,y=y1;while(y!==y2){s(x,y,'.');y+=(y<y2?1:-1);}while(x!==x2){s(x,y,'.');x+=(x<x2?1:-1);}s(x2,y2,'.');};
+
+  // 九州（y=61-88, x=1-18）
+  rect(1,62,17,88,'f');rect(3,64,15,86,'.');
+  rect(1,73,5,78,'.');// 長崎方面
+  rect(11,77,16,82,'.');// 宮崎方面
+
+  // 九州→本州 関門海峡
+  rect(7,59,11,64,'.');
+
+  // 中国山陽（小倉から斜め右上 y=54-64, 地形が斜め）
+  for(let step=0;step<=10;step++){
+    const bx=8+Math.round(step*0.4);
+    const by=64-step;
+    for(let dx=-2;dx<=4;dx++)s(bx+dx,by,'f');
+    s(bx+1,by,'.');s(bx+2,by,'.');
+  }
+  // 広島周辺
+  rect(9,52,17,58,'f');rect(11,54,16,57,'.');
+
+  // 近畿（Honshu中部, 右上に広がる y=44-53）
+  rect(12,44,19,53,'f');rect(13,46,18,52,'.');
+  rect(13,47,16,51,'^');// 山
+
+  // 中部（名古屋 y=38-45）
+  rect(16,38,23,45,'f');rect(17,40,22,44,'.');
+  rect(17,39,20,43,'^');// アルプス
+
+  // 関東（東京 y=28-37）
+  rect(19,28,25,37,'f');rect(20,30,24,36,'.');
+
+  // 東北（y=14-26）
+  rect(19,14,25,26,'f');rect(20,16,24,25,'.');
+  rect(20,16,22,23,'^');// 奥羽山脈
+
+  // 津軽海峡
+  rect(20,12,22,14,'.');
+
+  // 北海道（y=3-13）
+  rect(16,3,25,13,'f');rect(17,5,24,12,'.');
+
+  // 各都市間の道
+  for(let i=0;i<WALK_CITIES.length-1;i++){
+    const a=WALK_CITIES[i],b=WALK_CITIES[i+1];
+    road(a.x,a.y,b.x,b.y);
+  }
+  road(6,67,3,75);// 博多→長崎
+  road(7,73,13,70);// 熊本→大分
+
+  // 都市配置
+  WALK_CITIES.forEach(c=>s(c.x,c.y,'@'));
+  return G;
+}
+
+const WK_MAP=buildWalkMap();
+
+const WT={
+  '~':{bg:"#050d1a",pass:false,enc:false},
+  '.':{bg:"#162010",pass:true, enc:false},
+  'f':{bg:"#0d1a0d",pass:true, enc:true,rate:.15},
+  '^':{bg:"#1a1208",pass:false,enc:false},
+  '@':{bg:"#1a0a2a",pass:true, enc:false},
+};
+
+function DPad({onMove}){
+  const bs={width:46,height:46,borderRadius:10,background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.18)",color:"#fff",fontSize:20,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",touchAction:"none",userSelect:"none",WebkitUserSelect:"none"};
+  const h=d=>e=>{e.preventDefault();onMove(d);};
+  return(<div style={{position:"fixed",bottom:88,left:14,display:"grid",gridTemplateColumns:"46px 46px 46px",gap:5,zIndex:200}}>
+    <div/><button style={bs} onPointerDown={h("up")}>▲</button><div/>
+    <button style={bs} onPointerDown={h("left")}>◀</button>
+    <div style={{...bs,background:"rgba(255,255,255,.03)",cursor:"default"}}/>
+    <button style={bs} onPointerDown={h("right")}>▶</button>
+    <div/><button style={bs} onPointerDown={h("down")}>▼</button><div/>
+  </div>);
+}
+
+function AButton({onPress,label="A",col="#ff4da6",disabled=false,sub=""}){
+  return(<div style={{position:"fixed",bottom:100,right:18,zIndex:200,display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
+    {sub&&<div style={{fontSize:8,color:col,fontFamily:"M PLUS Rounded 1c,sans-serif",textAlign:"center",maxWidth:64,lineHeight:1.3,opacity:.9}}>{sub}</div>}
+    <button
+      onPointerDown={e=>{e.preventDefault();if(!disabled)onPress();}}
+      style={{width:58,height:58,borderRadius:"50%",background:disabled?"#1a1a2a":`${col}33`,border:`2.5px solid ${disabled?"#2a2a4a":col}`,color:disabled?"#3a3a5a":col,fontSize:20,fontWeight:900,cursor:disabled?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Press Start 2P',monospace",touchAction:"none",userSelect:"none",WebkitUserSelect:"none",boxShadow:disabled?"none":`0 0 12px ${col}44`}}>
+      {label}
+    </button>
+  </div>);
+}
+
+/* ── 都市ミニマップ（ご飯屋・クラブ・溜まり場） ── */
+const CITY_MINI_MAP=[
+  "wwwwwwwwwwwwwwwwww",
+  "w................w",
+  "w..cc......ii....w",
+  "w..cc......ii....w",
+  "w................w",
+  "w...n............w",
+  "w................w",
+  "w..rr......rr....w",
+  "w..rr......rr....w",
+  "w................w",
+  "w........X.......w",
+  "wwwwwwwwwwwwwwwwww",
+];
+const CMT={
+  w:{bg:"#090912",pass:false},
+  ".":{bg:"#14142a",pass:true},
+  c:{bg:"#1f0a2e",pass:false,icon:"🎵",label:"CLUB",action:"club",col:"#ff4da6"},
+  i:{bg:"#0a1f1f",pass:false,icon:"🍺",label:"溜まり場",action:"inn",col:"#00e5ff"},
+  r:{bg:"#1f1808",pass:false,icon:"🍜",label:"グルメ",action:"food",col:"#ffd60a"},
+  n:{bg:"#1a1428",pass:false,icon:"💬",action:"npc",col:"#ce93d8"},
+  X:{bg:"#0a1428",pass:true,icon:"🚪",action:"exit",col:"#80c0ff"},
+};
+const CITY_TS=24;
+function CityMiniMap({cityId,char,setChar,genre,onExit,pushNotif,addLog}){
+  const rows=CITY_MINI_MAP;
+  const MW=rows[0].length,MH=rows.length;
+  const city=J[cityId]||W[cityId]||SP[cityId];
+  const wc=WALK_CITIES.find(c=>c.id===cityId);
+  const food=city?.food||[];
+  const[pos,setPos]=useState({x:9,y:9});
+  const[view,setView]=useState("map");
+  const[prompt,setPrompt]=useState(null);
+  const[battle,setBattle]=useState(null);
+
+  function gt(x,y){if(y<0||y>=MH||x<0||x>=MW)return'w';return rows[y]?.[x]||'w';}
+  function move(dir){
+    setPrompt(null);
+    setPos(prev=>{
+      let{x,y}=prev;let nx=x,ny=y;
+      if(dir==="up")ny--;if(dir==="down")ny++;if(dir==="left")nx--;if(dir==="right")nx++;
+      const t=gt(nx,ny);const def=CMT[t]||CMT["."];
+      if(!def.pass){if(def.action)setPrompt({type:def.action,def});return prev;}
+      if(def.action)setTimeout(()=>setPrompt({type:def.action,def}),50);
+      return{x:nx,y:ny};
+    });
+  }
+  useEffect(()=>{
+    const h=e=>{if(view!=="map")return;const m={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right"};if(m[e.key]){e.preventDefault();move(m[e.key]);}};
+    window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
+  },[pos,view]);
+
+  if(view==="club")return<JapanWalkClub cityId={cityId} char={char} setChar={setChar} genre={genre} onBack={()=>setView("map")} pushNotif={pushNotif} addLog={addLog}/>;
+  if(view==="inn")return<JapanWalkInn cityId={cityId} char={char} setChar={setChar} genre={genre} onBack={()=>setView("map")} pushNotif={pushNotif}/>;
+
+  const gc=genre.c;const ts=CITY_TS;
+  const svgW=MW*ts;const svgH=MH*ts;
+
+  return(<div style={{paddingBottom:160}}>
+    {battle&&<BattleOverlay state={battle} gc={gc} onClose={()=>setBattle(null)}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 14px",background:BG2,borderBottom:`2px solid ${gc}55`}}>
+      <div style={{display:"flex",gap:8,alignItems:"center"}}>
+        <span style={{fontSize:22}}>{wc?.e||"🏙"}</span>
+        <div><div style={{fontWeight:700,fontSize:15,color:gc,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{wc?.name||cityId}</div>
+          <div style={{fontSize:9,color:TX3}}>🎵クラブ · 🍺溜まり場 · 🍜グルメ · 🚪EXIT</div></div>
+      </div>
+      <button onClick={onExit} style={{fontSize:10,color:TX3,background:"none",border:`1px solid ${BD}`,borderRadius:4,padding:"5px 10px",cursor:"pointer"}}>← 全国MAP</button>
+    </div>
+
+    {/* ミニマップ */}
+    <div style={{border:`1px solid ${BD}`,borderRadius:8,overflow:"hidden",margin:"8px 4px"}}>
+      <svg viewBox={`0 0 ${svgW} ${svgH}`} width="100%" style={{display:"block"}}>
+        <rect width={svgW} height={svgH} fill="#090912"/>
+        {rows.map((row,y)=>Array.from(row).map((tile,x)=>{
+          const def=CMT[tile]||CMT["."];
+          return(<g key={`${x}-${y}`}>
+            <rect x={x*ts} y={y*ts} width={ts} height={ts} fill={def.bg||"#14142a"} stroke="#0a0a18" strokeWidth=".5"/>
+            {def.icon&&<text x={x*ts+ts*.5} y={y*ts+ts*.58} textAnchor="middle" dominantBaseline="middle" fontSize={ts*.62}>{def.icon}</text>}
+            {def.label&&<text x={x*ts+ts*.5} y={y*ts+ts*.9} textAnchor="middle" fontSize="4" fill={def.col||"#888"} fontFamily="M PLUS Rounded 1c,sans-serif">{def.label}</text>}
+          </g>);
+        }))}
+        <circle cx={pos.x*ts+ts*.5} cy={pos.y*ts+ts*.5} r={ts*.42} fill={gc} stroke="#fff" strokeWidth="2" style={{filter:`drop-shadow(0 0 5px ${gc})`}}/>
+        <text x={pos.x*ts+ts*.5} y={pos.y*ts+ts*.58} textAnchor="middle" dominantBaseline="middle" fontSize={ts*.5}>{genre.e}</text>
+      </svg>
+    </div>
+
+    {/* アクションプロンプト */}
+    {prompt&&<div style={{margin:"0 4px 8px",padding:14,background:BG2,borderRadius:10,border:`1px solid ${prompt.def?.col||BD}`,animation:"su .2s ease"}}>
+      <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:10}}>
+        <span style={{fontSize:26}}>{prompt.def?.icon}</span>
+        <span style={{color:prompt.def?.col,fontWeight:700,fontSize:14,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{prompt.def?.label}</span>
+      </div>
+      {prompt.type==="exit"&&<Btn onClick={onExit} col="#0a1428" tc="#80c0ff" full sx={{fontSize:12}}>🗺 全国MAPに戻る</Btn>}
+      {(prompt.type==="club"||prompt.type==="club_adj")&&(
+        <Btn disabled={char.energy<20} col="#280a0a" tc="#ff7070" onClick={()=>setView("club")} full sx={{fontSize:12,fontWeight:700}}>
+          {char.energy<20?"⚡ エネルギー不足":"⚔️ クラブに入る！"}
+        </Btn>
+      )}
+      {(prompt.type==="inn"||prompt.type==="inn_adj")&&<Btn col="#0a1f1f" tc="#00e5ff" onClick={()=>setView("inn")} full sx={{fontSize:12}}>🍺 溜まり場に入る</Btn>}
+      {(prompt.type==="food"||prompt.type==="food_adj")&&(
+        <div>
+          <div style={{fontSize:10,color:"#ffd60a",marginBottom:8,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>現地グルメを食べて体力回復！</div>
+          {food.length===0&&<div style={{fontSize:11,color:TX3}}>このエリアのグルメ情報なし</div>}
+          {food.map((f,i)=>{
+            const can=char.coins>=f.p;
+            return(<div key={i} style={{background:BG3,borderRadius:6,padding:"8px 10px",marginBottom:8}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                <div>
+                  <div style={{fontWeight:700,fontSize:12,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{f.n}</div>
+                  <div style={{fontSize:9,color:TX3}}>{f.desc} · ⚡+{f.e} 🍚+{f.h}</div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontSize:11,color:can?"#b3ff00":"#ff5555",fontWeight:700}}>¥{f.p.toLocaleString()}</div>
+                </div>
+              </div>
+              <Btn disabled={!can} col="#1f1808" tc="#ffd60a" onClick={()=>{
+                if(char.coins<f.p){pushNotif("コインが足りない！","#ff5555");return;}
+                const MAX=char.maxEnergy||50;
+                setChar(c=>({...c,coins:c.coins-f.p,energy:Math.min(MAX,c.energy+f.e),hunger:Math.min(100,(c.hunger||0)+f.h),mood:Math.min(100,(c.mood||50)+8)}));
+                pushNotif(`${f.n}食べた！⚡+${f.e} 気分UP！`,"#ffd60a");
+                addLog(`🍜 ${f.n}を食べた @${wc?.name}`);
+              }} full sx={{fontSize:11,border:"1px solid #4a3a08"}}>
+                {can?`食べる（¥${f.p.toLocaleString()}）`:"コイン不足"}
+              </Btn>
+            </div>);
+          })}
+        </div>
+      )}
+      {(prompt.type==="npc"||prompt.type==="npc_adj")&&<div style={{fontSize:11,color:"#ce93d8",lineHeight:1.7,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>「ここ{wc?.name||""}へようこそ！🎵クラブでバトルして🍺溜まり場で仲間を探せ。🍜グルメで体力を回復するのも忘れずに！」</div>}
+    </div>}
+
+    <div style={{textAlign:"center",fontSize:9,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>十字キーで移動 · 建物に近づいてAボタン</div>
+    <DPad onMove={move}/>
+    {prompt&&<AButton
+      onPress={()=>{
+        if(prompt.type==="exit")onExit();
+        else if(prompt.type==="club")setView("club");
+        else if(prompt.type==="inn")setView("inn");
+      }}
+      col={prompt.def?.col||gc}
+      sub={prompt.def?.label||""}
+      disabled={prompt.type==="club"&&char.energy<20}
+    />}
+  </div>);
+}
+
+/* ── ここからJapanWalkInn ── */
+function MessageInbox({myName,onClose}){
+  const[inbox,setInbox]=useState([]);
+  const[thread,setThread]=useState(null); // {name, msgs}
+  const[reply,setReply]=useState("");
+  const[sending,setSending]=useState(false);
+  const[loading,setLoading]=useState(true);
+
+  useEffect(()=>{
+    load();
+    const t=setInterval(load,15000);
+    return()=>clearInterval(t);
+  },[]);
+
+  async function load(){
+    const msgs=await fetchInbox(myName);
+    setInbox(msgs);setLoading(false);
+  }
+
+  async function openThread(name){
+    await markRead(myName,name);
+    const msgs=await fetchThread(myName,name);
+    setThread({name,msgs});
+    load();
+  }
+
+  async function doReply(){
+    if(!reply.trim()||!thread)return;
+    setSending(true);
+    const res=await sendMsg(myName,thread.name,reply);
+    const ok=res?.ok??res;
+    if(ok){
+      setReply("");
+      const msgs=await fetchThread(myName,thread.name);
+      setThread(t=>({...t,msgs}));
+      load();
+    }
+    setSending(false);
+  }
+
+  // 会話ごとにグループ化
+  const threads=[...new Set(inbox.map(m=>m.from_name))].map(name=>({
+    name,
+    latest:inbox.find(m=>m.from_name===name),
+    unread:inbox.filter(m=>m.from_name===name&&!m.read).length,
+  }));
+
+  if(thread)return(
+    <div style={{position:"fixed",inset:0,background:BG,zIndex:900,display:"flex",flexDirection:"column"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",background:BG2,borderBottom:`1px solid ${BD}`}}>
+        <button onClick={()=>setThread(null)} style={{color:TX3,background:"none",border:"none",fontSize:16,cursor:"pointer"}}>←</button>
+        <span style={{fontWeight:700,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{thread.name}</span>
+        <div/>
+      </div>
+      <div style={{flex:1,overflowY:"auto",padding:12,display:"flex",flexDirection:"column",gap:8}}>
+        {thread.msgs.map((m,i)=>{
+          const isMe=m.from_name===myName;
+          return(<div key={i} style={{display:"flex",justifyContent:isMe?"flex-end":"flex-start"}}>
+            <div style={{maxWidth:"75%",padding:"8px 12px",borderRadius:12,background:isMe?`${BD}`:"#0a1a2a",border:`1px solid ${isMe?"#4a4a7a":"#1a3a5a"}`}}>
+              <div style={{fontSize:12,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1.5}}>{m.body}</div>
+              <div style={{fontSize:9,color:TX3,marginTop:3,textAlign:isMe?"right":"left"}}>{new Date(m.created_at).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}</div>
+            </div>
+          </div>);
+        })}
+        {thread.msgs.length===0&&<div style={{textAlign:"center",color:TX3,fontSize:11,padding:20,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>まだメッセージなし</div>}
+      </div>
+      <div style={{padding:"10px 12px",background:BG2,borderTop:`1px solid ${BD}`,display:"flex",gap:8}}>
+        <input value={reply} onChange={e=>setReply(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();doReply();}}}
+          placeholder="メッセージを入力..." style={{flex:1,padding:"10px 12px",borderRadius:20,background:BG3,border:`1px solid ${BD}`,color:TX,fontSize:13,outline:"none"}}/>
+        <button onClick={doReply} disabled={!reply.trim()||sending} style={{padding:"10px 16px",borderRadius:20,background:"#3a3a8a",color:"#fff",border:"none",fontSize:13,cursor:"pointer",fontWeight:700}}>{sending?"...":"送信"}</button>
+      </div>
+    </div>
+  );
+
+  return(
+    <div style={{position:"fixed",inset:0,background:BG,zIndex:900,display:"flex",flexDirection:"column"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",background:BG2,borderBottom:`1px solid ${BD}`}}>
+        <span style={{fontFamily:"'Press Start 2P',monospace",fontSize:9,color:"#ce93d8"}}>📬 メッセージ</span>
+        <button onClick={onClose} style={{color:TX3,background:"none",border:"none",fontSize:20,cursor:"pointer"}}>✕</button>
+      </div>
+      <div style={{flex:1,overflowY:"auto",padding:12}}>
+        {loading&&<div style={{textAlign:"center",color:TX3,padding:20}}>⏳</div>}
+        {!loading&&threads.length===0&&<div style={{textAlign:"center",color:TX3,fontSize:11,padding:30,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+          まだメッセージがない。<br/>溜まり場でダンサーにメッセージを送ろう！
+        </div>}
+        {threads.map((t,i)=>(
+          <button key={i} onClick={()=>openThread(t.name)} style={{width:"100%",textAlign:"left",background:BG2,border:`1px solid ${t.unread>0?"#6060c0":BD}`,borderRadius:8,padding:"12px 14px",marginBottom:8,cursor:"pointer",display:"block"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{fontWeight:700,fontSize:13,color:t.unread>0?"#c0c0ff":TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{t.name}</span>
+              {t.unread>0&&<span style={{background:"#5050c0",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700}}>{t.unread}</span>}
+            </div>
+            <div style={{fontSize:11,color:TX3,marginTop:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{t.latest?.body}</div>
+            <div style={{fontSize:9,color:TX3,marginTop:3}}>{new Date(t.latest?.created_at).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── メッセージ送信ダイアログ ── */
+function ComposeMsg({toName,fromName,onClose}){
+  const[body,setBody]=useState("");
+  const[status,setStatus]=useState("");
+  const[errMsg,setErrMsg]=useState("");
+  async function doSend(){
+    if(!body.trim())return;
+    setStatus("sending");setErrMsg("");
+    const res=await sendMsg(fromName,toName,body);
+    const ok=res?.ok??res;
+    if(ok){setStatus("sent");setTimeout(onClose,1200);}
+    else{setStatus("error");setErrMsg(res?.err||"送信できませんでした");}
+  }
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",zIndex:800,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+      <div style={{width:"100%",maxWidth:440,background:BG2,borderRadius:"16px 16px 0 0",padding:20,border:`1px solid ${BD}`}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <span style={{fontWeight:700,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>💬 {toName} へ</span>
+          <button onClick={onClose} style={{color:TX3,background:"none",border:"none",fontSize:20,cursor:"pointer"}}>✕</button>
+        </div>
+        <div style={{fontSize:9,color:TX3,marginBottom:8,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>送信者: {fromName||"（名前未設定）"}</div>
+        <textarea value={body} onChange={e=>setBody(e.target.value)} placeholder="メッセージを入力..." rows={3}
+          style={{width:"100%",padding:"10px 12px",borderRadius:8,background:BG3,border:`1px solid ${BD}`,color:TX,fontSize:13,outline:"none",resize:"none",boxSizing:"border-box"}}/>
+        {status==="sent"&&<div style={{color:"#60c080",fontSize:12,marginTop:6,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✅ 送信完了！</div>}
+        {status==="error"&&<div style={{color:"#ff5555",fontSize:11,marginTop:6,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>❌ {errMsg}</div>}
+        <Btn onClick={doSend} disabled={!body.trim()||status==="sending"||status==="sent"} col="#3a3a8a" tc="#fff" full sx={{marginTop:10,fontSize:13,fontWeight:700}}>
+          {status==="sending"?"送信中...":"📨 送信"}
+        </Btn>
+      </div>
+    </div>
+  );
+}
+
+function JapanWalkInn({cityId,char,setChar,genre,onBack,pushNotif}){
+  const city=WALK_CITIES.find(c=>c.id===cityId)||{name:"?",e:"?"};
+  const[players,setPlayers]=useState([]);
+  const[loading,setLoading]=useState(false);
+  const[compose,setCompose]=useState(null); // toName
+  useEffect(()=>{
+    if(!supabase)return;setLoading(true);
+    supabase.from("dancers").select("name,genre,power,level").neq("name",char.name)
+      .order("power",{ascending:false}).limit(12)
+      .then(({data})=>{setPlayers(data||[]);setLoading(false);}).catch(()=>setLoading(false));
+  },[]);
+  return(<div style={{paddingBottom:80}}>
+    {compose&&<ComposeMsg toName={compose} fromName={char.name} onClose={()=>setCompose(null)}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"#0a1f1f",borderBottom:"1px solid #1a4a4a",marginBottom:12}}>
+      <span style={{color:"#00e5ff",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",fontSize:13}}>🍺 {city.name} 溜まり場</span>
+      <button onClick={onBack} style={{fontSize:10,color:TX3,background:"none",border:`1px solid ${BD}`,borderRadius:4,padding:"4px 8px",cursor:"pointer"}}>← 戻る</button>
+    </div>
+    <div style={{textAlign:"center",padding:"16px",background:"#0a1a1a",borderRadius:10,margin:"0 4px 12px",border:"1px solid #1a3a3a"}}>
+      <div style={{fontSize:40,marginBottom:8}}>🍺</div>
+      <div style={{fontSize:11,color:TX2,marginBottom:12,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>仲間がいる。メッセージを送ってみよう。</div>
+      <Btn onClick={()=>{setChar(c=>({...c,mood:Math.min(100,c.mood+30),hunger:Math.min(100,c.hunger+20)}));pushNotif("🍺 溜まり場で休憩！気分UP！","#00e5ff");}} col="#0a1f1f" tc="#00e5ff" full sx={{fontSize:12,border:"1px solid #1a4a4a"}}>💤 休憩（気分+30 お腹+20）</Btn>
+    </div>
+    <div style={{margin:"0 4px"}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>最近来たダンサー</div>
+      {loading&&<div style={{textAlign:"center",color:TX3,padding:16}}>⏳</div>}
+      {!loading&&players.length===0&&<div style={{textAlign:"center",color:TX3,fontSize:11,padding:16,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>まだ誰もいない！最初になろう。</div>}
+      {players.map((p,i)=>(
+        <div key={i} style={{background:BG2,border:`1px solid ${BD}`,borderRadius:7,padding:"10px 12px",marginBottom:8}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <div><div style={{fontWeight:700,fontSize:12,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{GENRES[p.genre]?.e} {p.name}</div><div style={{fontSize:9,color:TX3}}>{GENRES[p.genre]?.jp} · Lv.{p.level} · POWER {p.power}</div></div>
+            <span style={{fontSize:22}}>{GENRES[p.genre]?.e}</span>
+          </div>
+          <Btn onClick={()=>setCompose(p.name)} col="#1a1a3a" tc="#c0c0ff" full sx={{fontSize:11,border:"1px solid #3a3a6a"}}>💬 メッセージを送る</Btn>
+        </div>
+      ))}
+    </div>
+  </div>);
+}
+
+function JapanWalkClub({cityId,char,setChar,genre,onBack,pushNotif,addLog}){
+  const city=J[cityId]||W[cityId]||SP[cityId];
+  const wc=WALK_CITIES.find(c=>c.id===cityId);
+  const[battle,setBattle]=useState(null);
+  if(!city||!wc)return<div style={{padding:20,textAlign:"center",color:TX3}}><button onClick={onBack}>← 戻る</button></div>;
+  const cleared=char.clearedCities||{};
+  const isCl=!!cleared[cityId];
+  const bosses=city.bosses||[{...city.ch,style:city.g,intro:city.desc}];
+
+  async function doBattle(boss){
+    if(char.energy<20){pushNotif("⚡ エネルギー不足！","#ff5555");return;}
+    const btl=buildBattle(char,boss.style||city.g,boss.pw);
+    setBattle({phase:"seq",...btl,oppName:boss.name,step:0});
+    for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,_battleSpeed===2?380:1050));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
+    const bossKey=`${cityId}_${boss.name}`;
+    const{won,flags}=btl;
+    const eg=won?city.rw.exp:Math.floor(city.rw.exp*.2);
+    const coins=won?city.rw.coins:0;
+    const gem=won&&!cleared[cityId]?3:0;
+    // setChar内で最新stateを使って計算（stale closure回避）
+    let gainedArts=[],prevMaxLv=99,newMaxLv=99,finalNt=null;
+    setChar(c=>{
+      try{
+        const newBossDefeats={...(c.bossDefeats||{}),[bossKey]:true};
+        const baseArts=c.artifacts||[];
+        const newArtifacts=won?computeArtifacts({...c,bossDefeats:newBossDefeats},newBossDefeats,cityId):[...baseArts];
+        const keyArt=ARTIFACTS.find(a=>a.id==="key");
+        if(won&&keyArt&&!newArtifacts.includes("key")&&Math.random()<keyArt.dropRate)newArtifacts.push("key");
+        gainedArts=newArtifacts.filter(a=>!baseArts.includes(a));
+        prevMaxLv=getMaxLv(baseArts);
+        newMaxLv=getMaxLv(newArtifacts);
+        const nt=won&&city.rw.title&&!c.titles?.includes(city.rw.title)?city.rw.title:null;
+        finalNt=nt;
+        return{...c,exp:c.exp+eg,coins:c.coins+coins,gems:(c.gems||0)+gem,
+          energy:Math.max(0,c.energy-20),
+          mood:won?Math.min(100,c.mood+20):Math.max(0,c.mood-15),
+          battlesWon:won?c.battlesWon+1:c.battlesWon,
+          titles:nt?[...(c.titles||[]),nt]:c.titles||[],
+          clearedCities:won?{...(c.clearedCities||{}),[cityId]:true}:c.clearedCities,
+          bossDefeats:newBossDefeats,artifacts:newArtifacts};
+      }catch(e){console.error("doBattle setChar error:",e);return c;}
+    });
+    setBattle({phase:"result",won,eg,coins,gems:gem,title:finalNt,flags,myP:btl.myP,thP:btl.thP});
+    if(won)Sound.fanfare();else Sound.lose();
+    // 秘宝獲得通知（少し遅らせて表示）
+    gainedArts.forEach((artId,i)=>{
+      const art=ARTIFACTS.find(a=>a.id===artId);
+      if(art)setTimeout(()=>pushNotif(`✨ ${art.e} ${art.name} を獲得！`,"#ffd60a"),1000+i*800);
+    });
+    if(newMaxLv>prevMaxLv)setTimeout(()=>pushNotif(`🔓 Lv.${newMaxLv}まで解放！`,"#ff4da6"),gainedArts.length?2200:1000);
+    addLog(`${won?"🏆":"💀"} vs ${boss.name} @${city.name} +${eg}EXP${gainedArts.length?` ✨秘宝×${gainedArts.length}`:""}`);
+  }
+  return(<div style={{paddingBottom:80}}>
+    {battle&&<BattleOverlay state={battle} gc={genre.c} onClose={()=>setBattle(null)}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"#0f0a1a",borderBottom:"1px solid #3a1a4a",marginBottom:12}}>
+      <span style={{color:"#ff4da6",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",fontSize:13}}>🎵 {city.name} CLUB</span>
+      <button onClick={onBack} style={{fontSize:10,color:TX3,background:"none",border:`1px solid ${BD}`,borderRadius:4,padding:"4px 8px",cursor:"pointer"}}>← 戻る</button>
+    </div>
+    {isCl&&<div style={{textAlign:"center",fontSize:11,color:"#60c080",padding:"4px 0 10px",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✓ 制覇済み！リターンマッチ可</div>}
+    {(()=>{const cb1=compatBonus(char.genre,city.g);const cb2=char.genre2?compatBonus(char.genre2,city.g):{bonus:0};const best=cb2.bonus>cb1.bonus?cb2:cb1;return best.label?<div style={{textAlign:"center",marginBottom:10,fontSize:11,color:best.col,fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{best.label}</div>:null;})()}
+    {bosses.map((boss,i)=>(
+      <div key={i} style={{background:"#0f0a1a",borderRadius:10,margin:"0 4px 12px",border:`1px solid ${i===0?"#3a1a4a":"#2a1030"}`,padding:"18px 16px",textAlign:"center"}}>
+        <div style={{fontSize:48,marginBottom:8}}>{boss.e}</div>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:"#ff4da6",marginBottom:4}}>{i===0?"CLUB BOSS":"CHALLENGER"}</div>
+        <div style={{fontSize:18,color:TX,fontWeight:900,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>{boss.name}</div>
+        <div style={{fontSize:10,color:TX3,marginBottom:6}}>{GENRES[boss.style||city.g]?.e}{GENRES[boss.style||city.g]?.jp} · POWER {boss.pw.toLocaleString()}</div>
+        {boss.intro&&<div style={{fontSize:11,color:"#ff9ec4",marginBottom:12,fontFamily:"M PLUS Rounded 1c,sans-serif",fontStyle:"italic"}}>「{boss.intro}」</div>}
+        <Btn disabled={char.energy<20} col="#280a0a" tc="#ff7070" onClick={()=>doBattle(boss)} full sx={{fontSize:12,padding:"12px",fontWeight:700,border:"1px solid #5a1818"}}>
+          {char.energy<20?"⚡ エネルギー不足":"⚔️ バトル！ ⚡20"}
+        </Btn>
+      </div>
+    ))}
+  </div>);
+}
+
+function JapanWalkMode({char,setChar,genre,onExit,pushNotif,addLog}){
+  const startC=WALK_CITIES.find(c=>c.id===char.currentCity)||WALK_CITIES[0];
+  const[pos,setPos]=useState({x:startC.x,y:startC.y});
+  const[steps,setSteps]=useState(0);
+  const[enc,setEnc]=useState(null);
+  const[cityAt,setCityAt]=useState(null);
+  const[view,setView]=useState("walk");
+  const[battle,setBattle]=useState(null);
+  const[msg,setMsg]=useState("");
+
+  const[cityMini,setCityMini]=useState(null);
+
+  const camX=Math.max(0,Math.min(WK_W-VW,pos.x-Math.floor(VW/2)));
+  const camY=Math.max(0,Math.min(WK_H-VH,pos.y-Math.floor(VH/2)));
+
+  const gt=(x,y)=>{if(x<0||x>=WK_W||y<0||y>=WK_H)return'~';return WK_MAP[y]?.[x]||'~';};
+  const gd=(t)=>WT[t]||WT['~'];
+  const cityAt2=(x,y)=>WALK_CITIES.find(c=>c.x===x&&c.y===y)||null;
+  const region=(y)=>y>65?"九州":y>55?"中国":y>42?"近畿":y>32?"中部":y>22?"関東":y>12?"東北":"北海道";
+
+  function move(dir){
+    if(enc||cityAt||cityMini)return;
+    setPos(prev=>{
+      let{x,y}=prev;let nx=x,ny=y;
+      if(dir==="up")ny--;if(dir==="down")ny++;if(dir==="left")nx--;if(dir==="right")nx++;
+      const t=gt(nx,ny);const d=gd(t);
+      if(!d.pass)return prev;
+      const city=cityAt2(nx,ny);
+      if(city){
+        setCityAt(city);
+        setChar(c=>({...c,currentCity:city.id,energy:Math.max(0,c.energy-1)}));
+        addLog(`📍 ${city.name}に到着！`);
+        Sound.playRegion(city.id);
+        setMsg(`🏙 ${city.name}に到着！タップして街に入ろう`);
+        return{x:nx,y:ny};
+      }
+      if(d.enc&&Math.random()<d.rate){
+        const opps=QOPPS.filter(o=>o.lv<=Math.max(3,getLv(char.exp)+2));
+        const opp=opps[Math.floor(Math.random()*opps.length)]||QOPPS[0];
+        Sound.battle();setEnc(opp);
+        return{x:nx,y:ny};
+      }
+      setSteps(s=>s+1);
+      return{x:nx,y:ny};
+    });
+  }
+
+  async function fightEnc(){
+    if(!enc)return;
+    if(char.energy<3){pushNotif("⚡ エネルギー不足！","#ff5555");setEnc(null);return;}
+    const btl=buildBattle(char,enc.style,enc.pw);
+    setBattle({phase:"seq",...btl,oppName:enc.name,step:0});
+    setEnc(null);
+    for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,_battleSpeed===2?350:900));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
+    const{won,flags}=btl;const eg=won?enc.rw.exp:Math.floor(enc.rw.exp*.2);const coins=won?enc.rw.coins:0;
+    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-3),mood:won?Math.min(100,c.mood+12):Math.max(0,c.mood-10),battlesWon:won?c.battlesWon+1:c.battlesWon}));
+    setBattle({phase:"result",won,eg,coins,flags,myP:btl.myP,thP:btl.thP});
+    if(won){
+      Sound.clear();setMsg(`🏆 勝利！+${eg}EXP`);
+      // 伝説の鍵のレアドロップ（強敵から）
+      const keyArt=ARTIFACTS.find(a=>a.id==="key");
+      if(keyArt&&!(char.artifacts||[]).includes("key")&&Math.random()<keyArt.dropRate){
+        setChar(c=>({...c,artifacts:[...(c.artifacts||[]),"key"]}));
+        setTimeout(()=>pushNotif("✨ 🔑 伝説の鍵 を入手！！","#ffd60a"),1500);
+      }
+    }else{Sound.lose();setMsg("💀 敗北...");}
+    setTimeout(()=>setMsg(""),3000);
+    addLog(`${won?"⚡":"💀"} vs ${enc.name} +${eg}EXP`);
+  }
+
+  useEffect(()=>{
+    const h=e=>{const m={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right"};if(m[e.key]){e.preventDefault();move(m[e.key]);}};
+    window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
+  },[pos,enc,cityAt,cityMini]);
+
+  // ← useEffectの後ならconditional returnOK
+  if(cityMini)return<CityMiniMap cityId={cityMini} char={char} setChar={setChar} genre={genre} onExit={()=>{setCityMini(null);setCityAt(null);}} pushNotif={pushNotif} addLog={addLog}/>;
+
+  if(view==="club"&&cityAt)return<JapanWalkClub cityId={cityAt.id} char={char} setChar={setChar} genre={genre} onBack={()=>setView("walk")} pushNotif={pushNotif} addLog={addLog}/>;
+  if(view==="inn"&&cityAt)return<JapanWalkInn cityId={cityAt.id} char={char} setChar={setChar} genre={genre} onBack={()=>setView("walk")} pushNotif={pushNotif}/>;
+
+  const gc=genre.c;
+
+  return(<div style={{background:BG,minHeight:"100vh",paddingBottom:180}}>
+    {battle&&<BattleOverlay state={battle} gc={gc} onClose={()=>setBattle(null)}/>}
+    {/* ヘッダー */}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 14px",background:BG2,borderBottom:`2px solid ${gc}55`}}>
+      <div><div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:gc,letterSpacing:1}}>🚶 WALK JAPAN</div>
+        <div style={{fontSize:10,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",marginTop:2}}>{region(pos.y)} · {steps}歩</div></div>
+      <button onClick={onExit} style={{fontSize:10,color:TX3,background:"none",border:`1px solid ${BD}`,borderRadius:4,padding:"5px 10px",cursor:"pointer"}}>🗺 マップへ</button>
+    </div>
+
+    {/* エンカウント */}
+    {enc&&<div style={{position:"fixed",inset:0,background:"rgba(3,3,15,.92)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",zIndex:900,animation:"su .3s ease"}}>
+      <div style={{fontSize:62,marginBottom:14,animation:"vi .4s ease"}}>{enc.e}</div>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:11,color:"#ff6b6b",marginBottom:8}}>⚡ ENCOUNTER!</div>
+      <div style={{fontSize:15,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:6,fontWeight:700}}>{enc.name}が現れた！</div>
+      <div style={{fontSize:10,color:TX3,marginBottom:20}}>{GENRES[enc.style]?.e}{GENRES[enc.style]?.jp} · POWER {enc.pw}</div>
+      <div style={{display:"flex",gap:12}}>
+        <Btn disabled={char.energy<3} col="#280a0a" tc="#ff7070" onClick={fightEnc} sx={{fontSize:13,padding:"12px 28px",fontWeight:700}}>⚔️ バトル</Btn>
+        <Btn col="#0a1828" tc="#00e5ff" onClick={()=>{setEnc(null);Sound.playRegion(char.currentCity);}} sx={{fontSize:13,padding:"12px 20px"}}>🏃 逃げる</Btn>
+      </div>
+    </div>}
+
+    {/* タイルマップ */}
+    <div style={{margin:"8px 4px",border:`1px solid ${BD}`,borderRadius:8,overflow:"hidden",position:"relative"}}>
+      <svg viewBox={`0 0 ${VW*TS} ${VH*TS}`} width="100%" style={{display:"block"}}>
+        <rect width={VW*TS} height={VH*TS} fill="#040a12"/>
+        {Array.from({length:VH},(_,vy)=>Array.from({length:VW},(_,vx)=>{
+          const mx=camX+vx,my=camY+vy;
+          const t=gt(mx,my);const d=gd(t);
+          const city=cityAt2(mx,my);
+          const gc2=city?GENRES[city.g]?.c:null;
+          return(<g key={`${vx}-${vy}`}>
+            <rect x={vx*TS} y={vy*TS} width={TS} height={TS} fill={city?"#1a0a2e":d.bg} stroke="#030810" strokeWidth=".4"/>
+            {t==='f'&&<text x={vx*TS+TS*.25} y={vy*TS+TS*.6} fontSize={TS*.4} opacity=".6">🌲</text>}
+            {t==='^'&&<text x={vx*TS+TS*.5} y={vy*TS+TS*.62} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.55}>⛰</text>}
+            {t==='.'&&<rect x={vx*TS+TS*.25} y={vy*TS+TS*.4} width={TS*.5} height={TS*.2} fill="#2a3a1a" rx="1"/>}
+            {city&&<g>
+              <circle cx={vx*TS+TS*.5} cy={vy*TS+TS*.46} r={TS*.38} fill={`${gc2}44`} stroke={gc2} strokeWidth="1.4"/>
+              <text x={vx*TS+TS*.5} y={vy*TS+TS*.52} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.52}>{city.e}</text>
+              <text x={vx*TS+TS*.5} y={vy*TS+TS*.9} textAnchor="middle" fontSize="4" fill={gc2} fontFamily="M PLUS Rounded 1c,sans-serif">{city.name}</text>
+            </g>}
+          </g>);
+        }))}
+        {/* プレイヤー */}
+        {(()=>{const vx=pos.x-camX,vy=pos.y-camY;if(vx<0||vx>=VW||vy<0||vy>=VH)return null;return(<g><circle cx={vx*TS+TS*.5} cy={vy*TS+TS*.5} r={TS*.42} fill={gc} stroke="#fff" strokeWidth="2" style={{filter:`drop-shadow(0 0 5px ${gc})`}}/><text x={vx*TS+TS*.5} y={vy*TS+TS*.58} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.52}>{genre.e}</text></g>);})()}
+      </svg>
+      {/* ミニマップ */}
+      <div style={{position:"absolute",top:5,right:5,width:42,height:63,background:"rgba(0,0,0,.8)",borderRadius:4,border:"1px solid #2a2a4a",overflow:"hidden"}}>
+        <svg viewBox={`0 0 ${WK_W} ${WK_H}`} width="42" height="63">
+          {WALK_CITIES.map(c=>{const cl=char.clearedCities?.[c.id];return<circle key={c.id} cx={c.x} cy={c.y} r="1.8" fill={cl?"#60c080":GENRES[c.g]?.c||"#888"} opacity={cl?1:.6}/>;  })}
+          <circle cx={pos.x} cy={pos.y} r="2.2" fill="#fff"/>
+          <rect x={camX} y={camY} width={VW} height={VH} fill="none" stroke="#ffffff55" strokeWidth=".8"/>
+        </svg>
+      </div>
+    </div>
+
+    {/* メッセージ */}
+    {msg&&<div style={{margin:"0 4px 6px",padding:"8px 12px",background:BG2,borderRadius:6,fontSize:11,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{msg}</div>}
+
+    {/* 都市パネル */}
+    {cityAt&&!enc&&<div style={{margin:"0 4px 8px",padding:14,background:BG2,borderRadius:10,border:`2px solid ${GENRES[cityAt.g]?.c||gc}66`,animation:"su .2s ease"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          <span style={{fontSize:32}}>{cityAt.e}</span>
+          <div><div style={{fontWeight:700,fontSize:16,color:GENRES[cityAt.g]?.c||gc,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{cityAt.name}</div>
+            <div style={{fontSize:10,color:TX3}}>{GENRES[cityAt.g]?.e}{GENRES[cityAt.g]?.jp}{char.clearedCities?.[cityAt.id]&&" ✓"}</div></div>
+        </div>
+        <button onClick={()=>setCityAt(null)} style={{color:TX3,fontSize:22,background:"none",border:"none",cursor:"pointer"}}>✕</button>
+      </div>
+      <Btn col={`${GENRES[cityAt.g]?.c||gc}22`} tc={GENRES[cityAt.g]?.c||gc} onClick={()=>setCityMini(cityAt.id)} full sx={{fontSize:13,border:`1px solid ${GENRES[cityAt.g]?.c||gc}66`,fontWeight:700,padding:"12px",marginBottom:8}}>
+        🏙 {cityAt.name}の街に入る（クラブ・グルメ・溜まり場）
+      </Btn>
+    </div>}
+
+    {!cityAt&&!enc&&<div style={{textAlign:"center",fontSize:9,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>十字キーで移動 · 都市でAボタン · 🌲森でエンカウント！</div>}
+    <DPad onMove={move}/>
+    {cityAt&&!enc&&<AButton onPress={()=>setCityMini(cityAt.id)} col={GENRES[cityAt.g]?.c||gc} sub={`${cityAt.name}に入る`}/>}
+    {enc&&<AButton onPress={fightEnc} col="#ff4da6" sub="バトル！" disabled={char.energy<3}/>}
+    {!cityAt&&!enc&&<AButton onPress={()=>{}} col="#3a3a5a" disabled label="A"/>}
+  </div>);
+}
+
+
 function MapTab({char,setChar,genre,pushNotif,addLog}){
   const[region,setRegion]=useState(()=>{if(SP[char.currentCity])return"space";if(W[char.currentCity])return"world";return"japan";});
   const[selected,setSelected]=useState(null);
   const[battle,setBattle]=useState(null);
   const[bStep,setBStep]=useState(0);
+  const[traveling,setTraveling]=useState(null);
+  const[walkJapan,setWalkJapan]=useState(false);
   const cleared=char.clearedCities||{};
   const wldOk=!!cleared["tokyo"]||!!W[char.hometown];
   const spaceOk=!!cleared["wf"];
 
+  if(walkJapan)return<JapanWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkJapan(false)} pushNotif={pushNotif} addLog={addLog}/>;
+
+
   function travel(city){
     if(char.energy<5){pushNotif("エネルギー不足！","#ff5555");return;}
-    setChar(c=>({...c,currentCity:city.id,energy:Math.max(0,c.energy-5),lastEnergyTime:c.lastEnergyTime||(Date.now()-((50-Math.max(0,c.energy-5))*5*60*1000))}));
-    pushNotif(`${city.name}に移動！`,GENRES[city.g].c);addLog(`📍 ${city.name}に移動`);setSelected(city);
+    const allCities=allC();
+    const from=allCities[char.currentCity];
+    const to=city;
+    if(from&&to){
+      // アニメーション開始
+      setTraveling({fx:from.x,fy:from.y,tx:to.x,ty:to.y,prog:0,emoji:genre.e});
+      let start=null;
+      const dur=1800;
+      const step=ts=>{
+        if(!start)start=ts;
+        const prog=Math.min((ts-start)/dur,1);
+        setTraveling(t=>t?{...t,prog}:null);
+        if(prog<1){requestAnimationFrame(step);}
+        else{
+          setTraveling(null);
+          setChar(c=>({...c,currentCity:city.id,energy:Math.max(0,c.energy-5),lastEnergyTime:c.lastEnergyTime||(Date.now()-((50-Math.max(0,c.energy-5))*5*60*1000))}));
+          pushNotif(`${city.name}に到着！`,GENRES[city.g].c);
+          addLog(`📍 ${city.name}に移動`);
+          setSelected(city);
+        }
+      };
+      requestAnimationFrame(step);
+    }else{
+      setChar(c=>({...c,currentCity:city.id,energy:Math.max(0,c.energy-5)}));
+      pushNotif(`${city.name}に移動！`,GENRES[city.g].c);
+      addLog(`📍 ${city.name}に移動`);
+      setSelected(city);
+    }
   }
 
   async function startBattle(city){
@@ -913,7 +1868,7 @@ function MapTab({char,setChar,genre,pushNotif,addLog}){
     setBattle({phase:"seq",...btl,step:0,oppName:city.ch.name});setBStep(0);
     // Animate moves
     for(let i=0;i<8;i++){
-      await new Promise(r=>setTimeout(r,1200));
+      await new Promise(r=>setTimeout(r,_battleSpeed===2?400:1200));
       setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);
     }
     // Finalize
@@ -948,9 +1903,10 @@ function MapTab({char,setChar,genre,pushNotif,addLog}){
         <button key={r} onClick={()=>{if(ok){setRegion(r);setSelected(null);}else pushNotif(r==="space"?"WORLD FINALをクリアで解放！":"まず日本を制覇！","#ff5555");}} style={{flex:1,padding:"8px 4px",fontSize:9,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:region===r?`${genre.c}30`:ok?BG2:"#0c0c1a",color:region===r?genre.c:ok?TX2:"#303060",border:`1px solid ${region===r?genre.c+"88":ok?BD:"#1a1a38"}`,borderRadius:7,transition:"all .15s"}}>{ok?label:`🔒 ${r.toUpperCase()}`}</button>
       ))}
     </div>
-    {curCity&&<div style={{fontSize:10,color:TX2,marginBottom:8,textAlign:"center",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>現在地: <span style={{color:GENRES[curCity.g]?.c,fontWeight:700}}>{GENRES[curCity.g]?.e} {curCity.name}</span>{cleared[char.currentCity]&&<span style={{color:TX3}}> ✓</span>}</div>}
+    {/* WALK JAPAN ボタン */}
+    <Btn onClick={()=>setWalkJapan(true)} col={`${genre.c}22`} tc={genre.c} full sx={{fontSize:12,border:`1px solid ${genre.c}66`,fontWeight:700,marginBottom:10,padding:"12px"}}>🚶 WALK JAPAN（鹿児島から札幌まで歩く）</Btn>
     <div style={{border:`1px solid ${BD}`,borderRadius:10,overflow:"hidden",marginBottom:10}}>
-      <MapSVG region={region} char={char} selected={selected} onSelect={setSelected}/>
+      <MapSVG region={region} char={char} selected={selected} onSelect={setSelected} traveling={traveling}/>
     </div>
     {selected&&<CityPanel city={selected} char={char} region={region} cleared={cleared} gc2={genre.c} onClose={()=>setSelected(null)} onTravel={travel} onBattle={startBattle} onEatFood={(f)=>eatFood(f,selected)} pushNotif={pushNotif}/>}
     <OnlineArena char={char} setChar={setChar} genre={genre} pushNotif={pushNotif} addLog={addLog}/>
@@ -1001,7 +1957,7 @@ function OnlineArena({char,setChar,genre,pushNotif,addLog}){
     if(char.energy<20){pushNotif("エネルギー不足！","#ff5555");return;}
     const btl=buildBattle(char,opp.genre,opp.power);
     setBattle({...btl,oppName:opp.name,step:0,phase:"seq"});
-    for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,1000));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
+    for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,_battleSpeed===2?350:1000));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
     const{won,flags}=btl;
     const prize=won?Math.floor(opp.power*14+800):0;
     const eg=won?Math.floor(opp.power*2.5+120):Math.floor(opp.power*.4+30);
@@ -1068,125 +2024,371 @@ function OnlineArena({char,setChar,genre,pushNotif,addLog}){
   </div>);
 }
 
-/* ── QR BATTLE ── */
+/* ── QR BATTLE (ターン制コマンドバトル) ── */
 function QRBattle({char,genre,pushNotif,addLog,setChar}){
   const[qrUrl,setQrUrl]=useState(null);
   const[scanning,setScanning]=useState(false);
+  const[nameInput,setNameInput]=useState("");
+  const[searching,setSearching]=useState(false);
+  const[opp,setOpp]=useState(null); // {n,g,p,lv,e}
   const[battle,setBattle]=useState(null);
   const videoRef=useRef(null);
   const animRef=useRef(null);
   const streamRef=useRef(null);
   const myP=calcPow({...char.stats,...eqBonus(char.equipped||{})});
+  const myMoves=MOVES[char.genre]||[];
 
+  // QRコード生成
   useEffect(()=>{
-    const d=JSON.stringify({n:char.name,g:char.genre,p:myP,lv:getLv(char.exp),e:GENRES[char.genre]?.e||'🕺'});
-    QRCode.toDataURL(d,{width:220,margin:2,color:{dark:'#111111',light:'#ffffff'}})
+    const d=JSON.stringify({n:char.name,g:char.genre,p:myP,lv:getLv(char.exp),e:GENRES[char.genre]?.e||"🕺"});
+    QRCode.toDataURL(d,{width:220,margin:2,color:{dark:"#111111",light:"#ffffff"}})
       .then(url=>setQrUrl(url)).catch(()=>{});
     return()=>stopScan();
   },[]);
 
+  // QRスキャン（jsQR：iOS Safari含む全ブラウザ対応）
   async function startScan(){
     try{
-      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment",width:{ideal:1280},height:{ideal:720}}});
       streamRef.current=stream;
       if(videoRef.current){videoRef.current.srcObject=stream;videoRef.current.play();}
       setScanning(true);
-      if('BarcodeDetector' in window){
-        const det=new window.BarcodeDetector({formats:['qr_code']});
-        const check=async()=>{
-          if(!streamRef.current)return;
-          try{
-            const bc=await det.detect(videoRef.current);
-            if(bc.length>0){
-              const opp=JSON.parse(bc[0].rawValue);
-              stopScan();doBattle(opp);return;
-            }
-          }catch{}
-          animRef.current=requestAnimationFrame(check);
-        };
+      const canvas=document.createElement("canvas");
+      const ctx=canvas.getContext("2d",{willReadFrequently:true});
+      const check=()=>{
+        if(!streamRef.current)return;
+        const v=videoRef.current;
+        if(v&&v.readyState===v.HAVE_ENOUGH_DATA&&v.videoWidth>0){
+          canvas.width=v.videoWidth;canvas.height=v.videoHeight;
+          ctx.drawImage(v,0,0,canvas.width,canvas.height);
+          const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+          const code=jsQR(img.data,img.width,img.height,{inversionAttempts:"dontInvert"});
+          if(code){
+            try{
+              const o=JSON.parse(code.data);
+              stopScan();setOpp(o);
+              pushNotif("✅ QR読み取り成功！","#b3ff00");
+              return;
+            }catch{/* QRだけどJSONじゃない、スキャン続行 */}
+          }
+        }
         animRef.current=requestAnimationFrame(check);
-      }else{
-        pushNotif("Chrome推奨 — QRスキャンはChromeで動作","#ffcc02");
-      }
-    }catch{pushNotif("カメラへのアクセスを許可してください","#ff5555");setScanning(false);}
+      };
+      // 動画が再生開始してからスキャン開始
+      videoRef.current.onloadedmetadata=()=>{animRef.current=requestAnimationFrame(check);};
+    }catch(e){
+      if(e.name==="NotAllowedError")pushNotif("📷 カメラの許可が必要です","#ff5555");
+      else if(e.name==="NotFoundError")pushNotif("カメラが見つかりません","#ff5555");
+      else pushNotif(`カメラエラー: ${e.message}`,"#ff5555");
+      setScanning(false);
+    }
   }
-
   function stopScan(){
     setScanning(false);
     if(animRef.current)cancelAnimationFrame(animRef.current);
     if(streamRef.current){streamRef.current.getTracks().forEach(t=>t.stop());streamRef.current=null;}
   }
 
-  async function doBattle(opp){
-    if(char.energy<15){pushNotif("エネルギー不足！","#ff5555");return;}
-    const btl=buildBattle(char,opp.g,opp.p);
-    setBattle({phase:"seq",...btl,oppName:opp.n,step:0});
-    for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,1100));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
-    const{won,flags}=btl;
-    const eg=won?Math.floor(opp.p*2+100):Math.floor(opp.p*.3+20);
-    const coins=won?Math.floor(opp.p*10+500):0;
-    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-15),
-      mood:won?Math.min(100,c.mood+15):Math.max(0,c.mood-10),
-      battlesWon:won?c.battlesWon+1:c.battlesWon}));
-    setBattle({phase:"result",won,eg,coins,flags,myP:btl.myP,thP:btl.thP});
-    if(won)Sound.fanfare();else Sound.lose();
-    addLog(`📱 QR対戦 ${won?"勝利":"敗北"} vs ${opp.n} +${eg}EXP`);
+  // 名前で検索（QRの代替）
+  async function searchByName(){
+    if(!nameInput.trim())return;
+    setSearching(true);
+    try{
+      const{data}=await supabase.from("dancers").select("name,genre,power,level,hometown")
+        .ilike("name",nameInput.trim()).limit(1).single();
+      if(data){setOpp({n:data.name,g:data.genre,p:data.power,lv:data.level,e:GENRES[data.genre]?.e||"🕺"});}
+      else pushNotif("見つからない。相手が「更新」を押してるか確認","#ff5555");
+    }catch{pushNotif("検索失敗","#ff5555");}
+    setSearching(false);
   }
 
+  const[cursor,setCursor]=useState(0);
+
+  function moveCursor(dir){
+    const len=myMoves.length;
+    setCursor(c=>{
+      if(dir==="left")return Math.max(0,c-1);
+      if(dir==="right")return Math.min(len-1,c+1);
+      if(dir==="up")return Math.max(0,c-2);
+      if(dir==="down")return Math.min(len-1,c+2);
+      return c;
+    });
+  }
+  function moveCursorOpp(dir){
+    const len=oppMoves.length;
+    setCursor(c=>{
+      if(dir==="left")return Math.max(0,c-1);
+      if(dir==="right")return Math.min(len-1,c+1);
+      if(dir==="up")return Math.max(0,c-2);
+      if(dir==="down")return Math.min(len-1,c+2);
+      return c;
+    });
+  }
+
+  // バトル開始
+  function startBattle(){
+    if(char.energy<7){pushNotif("⚡ エネルギー不足！","#ff5555");return;}
+    setBattle({
+      round:1,maxRounds:5,
+      p1HP:100,p2HP:100,
+      phase:"p1_pick", // p1_pick|bridge|p2_pick|resolve|done
+      p1Move:null,p2Move:null,
+      log:[],winner:null,
+    });
+  }
+
+  // ターン制バトルのダメージ計算
+  function calcDmg(move,stats){
+    const base=Object.entries(move.g||{}).reduce((s,[k,v])=>(stats?s+(stats[k]||0)*v:s+v*3),0);
+    return Math.max(8,Math.floor(base*1.5+move.exp*.3+Math.random()*20-10));
+  }
+  function calcOppDmg(move){
+    const base=Object.values(move.g||{}).reduce((s,v)=>s+v*4,0);
+    return Math.max(6,Math.floor(base*1.2+move.exp*.3+Math.random()*20-10));
+  }
+
+  function pickMove(move,isP1){
+    setBattle(b=>{
+      if(!b)return b;
+      if(isP1&&b.phase==="p1_pick")return{...b,p1Move:move,phase:"bridge"};
+      if(!isP1&&b.phase==="p2_pick")return{...b,p2Move:move,phase:"resolve"};
+      return b;
+    });
+  }
+
+  // resolve: 両手の技が決まったら結果計算
+  useEffect(()=>{
+    if(battle?.phase!=="resolve")return;
+    const{p1Move,p2Move,p1HP,p2HP,round,maxRounds,log}=battle;
+    const p1dmg=calcDmg(p1Move,char.stats);
+    const p2dmg=calcOppDmg(p2Move);
+    const newP1HP=Math.max(0,p1HP-p2dmg);
+    const newP2HP=Math.max(0,p2HP-p1dmg);
+    const newLog=[...log,{round,p1Move:p1Move.name,p2Move:p2Move.name,p1dmg,p2dmg}];
+    const done=newP1HP===0||newP2HP===0||round>=maxRounds;
+    const winner=done?(newP1HP>newP2HP?"p1":newP2HP>newP1HP?"p2":"draw"):null;
+    setTimeout(()=>{
+      setBattle(b=>({...b,p1HP:newP1HP,p2HP:newP2HP,log:newLog,
+        round:round+1,phase:done?"done":"p1_pick",p1Move:null,p2Move:null,winner}));
+      if(done){
+        const won=winner==="p1";
+        const eg=won?Math.floor(opp.p*2+100):Math.floor(opp.p*.3+20);
+        const coins=won?Math.floor(opp.p*8+500):0;
+        setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-7),
+          mood:won?Math.min(100,c.mood+15):Math.max(0,c.mood-10),
+          battlesWon:won?c.battlesWon+1:c.battlesWon}));
+        if(won)Sound.fanfare();else Sound.lose();
+        addLog(`📱 QR対戦 ${won?"勝利":"敗北"} vs ${opp.n} +${eg}EXP`);
+      }
+    },1200);
+  },[battle?.phase]);
+
+  // ─── RENDER ───
+  const oppMoves=MOVES[opp?.g||"house"]||[];
+
+  // バトル画面
+  if(battle){
+    const{round,maxRounds,p1HP,p2HP,phase,p1Move,p2Move,log,winner}=battle;
+    const p1Pct=p1HP;const p2Pct=p2HP;
+
+    return(<div style={{paddingBottom:80}}>
+      {/* HP バー */}
+      <div style={{background:BG2,padding:"12px 14px",borderRadius:8,marginBottom:10,border:`1px solid ${BD}`}}>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:11,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:6}}>
+          <span style={{color:genre.c,fontWeight:700}}>{char.name}</span>
+          <span style={{color:TX3,fontSize:10}}>Round {Math.min(round,maxRounds)}/{maxRounds}</span>
+          <span style={{color:"#ff6b6b",fontWeight:700}}>{opp.n}</span>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:4}}>
+          <div style={{flex:1,height:12,background:BG3,borderRadius:6,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${p1Pct}%`,background:genre.c,borderRadius:6,transition:"width .5s"}}/>
+          </div>
+          <span style={{fontSize:10,color:TX3,width:30,textAlign:"center"}}>{p1HP}</span>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <div style={{flex:1,height:12,background:BG3,borderRadius:6,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${p2Pct}%`,background:"#ff6b6b",borderRadius:6,transition:"width .5s"}}/>
+          </div>
+          <span style={{fontSize:10,color:TX3,width:30,textAlign:"center"}}>{p2HP}</span>
+        </div>
+      </div>
+
+      {/* バトルログ（最新） */}
+      {log.length>0&&(()=>{const l=log[log.length-1];return(
+        <div style={{background:"#0a0a1a",border:`1px solid ${BD}`,borderRadius:8,padding:"10px 12px",marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+          <div style={{fontSize:11,color:genre.c,fontWeight:700,marginBottom:4}}>Round {l.round}</div>
+          <div style={{fontSize:11,color:TX}}>{char.name}：<span style={{color:"#ffd60a",fontWeight:700}}>「{l.p1Move}！」</span> → -{l.p2dmg}ダメージ</div>
+          <div style={{fontSize:11,color:TX}}>{opp.n}：<span style={{color:"#ff6b6b",fontWeight:700}}>「{l.p2Move}！」</span> → -{l.p1dmg}ダメージ</div>
+        </div>
+      );})()}
+
+      {/* フェーズ別UI */}
+      {phase==="done"&&(
+        <div style={{textAlign:"center",padding:20,background:winner==="p1"?"#0a2010":winner==="p2"?"#200a0a":"#1a1a1a",borderRadius:10,border:`1px solid ${winner==="p1"?"#2a6030":winner==="p2"?"#602a2a":"#3a3a3a"}`}}>
+          <div style={{fontSize:42,marginBottom:8}}>{winner==="p1"?"🏆":winner==="p2"?"💀":"🤝"}</div>
+          <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:12,color:winner==="p1"?"#b3ff00":winner==="p2"?"#ff6b6b":"#ffcc02",marginBottom:12}}>
+            {winner==="p1"?"WINNER!":winner==="p2"?"LOSE...":"DRAW"}
+          </div>
+          <div style={{fontSize:11,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:16}}>
+            {char.name} {p1HP}HP ／ {opp.n} {p2HP}HP
+          </div>
+          <Btn onClick={()=>{setBattle(null);setOpp(null);}} col="#1a1a30" tc={TX2} full sx={{fontSize:12}}>閉じる</Btn>
+        </div>
+      )}
+
+      {phase==="p1_pick"&&(
+        <div>
+          <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:genre.c,marginBottom:10,textAlign:"center"}}>{char.name}の番！技を選べ！</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+            {myMoves.map((m,i)=>(
+              <button key={m.id} onClick={()=>{setCursor(i);pickMove(m,true);}}
+                style={{padding:"14px 8px",borderRadius:8,background:i===cursor?"#1a2a3a":"#0a1a2a",border:`1px solid ${i===cursor?genre.c:genre.c+"55"}`,cursor:"pointer",textAlign:"center",transform:i===cursor?"scale(1.04)":"scale(1)",transition:"all .15s"}}>
+                <div style={{fontSize:13,color:genre.c,fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:3}}>{m.name}</div>
+                <div style={{fontSize:9,color:TX3}}>⚡{m.cost}</div>
+              </button>
+            ))}
+          </div>
+          <DPad onMove={moveCursor}/>
+          <AButton onPress={()=>pickMove(myMoves[cursor],true)} col={genre.c} sub="決定"/>
+        </div>
+      )}
+
+      {phase==="bridge"&&(
+        <div style={{textAlign:"center",padding:"30px 16px"}}>
+          <div style={{fontSize:36,marginBottom:16}}>📱</div>
+          <div style={{fontSize:14,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,marginBottom:8}}>{char.name}が選んだ！</div>
+          <div style={{fontSize:12,color:"#ffd60a",marginBottom:8}}>「{p1Move?.name}！」</div>
+          <div style={{fontSize:11,color:TX3,marginBottom:20,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>画面を伏せて {opp.n} に渡してください</div>
+          <Btn onClick={()=>{setCursor(0);setBattle(b=>({...b,phase:"p2_pick"}));}} col="#1a0a2a" tc="#ff4da6" full sx={{fontSize:12,fontWeight:700}}>渡した → {opp.n}の番へ</Btn>
+        </div>
+      )}
+
+      {phase==="p2_pick"&&(
+        <div>
+          <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:"#ff6b6b",marginBottom:10,textAlign:"center"}}>{opp.n}の番！技を選べ！</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+            {oppMoves.map((m,i)=>(
+              <button key={m.id} onClick={()=>{setCursor(i);pickMove(m,false);}}
+                style={{padding:"14px 8px",borderRadius:8,background:i===cursor?"#2a0a0a":"#1a0a0a",border:`1px solid ${i===cursor?"#ff6b6b":"#ff6b6b55"}`,cursor:"pointer",textAlign:"center",transform:i===cursor?"scale(1.04)":"scale(1)",transition:"all .15s"}}>
+                <div style={{fontSize:13,color:"#ff6b6b",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:3}}>{m.name}</div>
+                <div style={{fontSize:9,color:TX3}}>⚡{m.cost}</div>
+              </button>
+            ))}
+          </div>
+          <DPad onMove={moveCursorOpp}/>
+          <AButton onPress={()=>pickMove(oppMoves[cursor],false)} col="#ff6b6b" sub="決定"/>
+        </div>
+      )}
+
+      {phase==="resolve"&&(
+        <div style={{textAlign:"center",padding:"30px 16px"}}>
+          <div style={{fontSize:30,marginBottom:10}}>⚔️</div>
+          <div style={{fontSize:14,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,marginBottom:4}}>計算中...</div>
+          <div style={{display:"flex",gap:16,justifyContent:"center"}}>
+            <span style={{fontSize:12,color:genre.c}}>「{p1Move?.name}！」</span>
+            <span style={{color:TX3}}>VS</span>
+            <span style={{fontSize:12,color:"#ff6b6b"}}>「{p2Move?.name}！」</span>
+          </div>
+        </div>
+      )}
+    </div>);
+  }
+
+  // セットアップ画面
   return(<div>
-    {battle&&<BattleOverlay state={battle} gc={genre.c} onClose={()=>setBattle(null)}/>}
-    {/* 自分のQRコード */}
-    <div style={{textAlign:"center",marginBottom:16,padding:"14px",background:BG2,borderRadius:10,border:`1px solid ${BD}`}}>
-      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>MY QR CODE</div>
-      <div style={{fontSize:10,color:TX2,marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>相手のスマホに見せよう 📱</div>
+    {/* 自分のQR */}
+    <div style={{textAlign:"center",marginBottom:14,padding:14,background:BG2,borderRadius:10,border:`1px solid ${BD}`}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:8}}>MY QR CODE</div>
+      <div style={{fontSize:10,color:TX2,marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>相手に見せる 📱</div>
       {qrUrl?(
         <div style={{display:"inline-block",padding:10,background:"#fff",borderRadius:8,marginBottom:8}}>
           <img src={qrUrl} alt="QR" style={{display:"block",width:180,height:180}}/>
         </div>
       ):(
-        <div style={{width:180,height:180,background:BG3,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center",color:TX3,fontSize:11}}>生成中...</div>
+        <div style={{width:180,height:180,background:BG3,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center",color:TX3}}>生成中...</div>
       )}
-      <div style={{marginTop:8,fontSize:12,color:genre.c,fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{char.name}</div>
-      <div style={{fontSize:10,color:TX3}}>{genre.jp} · POWER {myP} · Lv.{getLv(char.exp)}</div>
+      <div style={{fontSize:12,color:genre.c,fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{char.name} · POWER {myP}</div>
     </div>
-    {/* スキャンエリア */}
-    <div style={{background:BG2,borderRadius:10,padding:14,border:`1px solid ${BD}`}}>
-      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>SCAN & BATTLE</div>
-      <video ref={videoRef} style={{width:"100%",borderRadius:8,border:`2px solid ${genre.c}66`,display:scanning?"block":"none",maxHeight:280,objectFit:"cover"}} muted playsInline/>
-      {scanning&&<div style={{fontSize:11,color:"#b3ff00",textAlign:"center",padding:"8px 0",fontFamily:"M PLUS Rounded 1c,sans-serif",animation:"pu 1s infinite"}}>📷 相手のQRコードに向けて！</div>}
-      <div style={{marginTop:scanning?8:0}}>
+
+    {/* 相手を読み込む */}
+    {!opp?(
+      <div style={{background:BG2,borderRadius:10,padding:14,border:`1px solid ${BD}`}}>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>相手のキャラを読み込む</div>
+        {/* QRスキャン */}
+        <video ref={videoRef} style={{width:"100%",borderRadius:8,display:scanning?"block":"none",marginBottom:8,maxHeight:220,objectFit:"cover"}} muted playsInline/>
         {scanning?(
-          <Btn onClick={stopScan} full sx={{fontSize:11}}>キャンセル</Btn>
+          <div>
+            <div style={{fontSize:11,color:"#b3ff00",textAlign:"center",marginBottom:8,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>📷 QRに向けて！</div>
+            <Btn onClick={stopScan} full sx={{fontSize:11,marginBottom:12}}>キャンセル</Btn>
+          </div>
         ):(
-          <Btn disabled={char.energy<15} col="#0a2a0a" tc="#80e080" onClick={startScan} full sx={{fontSize:12,padding:"13px",border:"1px solid #1a5a1a",fontWeight:700}}>
-            {char.energy<15?"⚡ エネルギー不足":"📷 相手のQRをスキャン ⚡15"}
-          </Btn>
+          <Btn onClick={startScan} col="#0a1828" tc="#00e5ff" full sx={{fontSize:11,border:"1px solid #1a4870",marginBottom:12}}>📷 QRをスキャン</Btn>
         )}
+        {/* 名前入力（代替）*/}
+        <div style={{borderTop:`1px solid ${BD}`,paddingTop:12}}>
+          <div style={{fontSize:10,color:TX3,marginBottom:6,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>または相手のキャラ名で検索：</div>
+          <div style={{display:"flex",gap:8}}>
+            <input value={nameInput} onChange={e=>setNameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&searchByName()} placeholder="キャラ名を入力..." style={{flex:1,padding:"10px",borderRadius:6,background:BG3,border:`1px solid ${BD}`,color:TX,fontSize:12,outline:"none"}}/>
+            <Btn onClick={searchByName} disabled={!nameInput.trim()||searching} col="#0a2a0a" tc="#80e080" sx={{fontSize:11,padding:"0 12px",border:"1px solid #1a4a1a"}}>{searching?"...":"検索"}</Btn>
+          </div>
+          <div style={{fontSize:9,color:TX3,marginTop:4,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>※相手が溜まり場/オンラインで「更新」していれば検索できます</div>
+        </div>
       </div>
-      <div style={{fontSize:10,color:TX3,marginTop:10,textAlign:"center",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
-        ※ Chrome/Safariで動作 · 同じ場所にいる人と対戦
+    ):(
+      <div style={{background:BG2,borderRadius:10,padding:16,border:`1px solid ${genre.c}66`,textAlign:"center"}}>
+        <div style={{fontSize:36,marginBottom:8}}>{opp.e}</div>
+        <div style={{fontSize:16,color:TX,fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>{opp.n}</div>
+        <div style={{fontSize:11,color:TX3,marginBottom:4}}>{GENRES[opp.g]?.jp} · Lv.{opp.lv} · POWER {opp.p}</div>
+        {(()=>{const cb1=compatBonus(char.genre,opp.g);const cb2=char.genre2?compatBonus(char.genre2,opp.g):{bonus:0};const best=cb2.bonus>cb1.bonus?cb2:cb1;return best.label?<div style={{fontSize:11,color:best.col,fontWeight:700,marginBottom:8}}>{best.label}</div>:null;})()}
+        <div style={{fontSize:10,color:"#ffd60a",marginBottom:14,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>ターン制コマンドバトル！5ラウンド制</div>
+        <div style={{display:"flex",gap:8}}>
+          <Btn onClick={()=>setOpp(null)} col={BG3} tc={TX3} sx={{flex:1,fontSize:11}}>キャンセル</Btn>
+          <Btn disabled={char.energy<7} col="#280a0a" tc="#ff7070" onClick={startBattle} sx={{flex:2,fontSize:12,fontWeight:700}}>
+            {char.energy<7?"⚡ 不足":"⚔️ バトル開始！"}
+          </Btn>
+        </div>
       </div>
-    </div>
+    )}
   </div>);
 }
 
-/* ── BATTLE TAB ── */
 function BattleTab({char,setChar,genre,pushNotif,addLog}){
   const[sub,setSub]=useState("battle");
   const[battle,setBattle]=useState(null);
   const[showAI,setShowAI]=useState({text:"",loading:false});
+  const[recruit,setRecruit]=useState(null); // {opp} ラスボス勧誘ダイアログ
   const lv=getLv(char.exp);
   const mp=calcPow({...char.stats,...eqBonus(char.equipped||{})});
 
+  const FINAL_BOSSES=["q9","q10"]; // 勧誘してくるボス
+
   async function fight(opp){
-    if(char.energy<15){pushNotif("エネルギー不足！⚡15必要","#ff5555");return;}
+    if(char.energy<7){pushNotif("エネルギー不足！⚡7必要","#ff5555");return;}
+    // 必須アイテムチェック
+    if(opp.requireItems&&opp.requireItems.length>0){
+      const missing=opp.requireItems.filter(id=>!(char.specialItems||[]).includes(id));
+      if(missing.length>0){
+        const names={"michael_glove":"🧤手袋","michael_loafer":"👞ローファー","michael_hat":"🎩ハット"};
+        pushNotif(`必要：${missing.map(id=>names[id]||id).join("・")}（ショップ→👑伝説）`,"#ffd60a");
+        return;
+      }
+    }
+    // ラスボスは勧誘ダイアログを先に出す
+    if(FINAL_BOSSES.includes(opp.id)){
+      setRecruit(opp);
+      return;
+    }
+    await doBattle(opp);
+  }
+
+  async function doBattle(opp){
     const btl=buildBattle(char,opp.style,opp.pw);
     setBattle({phase:"seq",...btl,oppName:opp.name,step:0});
-    for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,1100));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
+    for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,_battleSpeed===2?380:1100));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
     const{won,flags}=btl;
     const eg=won?opp.rw.exp:Math.floor(opp.rw.exp*.25),coins=won?opp.rw.coins:Math.floor(opp.rw.coins*.1);
     const nt=won&&opp.rw.title&&!char.titles?.includes(opp.rw.title)?opp.rw.title:null;
-    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-15),mood:won?Math.min(100,c.mood+18):Math.max(0,c.mood-12),battlesWon:won?c.battlesWon+1:c.battlesWon,titles:nt?[...(c.titles||[]),nt]:c.titles||[]}));
+    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-7),mood:won?Math.min(100,c.mood+18):Math.max(0,c.mood-12),battlesWon:won?c.battlesWon+1:c.battlesWon,titles:nt?[...(c.titles||[]),nt]:c.titles||[]}));
     setBattle({phase:"result",won,eg,coins,title:nt,flags,myP:btl.myP,thP:btl.thP});
     if(won)Sound.fanfare();else Sound.lose();
     addLog(`${won?"🏆 勝利":"💀 敗北"} vs ${opp.name} +${eg}EXP ${fc(coins)}`);
@@ -1206,6 +2408,43 @@ function BattleTab({char,setChar,genre,pushNotif,addLog}){
 
   return(<div>
     {battle&&<BattleOverlay state={battle} gc={genre.c} onClose={()=>setBattle(null)}/>}
+
+    {/* 勧誘ダイアログ */}
+    {recruit&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",zIndex:910,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{maxWidth:360,width:"100%",textAlign:"center"}}>
+        <div style={{fontSize:56,marginBottom:16,animation:"vi .5s ease"}}>{recruit.e}</div>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:"#9b59b6",marginBottom:16,letterSpacing:2}}>DARK INVITATION</div>
+        <div style={{background:"#0a0a1a",border:"1px solid #9b59b633",borderRadius:12,padding:"20px 18px",marginBottom:20}}>
+          <div style={{fontSize:13,color:"#d7bde2",fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:2,fontStyle:"italic"}}>
+            「お前のダンスは本物だ。<br/>
+            だからこそ言う…<br/><br/>
+            お前を仲間にしてやろう。<br/>
+            一緒に<span style={{color:"#9b59b6",fontWeight:700}}>闇ダンス</span>の<br/>
+            世界を作らないか？」
+          </div>
+          <div style={{marginTop:12,fontSize:10,color:"#7f8c8d",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>— {recruit.name}</div>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <Btn col="#280a0a" tc="#ff4da6" onClick={()=>{setRecruit(null);doBattle(recruit);}} full sx={{fontSize:13,fontWeight:700,padding:"14px",border:"1px solid #5a1818"}}>
+            🔥 断る！闘って決める！
+          </Btn>
+          <Btn col="#0a0a0a" tc="#9b59b6" onClick={()=>{
+            const lostCoins=Math.floor((char.coins||0)*0.5);
+            setChar(c=>({...c,
+              coins:Math.floor((c.coins||0)*0.5),
+              mood:0,
+              gems:Math.max(0,(c.gems||0)-100),
+              titles:[...(c.titles||[]),"⚫ 闇堕ち"],
+            }));
+            setRecruit(null);
+            pushNotif(`😈 闇に堕ちた…コイン半減・💎-100`,"#9b59b6");
+            addLog(`⚫ ${recruit.name}の誘いに乗ってしまった…闇堕ち`);
+          }} full sx={{fontSize:12,border:"1px solid #2a1a4a",opacity:.85}}>
+            😶 は、はい…
+          </Btn>
+        </div>
+      </div>
+    </div>}
     <div style={{display:"flex",background:BG2,borderRadius:8,padding:3,gap:2,marginBottom:14}}>
       {[["battle","⚔️ バトル"],["qr","📱 QR対戦"],["show","🎭 ショー"]].map(([id,label])=>(
         <button key={id} onClick={()=>setSub(id)} style={{flex:1,padding:"9px 4px",fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:sub===id?genre.c+"33":"none",color:sub===id?genre.c:TX3,borderRadius:6,border:sub===id?`1px solid ${genre.c}66`:"1px solid transparent",transition:"all .15s"}}>{label}</button>
@@ -1226,21 +2465,34 @@ function BattleTab({char,setChar,genre,pushNotif,addLog}){
           お腹 {char.hunger>=80?"🍜 満腹！+8%":char.hunger>=50?"🍱 普通":char.hunger>=30?"😤 空腹 -8%":"💀 超空腹 -22%"}
         </span>
       </div>
+      {/* ジャンル表示 */}
+      {char.genre2&&<div style={{background:BG3,borderRadius:6,padding:"6px 10px",marginBottom:8,fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",color:"#ce93d8"}}>
+        {genre.e}{genre.jp} ＋ {GENRES[char.genre2]?.e}{GENRES[char.genre2]?.jp} → 相性有利な方を自動選択！
+      </div>}
       {QOPPS.map(opp=>{
         const diff=opp.pw<mp-100?"easy":opp.pw>mp+100?"hard":"fair";
         const dc={easy:"#81c784",fair:"#ffcc02",hard:"#ff6b6b"}[diff];
         const locked=lv<opp.lv;
-        return(<div key={opp.id} style={{background:locked?"#0c0c18":BG2,border:`1px solid ${locked?"#1a1a28":BD}`,borderRadius:9,padding:"12px 14px",marginBottom:10,opacity:locked?.5:1}}>
+        const cb1=compatBonus(char.genre,opp.style);
+        const cb2=char.genre2?compatBonus(char.genre2,opp.style):{bonus:0,label:""};
+        const bestCB=cb2.bonus>cb1.bonus?cb2:cb1;
+        return(<div key={opp.id} style={{background:locked?"#0c0c18":BG2,border:`1px solid ${locked?"#1a1a28":bestCB.bonus>1?bestCB.col+"44":BD}`,borderRadius:9,padding:"12px 14px",marginBottom:10,opacity:locked?.5:1}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
             <div style={{display:"flex",gap:10,alignItems:"center"}}>
               <span style={{fontSize:28}}>{opp.e}</span>
-              <div><div style={{fontWeight:700,fontSize:13,color:locked?"#555":TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{opp.name}</div><div style={{fontSize:10,color:TX3}}>{GENRES[opp.style]?.jp||opp.style} · Lv.{opp.lv}+</div></div>
+              <div>
+                <div style={{fontWeight:700,fontSize:13,color:locked?"#555":TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{opp.name}</div>
+                <div style={{fontSize:10,color:TX3}}>{GENRES[opp.style]?.e}{GENRES[opp.style]?.jp||opp.style} · Lv.{opp.lv}+</div>
+              </div>
             </div>
-            {locked?<span style={{fontSize:9,color:"#4050a0",background:"#14142a",padding:"4px 8px",borderRadius:4}}>🔒 Lv.{opp.lv}</span>:<span style={{fontSize:10,color:dc,background:`${dc}22`,padding:"3px 8px",borderRadius:4,border:`1px solid ${dc}44`}}>{diff==="easy"?"楽勝":diff==="fair"?"互角":"強敵"}</span>}
+            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3}}>
+              {locked?<span style={{fontSize:9,color:"#4050a0",background:"#14142a",padding:"4px 8px",borderRadius:4}}>🔒 Lv.{opp.lv}</span>:<span style={{fontSize:10,color:dc,background:`${dc}22`,padding:"3px 8px",borderRadius:4,border:`1px solid ${dc}44`}}>{diff==="easy"?"楽勝":diff==="fair"?"互角":"強敵"}</span>}
+              {!locked&&bestCB.label&&<span style={{fontSize:9,color:bestCB.col,fontWeight:700}}>{bestCB.label}</span>}
+            </div>
           </div>
           {!locked&&<div style={{display:"flex",gap:14,marginBottom:8}}><span style={{fontSize:10,color:"#ff7c3a"}}>POWER {opp.pw.toLocaleString()}</span><span style={{fontSize:10,color:"#ffd60a"}}>+{opp.rw.exp}EXP</span><span style={{fontSize:10,color:"#b3ff00",fontWeight:700}}>{fc(opp.rw.coins)}</span></div>}
           {!locked&&opp.rw.title&&<div style={{fontSize:10,color:"#ce93d8",marginBottom:8}}>🎖 {opp.rw.title}</div>}
-          {!locked&&<Btn disabled={char.energy<15} col="#280a0a" tc="#ff7070" onClick={()=>fight(opp)} full sx={{fontSize:11,border:"1px solid #5a1818"}}>{char.energy<15?"⚡ エネルギー不足":"⚔️ バトル開始 ⚡15"}</Btn>}
+          {!locked&&<Btn disabled={char.energy<7} col="#280a0a" tc="#ff7070" onClick={()=>fight(opp)} full sx={{fontSize:11,border:"1px solid #5a1818"}}>{char.energy<7?"⚡ エネルギー不足":"⚔️ バトル開始 ⚡15"}</Btn>}
         </div>);
       })}
     </div>)}
@@ -1317,10 +2569,24 @@ function HomeTab({char,genre,log,onRest,onEat,onTrain,onUseHeart}){
 }
 
 /* ── SHOP TAB ── */
-function ShopTab({char,setChar,genre,pushNotif}){
+function ShopTab({char,setChar,genre,pushNotif,onTokushou}){
   const[sub,setSub]=useState("costumes");
   const lv=getLv(char.exp);
   const items=SHOP[sub]||[];
+  const hasMichael=(id)=>(char.specialItems||[]).includes(id);
+
+  function buyLegend(item){
+    const owned=hasMichael(item.id);
+    if(owned){pushNotif("すでに所持中！","#ffcc02");return;}
+    if(char.coins<item.p&&(char.gems||0)<item.pg){pushNotif(`コイン${item.p.toLocaleString()}またはジェム${item.pg}必要！`,"#ff5555");return;}
+    const useGems=(char.coins<item.p)&&(char.gems||0)>=item.pg;
+    setChar(c=>({...c,
+      coins:useGems?c.coins:c.coins-item.p,
+      gems:useGems?(c.gems||0)-item.pg:c.gems||0,
+      specialItems:[...(c.specialItems||[]),item.id],
+    }));
+    pushNotif(`✨ ${item.n} を入手！`,  "#ffd60a");
+  }
 
   function buyDrink(drink){
     if((char.gems||0)<drink.p){pushNotif(`💎 ジェムが足りない！${drink.p}💎必要`,"#ff5555");return;}
@@ -1358,7 +2624,7 @@ function ShopTab({char,setChar,genre,pushNotif}){
       <div style={{fontSize:13,color:"#b3ff00",fontWeight:700}}>{fc(char.coins)}</div>
     </div>
     <div style={{display:"flex",background:BG2,borderRadius:8,padding:3,gap:2,marginBottom:14,flexWrap:"wrap"}}>
-      {[["costumes","衣装"],["sneakers","靴"],["accessories","アクセ"],["drinks","ドリンク"],["workshops","WS"]].map(([id,label])=>(
+      {[["costumes","衣装"],["sneakers","靴"],["accessories","アクセ"],["drinks","ドリンク"],["workshops","WS"],["legend","👑伝説"]].map(([id,label])=>(
         <button key={id} onClick={()=>setSub(id)} style={{flex:1,minWidth:55,padding:"7px 2px",fontSize:9,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:sub===id?genre.c+"33":"none",color:sub===id?genre.c:TX3,borderRadius:6,border:sub===id?`1px solid ${genre.c}66`:"1px solid transparent",transition:"all .15s"}}>{label}</button>
       ))}
     </div>
@@ -1418,16 +2684,150 @@ function ShopTab({char,setChar,genre,pushNotif}){
         </div>);
       })}
     </div>)}
+
+    {/* 伝説アイテム（マイケル3点セット） */}
+    {sub==="legend"&&<div style={{padding:"0 4px"}}>
+      <div style={{background:"#1a1000",border:"1px solid #ffd60a55",borderRadius:10,padding:"14px 12px",marginBottom:12,textAlign:"center"}}>
+        <div style={{fontSize:24,marginBottom:6}}>🎩🧤👞</div>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:"#ffd60a",marginBottom:6}}>LEGEND ITEMS</div>
+        <div style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1.7}}>
+          マイケルの3点セットを揃えると<br/>宇宙ボス・世界大会に挑戦できる！
+        </div>
+      </div>
+      {SHOP.legend.map(item=>{
+        const owned=hasMichael(item.id);
+        const canBuyCoins=char.coins>=item.p;
+        const canBuyGems=(char.gems||0)>=item.pg;
+        return(<div key={item.id} style={{background:owned?"#1a1a00":"#0a0a00",border:`1px solid ${owned?"#ffd60a":"#3a3a00"}`,borderRadius:10,padding:"14px 12px",marginBottom:12}}>
+          <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:10}}>
+            <span style={{fontSize:36}}>{item.e}</span>
+            <div>
+              <div style={{fontWeight:700,fontSize:14,color:"#ffd60a",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{item.n}</div>
+              <div style={{fontSize:9,color:TX3,marginTop:2}}>{item.desc}</div>
+              {owned&&<div style={{fontSize:10,color:"#b3ff00",marginTop:4,fontWeight:700}}>✓ 所持中</div>}
+            </div>
+          </div>
+          {!owned&&<div>
+            <div style={{fontSize:10,color:TX2,marginBottom:8,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+              {Object.entries(item.b).map(([k,v])=>`${SM[k]?.jp||k}+${v}`).join(" · ")}
+            </div>
+            <div style={{display:"flex",gap:8}}>
+              <Btn disabled={!canBuyCoins} col="#1a1000" tc="#ffd60a" onClick={()=>buyLegend(item)} sx={{flex:1,fontSize:11,border:"1px solid #4a3a00"}}>
+                💰 {item.p.toLocaleString()}コイン
+              </Btn>
+              <Btn disabled={!canBuyGems} col="#100020" tc="#ce93d8" onClick={()=>{
+                if(owned)return;
+                if((char.gems||0)<item.pg){pushNotif(`💎${item.pg}必要！`,"#ff5555");return;}
+                setChar(c=>({...c,gems:(c.gems||0)-item.pg,specialItems:[...(c.specialItems||[]),item.id]}));
+                pushNotif(`✨ ${item.n} を入手！`,"#ffd60a");
+              }} sx={{flex:1,fontSize:11,border:"1px solid #3a1a5a"}}>
+                💎 {item.pg}ジェム
+              </Btn>
+            </div>
+          </div>}
+        </div>);
+      })}
+    </div>}
+
+    {/* 特定商取引法リンク */}
+    <div style={{textAlign:"center",padding:"20px 0 8px"}}>
+      <button onClick={onTokushou} style={{fontSize:10,color:TX3,opacity:.6,background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>
+        特定商取引法に基づく表記
+      </button>
+    </div>
   </div>);
 }
+function StatusTab({char,lv,rnk,genre,setChar,user,onAuthChange,lightMode,toggleLight}){
+  const[showAuth,setShowAuth]=useState(false);
+  const[authMode,setAuthMode]=useState("register");
+  const[email,setEmail]=useState("");
+  const[pass,setPass]=useState("");
+  const[authLoading,setAuthLoading]=useState(false);
+  const[authErr,setAuthErr]=useState("");
+  const[authMsg,setAuthMsg]=useState("");
 
-/* ── STATUS TAB ── */
-function StatusTab({char,lv,rnk,genre,setChar}){
+  async function handleAuth(){
+    if(!email||!pass){setAuthErr("入力してください");return;}
+    setAuthLoading(true);setAuthErr("");setAuthMsg("");
+    try{
+      let u;
+      if(authMode==="register"){
+        u=await signUp(email,pass);
+        // 現在のキャラをクラウドに保存（localStorageから直接読む）
+        const raw=localStorage.getItem("dancer_save");
+        const localChar=raw?JSON.parse(raw):char;
+        if(localChar)await saveCharToCloud(u,localChar);
+        setAuthMsg("登録完了！データをクラウドに保存しました！");
+      }else{
+        u=await signIn(email,pass);
+        const cloudChar=await loadCharFromCloud(u);
+        if(cloudChar){
+          const merged=migrateChar(cloudChar);
+          setChar(merged); // setCharRaw→setChar（スコープ内で使える）
+          localStorage.setItem("dancer_save",JSON.stringify(merged));
+          setAuthMsg("ログイン完了！クラウドのデータを読み込みました！");
+        }else{
+          const raw=localStorage.getItem("dancer_save");
+          const localChar=raw?JSON.parse(raw):char;
+          if(localChar)await saveCharToCloud(u,localChar);
+          setAuthMsg("ログイン完了！データをクラウドに保存しました！");
+        }
+      }
+      onAuthChange(u);
+      setShowAuth(false);
+    }catch(e){
+      setAuthErr(e.message==="Invalid login credentials"?"メールかパスワードが違います":e.message);
+    }
+    setAuthLoading(false);
+  }
+
+  async function handleLogout(){
+    if(!window.confirm("ログアウトしますか？"))return;
+    await signOut();
+    onAuthChange(null);
+  }
+
   const eb=eqBonus(char.equipped||{});
   const ts={};Object.entries(char.stats).forEach(([k,v])=>{ts[k]=v+(eb[k]||0);});
   const p=calcPow(ts);const nr=RANKS.find(r=>r.lv>lv);
   const cc=Object.keys(char.clearedCities||{}).length;
   return(<div>
+    {/* アカウントセクション */}
+    <div style={{background:BG2,border:`1px solid ${user?"#40c06066":"#ffcc0266"}`,borderRadius:10,padding:14,marginBottom:14}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>ACCOUNT</div>
+      {user?(
+        <div>
+          <div style={{fontSize:11,color:"#40c080",fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:8}}>✅ ログイン中</div>
+          <div style={{fontSize:10,color:TX3,marginBottom:10}}>{user.email}</div>
+          <div style={{fontSize:10,color:TX2,marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>データはクラウドに自動保存中。どのデバイスからでも続きから遊べます！</div>
+          <Btn onClick={handleLogout} col="#1a1a30" tc={TX3} full sx={{fontSize:10}}>ログアウト</Btn>
+        </div>
+      ):(
+        <div>
+          <div style={{fontSize:11,color:"#ffcc02",fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:6}}>⚠️ ゲストモード</div>
+          <div style={{fontSize:10,color:TX2,marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>登録すると今のデータをクラウドに保存！スマホを変えても続きから遊べる。</div>
+          {!showAuth?(
+            <Btn onClick={()=>setShowAuth(true)} col="#ffcc02" tc="#000" full sx={{fontSize:11,fontWeight:700}}>📧 アカウント登録 / ログイン</Btn>
+          ):(
+            <div style={{animation:"su .3s ease"}}>
+              <div style={{display:"flex",background:BG3,borderRadius:6,padding:3,gap:2,marginBottom:10}}>
+                {[["register","新規登録"],["login","ログイン"]].map(([m,l])=>(
+                  <button key={m} onClick={()=>{setAuthMode(m);setAuthErr("");setAuthMsg("");}} style={{flex:1,padding:"6px",fontSize:10,fontWeight:700,background:authMode===m?"#ffcc02":"none",color:authMode===m?"#000":TX3,borderRadius:4,border:"none",cursor:"pointer"}}>{l}</button>
+                ))}
+              </div>
+              <input value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder="メールアドレス" style={{width:"100%",padding:"10px",borderRadius:6,background:BG3,border:`1px solid ${BD}`,color:TX,fontSize:12,outline:"none",marginBottom:8}}/>
+              <input value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="パスワード（6文字以上）" style={{width:"100%",padding:"10px",borderRadius:6,background:BG3,border:`1px solid ${BD}`,color:TX,fontSize:12,outline:"none",marginBottom:8}}/>
+              {authErr&&<div style={{fontSize:10,color:"#ff5555",marginBottom:8,padding:"6px 8px",background:"#200a0a",borderRadius:4}}>{authErr}</div>}
+              {authMsg&&<div style={{fontSize:10,color:"#60c080",marginBottom:8,padding:"6px 8px",background:"#0a2010",borderRadius:4}}>{authMsg}</div>}
+              <div style={{display:"flex",gap:8}}>
+                <Btn onClick={()=>setShowAuth(false)} col={BG3} tc={TX3} sx={{flex:1,fontSize:10}}>キャンセル</Btn>
+                <Btn onClick={handleAuth} disabled={authLoading} col="#ffcc02" tc="#000" sx={{flex:2,fontSize:11,fontWeight:700}}>{authLoading?"処理中...":authMode==="register"?"登録してデータを保存":"ログイン"}</Btn>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
     <div style={{background:BG2,border:`1px solid ${genre.c}40`,borderRadius:10,padding:14,marginBottom:14,textAlign:"center"}}>
       <div style={{display:"inline-block"}}><DancerSVG genre={char.genre} mood={char.mood} energy={char.energy} equipped={char.equipped} size={100}/></div>
       <div style={{fontWeight:900,fontSize:15,color:TX,marginTop:4,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{char.name}</div>
@@ -1440,35 +2840,110 @@ function StatusTab({char,lv,rnk,genre,setChar}){
       <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:12}}>STATS</div>
       {Object.entries(char.stats).map(([k,v])=>{const b=eb[k]||0;return<SBar key={k} label={`${SM[k].jp}${b?` (+${b})`:""}`} val={v+b} col={SM[k].c} max={Math.max(40,v+b+5)}/>;  })}
     </div>
+    {/* 秘宝コレクション */}
+    <div style={{background:BG2,border:"1px solid #ffd60a44",borderRadius:10,padding:14,marginBottom:14}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>✨ 秘宝 – レベル上限解放</div>
+      {(()=>{
+        const arts=char.artifacts||[];
+        const maxLv=getMaxLv(arts);
+        const next=[1,3,5,7,9].find(n=>n>arts.length)||null;
+        const nextHint=ARTIFACTS.find(a=>!arts.includes(a.id));
+        return(<div>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+            <div><span style={{fontSize:20,color:"#ffd60a",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{arts.length}</span><span style={{fontSize:12,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>/{ARTIFACTS.length}個</span></div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontSize:11,color:"#ff4da6",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>上限 Lv.{maxLv}</div>
+              {next&&<div style={{fontSize:9,color:TX3}}>次: {next}個で更に解放</div>}
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6,marginBottom:8}}>
+            {ARTIFACTS.map(a=>{
+              const have=arts.includes(a.id);
+              return(<div key={a.id} style={{textAlign:"center",padding:"8px 4px",borderRadius:8,background:have?"#1a1a08":"#0a0a1a",border:`1px solid ${have?"#ffd60a":"#1a1a2a"}`,opacity:have?1:.5}}>
+                <div style={{fontSize:22}}>{a.e}</div>
+                <div style={{fontSize:7,color:have?"#ffd60a":TX3,marginTop:2,fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1.2}}>{a.name}</div>
+              </div>);
+            })}
+          </div>
+          {nextHint&&<div style={{fontSize:9,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>💡 ヒント: {nextHint.hint}</div>}
+        </div>);
+      })()}
+    </div>
+    {/* テーマ切り替え */}
+    <div style={{background:BG2,border:`1px solid ${BD}`,borderRadius:8,padding:"14px 16px",marginBottom:12}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>DISPLAY</div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div>
+          <div style={{fontSize:12,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700}}>{lightMode?"☀️ ライトモード":"🌙 ダークモード"}</div>
+          <div style={{fontSize:10,color:TX3,marginTop:2}}>タップで切り替え</div>
+        </div>
+        <button onClick={toggleLight} style={{width:52,height:28,borderRadius:14,background:lightMode?"#ffcc02":"#323258",border:"none",cursor:"pointer",position:"relative",transition:"background .3s"}}>
+          <div style={{width:22,height:22,borderRadius:11,background:"#fff",position:"absolute",top:3,left:lightMode?27:3,transition:"left .3s",boxShadow:"0 2px 4px rgba(0,0,0,.3)"}}/>
+        </button>
+      </div>
+    </div>
     <div style={{background:BG2,border:`1px solid ${BD}`,borderRadius:8,padding:"14px 16px",marginBottom:12}}>
       <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>STYLE CHANGE ¥5,000</div>
-      <div style={{fontSize:10,color:TX2,marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>ジャンルを変更。スタッツは半分引き継ぎ。</div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
-        {Object.entries(GENRES).filter(([k])=>k!==char.genre).map(([key,g])=>(
-          <button key={key} onClick={()=>{
-            if(char.coins<5000){alert("コインが足りない！¥5,000必要");return;}
-            if(!window.confirm(`${g.jp}に変更しますか？¥5,000消費`))return;
-            const ns={};Object.entries(char.stats).forEach(([k,v])=>{ns[k]=Math.floor(v/2);});Object.entries(BASE[key]).forEach(([k,v])=>{ns[k]=(ns[k]||0)+v;});
-            setChar(c=>({...c,genre:key,coins:c.coins-5000,stats:ns}));
-          }} style={{padding:"8px 6px",borderRadius:7,background:BG3,border:`1px solid ${g.c}55`,cursor:"pointer",textAlign:"left"}}>
-            <span style={{fontSize:16}}>{g.e}</span>
-            <div style={{fontSize:10,color:g.c,fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{g.jp}</div>
-          </button>
-        ))}
+      {/* 現在のジャンル表示 */}
+      <div style={{display:"flex",gap:8,marginBottom:10,padding:"8px 10px",background:BG3,borderRadius:6}}>
+        <div style={{textAlign:"center",flex:1}}>
+          <div style={{fontSize:9,color:TX3,marginBottom:2}}>メイン</div>
+          <span style={{fontSize:20}}>{GENRES[char.genre]?.e}</span>
+          <div style={{fontSize:9,color:GENRES[char.genre]?.c,fontWeight:700}}>{GENRES[char.genre]?.jp}</div>
+        </div>
+        {char.genre2&&<div style={{textAlign:"center",flex:1,borderLeft:`1px solid ${BD}`,paddingLeft:8}}>
+          <div style={{fontSize:9,color:TX3,marginBottom:2}}>サブ</div>
+          <span style={{fontSize:20}}>{GENRES[char.genre2]?.e}</span>
+          <div style={{fontSize:9,color:GENRES[char.genre2]?.c,fontWeight:700}}>{GENRES[char.genre2]?.jp}</div>
+        </div>}
       </div>
+      <div style={{fontSize:10,color:TX2,marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+        選択したジャンルがメインに。旧メインはサブへ移動（最大2ジャンル）。相性有利でバトル+20%！
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+        {Object.entries(GENRES).filter(([k])=>k!==char.genre&&k!==char.genre2).map(([key,g])=>{
+          const cb=compatBonus(key,char.genre);
+          return(<button key={key} onClick={()=>{
+            if(char.coins<5000){alert("コインが足りない！¥5,000必要");return;}
+            if(!window.confirm(`${g.jp}をメインに変更？¥5,000消費。旧メインはサブへ。`))return;
+            const ns={};
+            Object.entries(char.stats).forEach(([k,v])=>{ns[k]=Math.floor(v/2);});
+            Object.entries(BASE[key]).forEach(([k,v])=>{ns[k]=(ns[k]||0)+v;});
+            setChar(c=>({...c,genre:key,genre2:c.genre,coins:c.coins-5000,stats:ns}));
+          }} style={{padding:"8px 6px",borderRadius:7,background:BG3,border:`1px solid ${g.c}55`,cursor:"pointer",textAlign:"left"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+              <span style={{fontSize:16}}>{g.e}</span>
+              {cb.label&&<span style={{fontSize:7,color:cb.col,background:`${cb.col}22`,padding:"1px 4px",borderRadius:3}}>{cb.bonus>1?"強":"弱"}</span>}
+            </div>
+            <div style={{fontSize:10,color:g.c,fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{g.jp}</div>
+          </button>);
+        })}
+      </div>
+      {char.genre2&&<Btn onClick={()=>{if(!window.confirm("サブジャンルを削除しますか？"))return;setChar(c=>({...c,genre2:null}));}} col="#200a0a" tc="#ff7070" full sx={{marginTop:8,fontSize:10,border:"1px solid #4a1a1a"}}>サブジャンルを削除</Btn>}
     </div>
     {char.titles?.length>0&&<div style={{background:BG2,border:`1px solid ${BD}`,borderRadius:8,padding:"12px 14px"}}><div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>TITLES</div><div style={{display:"flex",flexWrap:"wrap",gap:7}}>{char.titles.map(t=><span key={t} style={{fontSize:11,padding:"5px 12px",borderRadius:20,background:"#1a0a2a",color:"#ce93d8",border:"1px solid #3a1a5a",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>🎖 {t}</span>)}</div></div>}
   </div>);
 }
 
 /* ── GAME SCREEN ── */
-function Game({char,setChar,onTitle}){
+function Game({char,setChar,onTitle,user,onLogout,onAuthChange,manualSave,saveStatus,lightMode,toggleLight,onTokushou}){
   const[tab,setTab]=useState("home");
   const[notif,setNotif]=useState(null);
   const[log,setLog]=useState([]);
   const[muted,setMuted]=useState(false);
+  const[unread,setUnread]=useState(0);
+  const[showInbox,setShowInbox]=useState(false);
   const genre=GENRES[char.genre];const lv=getLv(char.exp);const rnk=rnkOf(lv);
   const xpC=char.exp-xpL(lv),xpN=xpL(lv+1)-xpL(lv),xpP=Math.min(100,Math.round((xpC/xpN)*100));
+
+  // 未読メッセージ数を30秒ごとにチェック
+  useEffect(()=>{
+    if(!char.name)return;
+    const check=()=>countUnread(char.name).then(n=>setUnread(n)).catch(()=>{});
+    check();
+    const t=setInterval(check,30000);
+    return()=>clearInterval(t);
+  },[char.name]);
 
   // BGM制御（エリア別）
   useEffect(()=>{
@@ -1536,7 +3011,8 @@ function Game({char,setChar,onTitle}){
 
   const TABS=[{id:"home",l:"ホーム",e:"🏠"},{id:"battle",l:"バトル",e:"⚔️"},{id:"map",l:"MAP",e:"🗺"},{id:"shop",l:"ショップ",e:"🛍"},{id:"status",l:"ステータス",e:"📊"}];
   return(<div style={{minHeight:"100vh",background:BG,fontFamily:"M PLUS Rounded 1c,sans-serif",paddingBottom:80}}>
-    {notif&&<div style={{position:"fixed",top:14,left:"50%",transform:"translateX(-50%)",zIndex:999,background:"#0e0e22",border:`2px solid ${notif.col}`,color:notif.col,padding:"9px 18px",borderRadius:6,fontSize:12,fontWeight:700,animation:"su .25s ease",whiteSpace:"nowrap",maxWidth:"90vw"}}>{notif.msg}</div>}
+    {showInbox&&<MessageInbox myName={char.name} onClose={()=>{setShowInbox(false);countUnread(char.name).then(n=>setUnread(n));}}/>}
+    {notif&&<div style={{position:"fixed",top:14,left:"50%",transform:"translateX(-50%)",zIndex:999,background:"#0e0e22",border:`2px solid ${notif.col}`,color:notif.col,padding:"9px 18px",borderRadius:6,fontSize:12,fontWeight:700,animation:"su .25s ease",whiteSpace:"nowrap",maxWidth:"90vw",pointerEvents:"none"}}>{notif.msg}</div>}
     <div style={{padding:"10px 16px",background:BG2,borderBottom:`2px solid ${genre.c}55`}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -1551,8 +3027,15 @@ function Game({char,setChar,onTitle}){
           </div>
           <div style={{width:90,height:5,background:BG3,borderRadius:3,marginTop:3}}><div style={{height:"100%",width:`${xpP}%`,background:genre.c,borderRadius:3,transition:"width .5s"}}/></div>
           <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
-            <span style={{fontSize:8,color:"#40c060"}}>💾 AUTO</span>
+            <button onClick={manualSave} style={{fontSize:9,color:saveStatus==="saved"?"#40c060":saveStatus==="saving"?"#ffcc02":saveStatus==="error"?"#ff5555":saveStatus==="local"?"#888":"#6060a0",background:"none",border:"none",cursor:"pointer",padding:0}}>
+              {saveStatus==="saving"?"⏳保存中...":saveStatus==="saved"?"☁️保存済み✓":saveStatus==="error"?"❌保存失敗":saveStatus==="local"?"💾ローカルのみ":"☁️セーブ"}
+              {saveStatus==="saving"?"⏳ 保存中":saveStatus==="saved"?"✅ 保存済":saveStatus==="error"?"❌ エラー":user?"☁️ セーブ":"💾 セーブ"}
+            </button>
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              <div style={{position:"relative",display:"inline-block"}}>
+                <button onClick={()=>setShowInbox(true)} style={{fontSize:14,background:"none",padding:"0 2px",opacity:.9}}>📬</button>
+                {unread>0&&<span style={{position:"absolute",top:-4,right:-4,background:"#5050c0",color:"#fff",borderRadius:8,fontSize:9,padding:"1px 4px",fontWeight:700,minWidth:14,textAlign:"center"}}>{unread}</span>}
+              </div>
               <button onClick={()=>{const m=Sound.toggle();setMuted(m);}} style={{fontSize:14,background:"none",padding:"0 2px",opacity:.8}}>{muted?"🔇":"🔊"}</button>
               <span style={{fontSize:9,color:TX3,cursor:"pointer"}} onClick={onTitle}>タイトルへ</span>
             </div>
@@ -1565,8 +3048,8 @@ function Game({char,setChar,onTitle}){
       {tab==="home"&&<HomeTab char={char} genre={genre} log={log} onRest={doRest} onEat={doEat} onTrain={doTrain} onUseHeart={useHeart}/>}
       {tab==="battle"&&<BattleTab char={char} setChar={setChar} genre={genre} pushNotif={notif2} addLog={addLog}/>}
       {tab==="map"&&<MapTab char={char} setChar={setChar} genre={genre} pushNotif={notif2} addLog={addLog}/>}
-      {tab==="shop"&&<ShopTab char={char} setChar={setChar} genre={genre} pushNotif={notif2}/>}
-      {tab==="status"&&<StatusTab char={char} lv={lv} rnk={rnk} genre={genre} setChar={setChar}/>}
+      {tab==="shop"&&<ShopTab char={char} setChar={setChar} genre={genre} pushNotif={notif2} onTokushou={onTokushou}/>}
+      {tab==="status"&&<StatusTab char={char} lv={lv} rnk={rnk} genre={genre} setChar={setChar} user={user} onAuthChange={u=>{onAuthChange&&onAuthChange(u);}} lightMode={lightMode} toggleLight={toggleLight}/>}
     </div>
     <div style={{position:"fixed",bottom:0,left:0,right:0,background:"#0e0e20",borderTop:`2px solid ${BD}`,display:"flex",zIndex:100}}>
       {TABS.map(t=><button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,padding:"9px 0",display:"flex",flexDirection:"column",alignItems:"center",gap:2,background:tab===t.id?`${genre.c}22`:"none",borderTop:tab===t.id?`3px solid ${genre.c}`:"3px solid transparent",transition:"all .15s"}}><span style={{fontSize:17}}>{t.e}</span><span style={{fontSize:8,color:tab===t.id?genre.c:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{t.l}</span></button>)}
@@ -1574,11 +3057,86 @@ function Game({char,setChar,onTitle}){
   </div>);
 }
 
+/* ── LOGIN SCREEN ── */
+function LoginScreen({onLogin,onGuest,onTokushou}){
+  const[mode,setMode]=useState("login"); // login | register
+  const[email,setEmail]=useState("");
+  const[pass,setPass]=useState("");
+  const[loading,setLoading]=useState(false);
+  const[err,setErr]=useState("");
+  const[msg,setMsg]=useState("");
+
+  async function submit(){
+    if(!email||!pass){setErr("メールとパスワードを入力してください");return;}
+    setLoading(true);setErr("");setMsg("");
+    try{
+      if(mode==="login"){
+        const user=await signIn(email,pass);
+        const char=await loadCharFromCloud(user);
+        onLogin(user,char); // この後コンポーネントがアンマウントされる可能性あり
+        return; // setLoadingを呼ばない！
+      }else{
+        await signUp(email,pass);
+        setMsg("登録完了！同じメールとパスワードでログインしてください。");
+        setMode("login");
+      }
+    }catch(e){
+      const msg=e.message||"";
+      if(msg.includes("Invalid login credentials"))setErr("メールかパスワードが違います");
+      else if(msg.includes("Email not confirmed"))setErr("メールの確認が完了していません");
+      else if(msg.includes("User already registered"))setErr("このメールはすでに登録済みです");
+      else if(msg.includes("Password should be"))setErr("パスワードは6文字以上必要です");
+      else setErr(`エラー: ${msg}`);
+    }
+    setLoading(false);
+  }
+
+  return(
+    <div style={{minHeight:"100vh",background:BG,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+      <div style={{fontSize:52,marginBottom:16}}>🎤</div>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:11,color:"#ff4da6",letterSpacing:3,marginBottom:24}}>DANCING QUEST</div>
+
+      <div style={{width:"100%",maxWidth:340,background:BG2,borderRadius:12,padding:24,border:`1px solid ${BD}`}}>
+        <div style={{display:"flex",marginBottom:20,background:BG3,borderRadius:8,padding:3,gap:2}}>
+          {[["login","ログイン"],["register","新規登録"]].map(([m,l])=>(
+            <button key={m} onClick={()=>{setMode(m);setErr("");setMsg("");}} style={{flex:1,padding:"8px",fontSize:11,fontWeight:700,background:mode===m?"#ff4da6":"none",color:mode===m?"#fff":TX3,borderRadius:6,border:"none",cursor:"pointer"}}>{l}</button>
+          ))}
+        </div>
+
+        <div style={{marginBottom:12}}>
+          <div style={{fontSize:10,color:TX3,marginBottom:4}}>メールアドレス</div>
+          <input value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder="email@example.com" style={{width:"100%",padding:"11px",borderRadius:6,background:BG3,border:`1px solid ${BD}`,color:TX,fontSize:13,outline:"none"}}/>
+        </div>
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:10,color:TX3,marginBottom:4}}>パスワード（6文字以上）</div>
+          <input value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="••••••" style={{width:"100%",padding:"11px",borderRadius:6,background:BG3,border:`1px solid ${BD}`,color:TX,fontSize:13,outline:"none"}}/>
+        </div>
+
+        {err&&<div style={{fontSize:11,color:"#ff5555",marginBottom:12,padding:"8px",background:"#200a0a",borderRadius:6}}>{err}</div>}
+        {msg&&<div style={{fontSize:11,color:"#60c080",marginBottom:12,padding:"8px",background:"#0a2010",borderRadius:6}}>{msg}</div>}
+
+        <Btn onClick={submit} disabled={loading} col="#ff4da6" tc="#fff" full sx={{fontSize:13,padding:"12px",fontWeight:700}}>
+          {loading?"処理中...":mode==="login"?"ログイン →":"アカウント作成 →"}
+        </Btn>
+
+        <div style={{textAlign:"center",marginTop:16,display:"flex",flexDirection:"column",gap:8,alignItems:"center"}}>
+          <button onClick={onGuest} style={{fontSize:11,color:TX3,background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>
+            ゲストとして遊ぶ（セーブはこの端末のみ）
+          </button>
+          <button onClick={onTokushou} style={{fontSize:10,color:TX3,opacity:.6,background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>
+            特定商取引法に基づく表記
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── TITLE ── */
 function Title({onStart,savedChar,onContinue,onDelete}){
   return(<div style={{minHeight:"100vh",background:BG,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,textAlign:"center",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
     <div style={{fontSize:64,animation:"fl 3s ease-in-out infinite",marginBottom:16}}>🎤</div>
-    <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:12,color:"#ff4da6",letterSpacing:4,lineHeight:2.2,marginBottom:6}}>DANCER<br/><span style={{color:"#00e5ff"}}>LEGEND</span></div>
+    <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:11,color:"#ff4da6",letterSpacing:4,lineHeight:2.2,marginBottom:6}}>DANCING<br/><span style={{color:"#00e5ff"}}>QUEST</span></div>
     <div style={{color:TX3,fontSize:11,marginBottom:4}}>全国制覇 RPG v5.0</div>
     <div style={{color:"#202040",fontSize:9,marginBottom:36}}>日本 → WORLD → 🚀 SPACE</div>
     {savedChar&&(<div style={{width:"100%",maxWidth:300,marginBottom:16}}>
@@ -1625,7 +3183,201 @@ function Create({onStart}){
 }
 
 /* ── ROOT ── */
-/* ── セーブデータ移行（アップデートしても消えない） ── */
+function TokushouhouPage({onClose}){
+  return(<div style={{minHeight:"100vh",background:BG,fontFamily:"M PLUS Rounded 1c,sans-serif",paddingBottom:60}}>
+    <div style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:BG2,borderBottom:`1px solid ${BD}`,position:"sticky",top:0,zIndex:10}}>
+      <button onClick={onClose} style={{background:"none",border:`1px solid ${BD}`,color:TX3,borderRadius:6,padding:"5px 10px",cursor:"pointer",fontSize:12}}>← 戻る</button>
+      <span style={{fontWeight:700,color:TX,fontSize:14}}>特定商取引法に基づく表記</span>
+    </div>
+    <div style={{padding:"24px 20px",maxWidth:600,margin:"0 auto"}}>
+      {[
+        ["販売事業者","佐藤 真二"],
+        ["運営責任者","佐藤 真二"],
+        ["メールアドレス","s.three_a_dancer@me.com"],
+        ["販売価格","各商品ページに記載"],
+        ["商品代金以外の必要料金","インターネット接続料金等はお客様負担となります。"],
+        ["支払方法","クレジットカード、Apple Pay、Google Pay 等"],
+        ["支払時期","購入時に即時決済"],
+        ["商品の引渡時期","決済完了後、直ちに利用可能"],
+        ["返品・キャンセル","デジタル商品の性質上、購入後の返品・返金には対応しておりません。"],
+      ].map(([label,value])=>(
+        <div key={label} style={{borderBottom:`1px solid ${BD}`,padding:"16px 0",display:"flex",flexDirection:"column",gap:6}}>
+          <div style={{fontSize:11,color:TX3,fontWeight:700}}>{label}</div>
+          <div style={{fontSize:13,color:TX,lineHeight:1.7}}>{value}</div>
+        </div>
+      ))}
+      <div style={{marginTop:24,fontSize:11,color:TX3,lineHeight:1.8}}>
+        ※ 本サービス「DANCING QUEST」はデジタルコンテンツ（ゲーム内通貨）を販売します。<br/>
+        ※ お問い合わせはメールにてご連絡ください。
+      </div>
+    </div>
+  </div>);
+}
+
+export default function DancingQuest(){
+  const[screen,setScreen]=useState("login");
+  const[tokushou,setTokushou]=useState(false);
+  const[lightMode,setLightMode]=useState(()=>{
+    try{return localStorage.getItem("dl_light")==="1";}catch{return false;}
+  });
+  function toggleLight(){
+    setLightMode(m=>{
+      const next=!m;
+      try{localStorage.setItem("dl_light",next?"1":"0");}catch{}
+      return next;
+    });
+  }
+  const[user,setUser]=useState(null);
+
+  const[char,setCharRaw]=useState(()=>{
+    try{const s=localStorage.getItem("dancer_save");return s?migrateChar(JSON.parse(s)):null;}catch{return null;}
+  });
+  const[saveStatus,setSaveStatus]=useState(""); // "" | "saving" | "saved" | "error"
+
+  // setChar: ローカル保存（クラウドはuseEffectで行う）
+  function setChar(fn){
+    setCharRaw(prev=>{
+      const next=typeof fn==="function"?fn(prev):fn;
+      if(next)localStorage.setItem("dancer_save",JSON.stringify(next));
+      return next;
+    });
+  }
+
+  // クラウド自動保存（charが変わるたびに）
+  useEffect(()=>{
+    if(!char||!user)return;
+    const timer=setTimeout(()=>{
+      setSaveStatus("saving");
+      saveCharToCloud(user,char)
+        .then(()=>setSaveStatus("saved"))
+        .catch(()=>setSaveStatus("error"));
+    },2000); // 2秒後に保存（連続変更をまとめる）
+    return()=>clearTimeout(timer);
+  },[char,user]);
+
+  // 手動セーブ
+  async function manualSave(){
+    if(!char)return;
+    localStorage.setItem("dancer_save",JSON.stringify(char));
+    if(user){
+      setSaveStatus("saving");
+      try{
+        const ok=await saveCharToCloud(user,char);
+        setSaveStatus(ok?"saved":"error");
+        if(!ok)console.error("manualSave: cloud save returned false");
+      }catch(e){
+        setSaveStatus("error");
+        console.error("manualSave error:",e);
+      }
+    }else{
+      // ゲスト：ローカルのみ
+      setSaveStatus("local");
+    }
+    setTimeout(()=>setSaveStatus(""),4000);
+  }
+
+  // 起動時にログイン状態確認
+  useEffect(()=>{
+    const fallback=()=>setScreen(char?"title":"login");
+    getUser().then(u=>{
+      if(u){
+        setUser(u);
+        loadCharFromCloud(u)
+          .then(cloudChar=>{
+            if(cloudChar){
+              const merged=migrateChar(cloudChar);
+              setCharRaw(merged);
+              localStorage.setItem("dancer_save",JSON.stringify(merged));
+              setScreen("game");
+            }else if(char){
+              setScreen("game");
+            }else{
+              setScreen("title");
+            }
+          })
+          .catch(()=>{setScreen(char?"game":"title");});
+      }else{
+        fallback();
+      }
+    }).catch(()=>fallback());
+  },[]);
+
+  // ログインボーナス
+  useEffect(()=>{
+    if(!char)return;
+    const today=new Date().toDateString();
+    if(char.lastLoginDate===today)return;
+    setChar(c=>({...c,gems:(c.gems||0)+1,lastLoginDate:today}));
+  },[char?.name]);
+
+  async function handleLogin(u,cloudChar){
+    setUser(u);
+
+    // 1. クラウドにデータあり
+    if(cloudChar){
+      const merged=migrateChar(cloudChar);
+      setCharRaw(merged);
+      localStorage.setItem("dancer_save",JSON.stringify(merged));
+      setScreen("game");
+      return;
+    }
+
+    // 2. ローカルをチェック
+    try{
+      const localRaw=localStorage.getItem("dancer_save");
+      const localChar=localRaw?migrateChar(JSON.parse(localRaw)):null;
+      if(localChar){
+        setCharRaw(localChar);  // awaitの前にcharをセット！
+        setScreen("game");
+        saveCharToCloud(u,localChar).catch(e=>console.error("cloud save:",e)); // fire & forget
+        return;
+      }
+    }catch(e){console.error("local save read error:",e);}
+
+    // 3. データなし → タイトルへ
+    setScreen("title");
+  }
+
+  function handleGuest(){
+    setScreen(char?"title":"create");
+  }
+
+  function start(name,genre,hometown){
+    const h=HT.find(x=>x.id===hometown);
+    const stats={...BASE[genre]};
+    if(h?.bonus){const bg=BASE[h.bonus];Object.entries(bg).forEach(([k,v])=>{stats[k]=(stats[k]||0)+Math.round(v*.3);});}
+    const newChar={name,genre,hometown,currentCity:hometown,clearedCities:{[hometown]:true},
+      exp:0,coins:500,gems:5,fame:0,
+      energy:50,maxEnergy:50,lastEnergyTime:Date.now(),
+      hearts:6,maxHearts:6,lastHeartTime:Date.now(),
+      mood:80,hunger:70,stats,inventory:[],equipped:{accessories:[]},
+      titles:[],battlesWon:0,showsDone:0,lastLoginDate:new Date().toDateString()};
+    setChar(newChar);setScreen("game");
+  }
+
+  async function handleLogout(){
+    await signOut();
+    setUser(null);
+    setScreen("login");
+  }
+
+  function deleteSave(){
+    if(!window.confirm("セーブデータを削除しますか？"))return;
+    localStorage.removeItem("dancer_save");
+    setCharRaw(null);
+    setScreen("title");
+  }
+
+  if(tokushou)return<TokushouhouPage onClose={()=>setTokushou(false)}/>;
+  if(screen==="login")return <LoginScreen onLogin={handleLogin} onGuest={handleGuest} onTokushou={()=>setTokushou(true)}/>;
+  return(<div style={{background:BG,minHeight:"100vh",width:"100%",maxWidth:"100%",overflowX:"hidden",filter:lightMode?"invert(0.92) hue-rotate(180deg) saturate(0.85)":"none",transition:"filter .3s"}}>
+    {screen==="title"&&<Title onStart={()=>setScreen("create")} savedChar={char} onContinue={()=>setScreen("game")} onDelete={deleteSave}/>}
+    {screen==="create"&&<Create onStart={start}/>}
+    {screen==="game"&&char&&<Game char={char} setChar={setChar} onTitle={()=>setScreen("title")} user={user} onLogout={handleLogout} onAuthChange={u=>{setUser(u);if(u)saveCharToCloud(u,char).catch(()=>{});}} manualSave={manualSave} saveStatus={saveStatus} lightMode={lightMode} toggleLight={toggleLight} onTokushou={()=>setTokushou(true)}/>}
+  </div>);
+}
+
+/* ── セーブデータ移行 ── */
 function migrateChar(raw){
   if(!raw)return null;
   const defaults={
@@ -1636,6 +3388,10 @@ function migrateChar(raw){
     inventory:[], equipped:{accessories:[]},
     titles:[], battlesWon:0, showsDone:0,
     clearedCities:{}, lastLoginDate:"",
+    genre2: null,
+    artifacts:[],
+    bossDefeats:{},
+    specialItems:[],
   };
   return{
     ...defaults,
@@ -1654,43 +3410,4 @@ function migrateChar(raw){
   };
 }
 
-export default function DancerLegend(){
-  const[screen,setScreen]=useState("title");
-  const[char,setChar]=useState(()=>{
-    try{
-      const s=localStorage.getItem("dancer_save");
-      return s?migrateChar(JSON.parse(s)):null;
-    }catch{return null;}
-  });
 
-  // オートセーブ
-  useEffect(()=>{if(char)localStorage.setItem("dancer_save",JSON.stringify(char));},[char]);
-
-  // ログインボーナス（毎日1💎）
-  useEffect(()=>{
-    if(!char)return;
-    const today=new Date().toDateString();
-    if(char.lastLoginDate===today)return;
-    setChar(c=>({...c,gems:(c.gems||0)+1,lastLoginDate:today}));
-  },[char?.name]);
-
-  function start(name,genre,hometown){
-    const h=HT.find(x=>x.id===hometown);
-    const stats={...BASE[genre]};
-    if(h?.bonus){const bg=BASE[h.bonus];Object.entries(bg).forEach(([k,v])=>{stats[k]=(stats[k]||0)+Math.round(v*.3);});}
-    const newChar={name,genre,hometown,currentCity:hometown,clearedCities:{[hometown]:true},
-      exp:0,coins:500,gems:5,fame:0,
-      energy:50,maxEnergy:50,lastEnergyTime:Date.now(),
-      hearts:6,maxHearts:6,lastHeartTime:Date.now(),
-      mood:80,hunger:70,stats,inventory:[],equipped:{accessories:[]},
-      titles:[],battlesWon:0,showsDone:0,lastLoginDate:new Date().toDateString()};
-    setChar(newChar);setScreen("game");
-  }
-  function deleteSave(){if(!window.confirm("セーブデータを削除しますか？"))return;localStorage.removeItem("dancer_save");setChar(null);setScreen("title");}
-
-  return(<div style={{background:BG,minHeight:"100vh",width:"100%",maxWidth:"100%",overflowX:"hidden"}}>
-    {screen==="title"&&<Title onStart={()=>setScreen("create")} savedChar={char} onContinue={()=>setScreen("game")} onDelete={deleteSave}/>}
-    {screen==="create"&&<Create onStart={start}/>}
-    {screen==="game"&&char&&<Game char={char} setChar={setChar} onTitle={()=>setScreen("title")}/>}
-  </div>);
-}
