@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     if (type === 'book') {
       session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
-        line_items: [{ price: BOOK_PRICE_ID, quantity: 1 }],
+        line_items: [{ price_data: { currency: 'jpy', product_data: { name: 'ダンスの歴史 大百科', description: 'バレエ・タップ・ソウル・HipHop・House 全ジャンル収録' }, unit_amount: 280 }, quantity: 1 }],
         mode: 'payment',
         success_url: origin + '?payment=book_success&session_id={CHECKOUT_SESSION_ID}',
         cancel_url: origin + '?payment=cancel',
