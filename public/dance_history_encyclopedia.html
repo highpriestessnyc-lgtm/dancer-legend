@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ダンスの歴史 大百科 — 完全版</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700;900&family=Shippori+Mincho+B1:wght@400;700;800&family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1208;--ink2:#3d3020;--paper:#f8f4ed;--paper2:#ede8df;--paper3:#e5dfd5;
+  --gold:#c49a3c;--gold2:#e8c97e;--red:#8b2e2e;--red2:#c4523c;
+  --div:#d4c8b0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#1e1608;font-family:'Noto Serif JP','Shippori Mincho B1',serif;color:var(--ink);line-height:1.9;font-size:14px}
+
+/* COVER */
+.cover{min-height:100vh;background:linear-gradient(150deg,#120c04 0%,#251808 50%,#120804 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:60px 28px;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 60px,rgba(196,154,60,.025) 60px,rgba(196,154,60,.025) 61px)}
+.badge{font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:7px;color:var(--gold);text-transform:uppercase;margin-bottom:24px;opacity:.8}
+.cover-icon{font-size:52px;margin-bottom:20px;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.cover-title{font-family:'Shippori Mincho B1',serif;font-size:clamp(40px,8vw,88px);font-weight:800;color:#f8f4ed;line-height:1.05;margin-bottom:6px}
+.cover-sub{font-family:'DM Serif Display',serif;font-size:clamp(12px,2.5vw,18px);color:var(--gold2);font-style:italic;letter-spacing:2px;margin-bottom:36px}
+.cover-rule{width:90px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 36px}
+.cover-desc{font-size:13px;color:rgba(248,244,237,.5);letter-spacing:2px;line-height:2.3;max-width:360px}
+.cover-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:44px}
+.ctag{font-size:10px;color:var(--gold);letter-spacing:3px;padding:5px 12px;border:1px solid rgba(196,154,60,.3);border-radius:2px;font-family:'Cormorant Garamond',serif;font-style:italic}
+
+/* TOC */
+.toc{max-width:820px;margin:0 auto;background:var(--paper2);padding:60px 52px;border-bottom:1px solid var(--div)}
+.toc-title{font-family:'Shippori Mincho B1',serif;font-size:24px;font-weight:800;color:var(--ink);margin-bottom:32px;text-align:center}
+.toc-item{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px dotted var(--div);font-size:13px}
+.toc-ch{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:2px;min-width:80px}
+.toc-name{color:var(--ink);font-weight:500;flex:1;padding:0 12px}
+.toc-pg{color:var(--ink2);font-size:11px;font-family:'Cormorant Garamond',serif}
+
+/* BOOK */
+.book{max-width:820px;margin:0 auto;background:var(--paper);box-shadow:0 0 100px rgba(0,0,0,.6)}
+
+/* CHAPTER */
+.ch{padding:68px 52px 52px;border-bottom:1px solid var(--div);position:relative}
+.ch:nth-child(even){background:var(--paper2)}
+.ch-label{font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.ch-label::before,.ch-label::after{content:'';flex:1;height:1px;max-width:46px}
+.ch-label::before{background:linear-gradient(90deg,var(--gold),transparent)}
+.ch-label::after{background:linear-gradient(90deg,transparent,var(--gold))}
+.ch-icon{font-size:48px;display:block;margin-bottom:18px}
+.ch-title{font-family:'Shippori Mincho B1',serif;font-size:clamp(24px,5vw,50px);font-weight:800;color:var(--ink);line-height:1.15;margin-bottom:5px}
+.ch-en{font-family:'DM Serif Display',serif;font-size:14px;color:var(--red);font-style:italic;letter-spacing:1px;margin-bottom:32px}
+.ch-lead{font-size:14.5px;color:var(--ink2);line-height:2.0;padding:20px 26px;border-left:3px solid var(--gold);background:rgba(196,154,60,.06);border-radius:0 8px 8px 0;margin-bottom:36px;font-weight:500}
+.ch-footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--div);display:flex;justify-content:space-between;font-size:11px;color:var(--gold);font-family:'Cormorant Garamond',serif;letter-spacing:2px}
+
+/* SECTIONS */
+.sec{margin-bottom:40px}
+.sec-h{font-family:'Shippori Mincho B1',serif;font-size:17px;font-weight:700;color:var(--red);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--div);display:flex;align-items:center;gap:9px}
+.sec-h::before{content:'◆';font-size:10px;color:var(--gold)}
+.sub-h{font-family:'Shippori Mincho B1',serif;font-size:14px;font-weight:700;color:var(--ink);margin:22px 0 9px;display:flex;align-items:center;gap:7px}
+.sub-h::before{content:'▸';color:var(--red);font-size:11px}
+p{font-size:14px;line-height:2.05;color:var(--ink);margin-bottom:16px;text-align:justify;text-justify:inter-ideograph}
+
+/* PULL QUOTE */
+.pq{font-family:'Shippori Mincho B1',serif;font-size:16px;font-weight:700;color:var(--red);text-align:center;padding:26px 32px;margin:32px 0;position:relative;font-style:italic;line-height:1.8}
+.pq::before{content:'\300E';font-size:50px;color:var(--gold);opacity:.22;position:absolute;top:0;left:12px;line-height:1}
+.pq::after{content:'';display:block;width:50px;height:2px;background:var(--gold);margin:12px auto 0}
+
+/* TIMELINE */
+.tl{position:relative;padding-left:26px;margin:24px 0}
+.tl::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--gold),var(--red))}
+.tl-item{position:relative;margin-bottom:20px;padding-left:16px}
+.tl-item::before{content:'';position:absolute;left:-24px;top:5px;width:9px;height:9px;border-radius:50%;background:var(--gold);border:2px solid var(--paper)}
+.tl-year{font-family:'DM Serif Display',serif;font-size:12px;color:var(--gold);font-weight:700;letter-spacing:2px;margin-bottom:2px}
+.tl-text{font-size:13px;line-height:1.8;color:var(--ink2);margin:0}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin:14px 0}
+.gi{background:var(--paper2);border:1px solid var(--div);border-radius:4px;padding:8px 12px;font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:7px}
+.gi::before{content:'◦';color:var(--gold);font-size:14px;flex-shrink:0}
+
+/* PERSON */
+.person{background:linear-gradient(135deg,var(--paper2),var(--paper));border:1px solid var(--div);border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:16px 20px;margin:18px 0}
+.pname{font-family:'Shippori Mincho B1',serif;font-size:15px;font-weight:700;color:var(--red);margin-bottom:3px}
+.pen{font-family:'DM Serif Display',serif;font-size:11px;color:var(--gold);font-style:italic;letter-spacing:1px;margin-bottom:8px}
+.ptext{font-size:12.5px;line-height:1.85;color:var(--ink2);margin:0}
+
+/* BOX */
+.box{background:rgba(139,46,46,.05);border:1px solid rgba(139,46,46,.2);border-radius:8px;padding:16px 20px;margin:18px 0}
+.box-t{font-size:11px;font-weight:700;color:var(--red);letter-spacing:2px;margin-bottom:9px;font-family:'Cormorant Garamond',serif}
+.box p{font-size:13px;margin-bottom:5px;line-height:1.7}
+.box p:last-child{margin-bottom:0}
+
+/* CREW BOX */
+.crew{background:rgba(26,18,8,.04);border:1px solid var(--div);border-radius:8px;padding:16px 20px;margin:18px 0}
+.crew-name{font-family:'Shippori Mincho B1',serif;font-size:15px;font-weight:800;color:var(--ink);margin-bottom:6px}
+.crew-sub{font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:10px;font-family:'Cormorant Garamond',serif;font-style:italic}
+.crew p{font-size:13px;line-height:1.75;color:var(--ink2);margin-bottom:4px}
+
+/* KNOW */
+.know{background:linear-gradient(135deg,rgba(196,154,60,.1),rgba(196,154,60,.04));border:1px solid rgba(196,154,60,.3);border-radius:8px;padding:18px 22px;margin:24px 0}
+.know-label{font-size:10px;letter-spacing:4px;color:var(--gold);font-family:'Cormorant Garamond',serif;margin-bottom:9px;display:block}
+.know p{font-size:13.5px;margin:0;font-weight:500;color:var(--ink)}
+
+/* DIVIDER */
+.pdeco{text-align:center;padding:20px;font-family:'Cormorant Garamond',serif;font-size:12px;color:var(--gold);opacity:.4;letter-spacing:5px;background:var(--paper)}
+
+/* STEP DICT */
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:14px 0}
+.step-item{background:var(--paper2);border:1px solid var(--div);border-radius:6px;padding:10px 14px}
+.step-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px;font-family:'Shippori Mincho B1',serif}
+.step-desc{font-size:11.5px;color:var(--ink2);line-height:1.6}
+
+@media(max-width:640px){
+  .ch{padding:44px 18px 36px}
+  .grid{grid-template-columns:1fr 1fr}
+  .steps-grid{grid-template-columns:1fr}
+  .toc{padding:40px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="badge">Dance History Encyclopedia — Complete Edition 2024</div>
+  <div class="cover-icon">💃</div>
+  <h1 class="cover-title">ダンスの歴史</h1>
+  <p class="cover-sub">大百科 — 起源から現代まで、ステップ辞典、人物名鑑、クルー図鑑</p>
+  <div class="cover-rule"></div>
+  <p class="cover-desc">人類の誕生と共にあった踊りの全記録<br>
+  すべてのダンス・すべての人物・すべてのステップ</p>
+  <div class="cover-tags">
+    <div class="ctag">Ballet</div><div class="ctag">Tap</div><div class="ctag">Jazz</div>
+    <div class="ctag">Soul</div><div class="ctag">Breaking</div><div class="ctag">Popping</div>
+    <div class="ctag">Locking</div><div class="ctag">Waacking</div><div class="ctag">Hip Hop</div>
+    <div class="ctag">House</div><div class="ctag">Contemporary</div>
+  </div>
+</div>
+
+<div class="book">
+
+<!-- PROLOGUE: 起源 -->
+<div class="ch">
+  <div class="ch-label">Prologue</div>
+  <span class="ch-icon">🌍</span>
+  <h2 class="ch-title">ダンスの起源</h2>
+  <p class="ch-en">The Origins of Dance — As Ancient as Life Itself</p>
+  <p class="ch-lead">ダンスの歴史は人類の歴史と同様に古い。すべての民族は固有のダンスを持ち、踊りは生命に内在する根源的な活動である。</p>
+  <div class="sec">
+    <p>旧石器時代のアルタミラ洞窟の壁画には、すでに人々が踊る様子が描かれています。動物、特に鳥類にも固有のダンスが見られることから、踊りとは生命そのものに宿る衝動と言われています。</p>
+    <p>日本の古事記・天岩戸神話では、天宇受売命（アメノウズメ）が力強くエロティックに踊り八百万の神々を大笑いさせ、閉じこもった天照大神を引き出して世界に光を取り戻しました。ダンスはつねに人間の祈りや願いを神に伝える手段でした。</p>
+    <p>古代ギリシアでは、プラトンやアリストテレスもダンスを踊りました。身体的にも精神的にも健康な人間を育む教育の方法としてです。ダンスは宗教的儀礼から労働の意識高揚、通過儀礼まで人間生活のあらゆる場面に息づいてきました。</p>
+    <div class="pq">タップダンスとは虐げられた人々の発散であり、魂の叫びなのである</div>
+  </div>
+  <div class="ch-footer"><span>ダンスの歴史 大百科</span><span>✦ ✦ ✦</span><span>Prologue</span></div>
+</div>
+
+<!-- CH 1: BALLET -->
+<div class="ch">
+  <div class="ch-label">Chapter I</div>
+  <span class="ch-icon">🩰</span>
+  <h2 class="ch-title">バレエ</h2>
+  <p class="ch-en">Ballet — From Renaissance Italy to the Russian Imperial Stage</p>
+  <p class="ch-lead">バレエはルネサンス期イタリアに起源を発し、フランス宮廷で体系化され、ロシアで頂点を極めた。歌詞・台詞を伴わない舞台舞踊の最高峰。</p>
+
+  <div class="sec">
+    <h3 class="sec-h">起源と歴史</h3>
+    <div class="tl">
+      <div class="tl-item"><div class="tl-year">1463年</div><p class="tl-text">グリエルモ・エブレオ著書で「Balletto」という語が初めて用いられる</p></div>
+      <div class="tl-item"><div class="tl-year">1496年</div><p class="tl-text">レオナルド・ダ・ヴィンチが衣装・装置を担当した「楽園」初演</p></div>
+      <div class="tl-item"><div class="tl-year">1533年</div><p class="tl-text">メディチ家のカトリーヌがフランス王室へ嫁ぎバレエを伝える</p></div>
+      <div class="tl-item"><div class="tl-year">1581年</div><p class="tl-text">「王妃のバレエ・コミック」─ 完全な記録の残る最古のバレエ作品</p></div>
+      <div class="tl-item"><div class="tl-year">1661年</div><p class="tl-text">ルイ14世が王立舞踏アカデミー創立。バレエが体系化される</p></div>
+      <div class="tl-item"><div class="tl-year">1671年</div><p class="tl-text">パリ・オペラ座設立。バレエは宮廷から劇場へ移行</p></div>
+      <div class="tl-item"><div class="tl-year">1832年</div><p class="tl-text">マリー・タリオーニ「ラ・シルフィード」でポワント確立。ロマンティック・バレエ誕生</p></div>
+      <div class="tl-item"><div class="tl-year">1890年</div><p class="tl-text">チャイコフスキー「眠れる森の美女」初演。3大バレエ幕開け</p></div>
+      <div class="tl-item"><div class="tl-year">1912年</div><p class="tl-text">日本にバレエ導入。帝国劇場歌劇部にイタリア人バレエマスター</p></div>
+      <div class="tl-item"><div class="tl-year">1927年</div><p class="tl-text">エリアナ・パブロワが鎌倉に日本初バレエ稽古場設立</p></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3 class="sec-h">主要人物</h3>
+    <div class="person">
+      <div class="pname">ルイ14世（Louis XIV）1638–1715</div>
+      <div class="pen">The Sun King — Father of Professional Ballet</div>
+      <p class="ptext">5歳で即位、15歳でバレエ本格デビュー。1661年に王立舞踏アカデミーを創立しバレエを体系化。舞踏教師ピエール・ボーシャンがポジションを定め現代バレエの基礎を確立した。</p>
+    </div>
+    <div class="person">
+      <div class="pname">マリー・タリオーニ（Marie Taglioni）1804–1884</div>
+      <div class="pen">La Sylphide — Queen of Romantic Ballet</div>
+      <p class="ptext">1832年「ラ・シルフィード」でポワント技法を本格確立。ロマンティック・バレエを完成させた女神。</p>
+    </div>
+    <div class="person">
+      <div class="pname">アンナ・パブロワ（Anna Pavlova）1881–1931</div>
+      <div class="pen">The Dying Swan — World's Greatest Ballerina</div>
+      <p class="ptext">「瀕死の白鳥」の代名詞。1922年の日本公演は西洋舞踏を日本に広く知らしめた。1931年ハーグで肺炎のため50歳で逝去。手術をすれば踊れなくなると言われ拒否した。</p>
+    </div>
+    <div class="person">
+      <div class="pname">エリアナ・パブロワ（Eliana Pavlova）1897–1941</div>
+      <div class="pen">日本バレエの母</div>
+      <p class="ptext">ロシア革命から逃れ日本へ亡命。1927年鎌倉七里ガ浜に日本初のバレエ稽古場を設立。東勇作、橘秋子、貝谷八百子らを育て「日本バレエの母」と呼ばれる。1941年南京で戦病死。</p>
+    </div>
+    <div class="person">
+      <div class="pname">オリガ・サファイア（Olga Saffire）1907–1981</div>
+      <div class="pen">ロシア=ソビエトバレエを日本に伝えた最初の人物</div>
+      <p class="ptext">日本名・清水みどり。レニングラード・バレエ学校卒業後、1936年来日。正統派ロシア=ソビエトバレエの理論と技術を日本に導入した最初の人物。日劇ダンシングチームのバレエ教師として松山樹子・谷桃子・東勇作らを指導した。</p>
+    </div>
+    <div class="know"><span class="know-label">チャイコフスキー三大バレエ</span><p>眠れる森の美女（1890）/ くるみ割り人形（1892）/ 白鳥の湖（1895）</p></div>
+    <div class="box">
+      <div class="box-t">主要なバレエ団</div>
+      <p>• パリ国立オペラ ─ 世界最古のバレエ団（1661年設立）</p>
+      <p>• マリインスキー・バレエ（ロシア）─ 旧キーロフ・バレエ（1738年〜）</p>
+      <p>• ボリショイ・バレエ（ロシア）─ 1778年〜</p>
+      <p>• ロイヤル・バレエ団（英国）─ 1931年〜</p>
+      <p>• アメリカン・バレエ・シアター ─ 1937年〜</p>
+      <p>• バレエ・リュス ─ セルゲイ・ディアギレフ設立。ニジンスキー、フォーキンらが活躍</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3 class="sec-h">基本技法</h3>
+    <div class="grid">
+      <div class="gi">ポワント（爪先立ち）</div><div class="gi">プリエ（膝を曲げる）</div>
+      <div class="gi">ピルエット（回転）</div><div class="gi">フェッテ（連続回転）</div>
+      <div class="gi">グラン・パ・ド・ドゥ</div><div class="gi">アラベスク</div>
+      <div class="gi">ジュテ（跳躍）</div><div class="gi">アントルシャ</div>
+      <div class="gi">ルルヴェ</div><div class="gi">シェネ</div>
+    </div>
+  </div>
+  <div class="ch-footer"><span>ダンスの歴史 大百科</span><span>✦ ✦ ✦</span><span>Chapter I — Ballet</span></div>
+</div>
+
+<div class="pdeco">— ✦ —</div>
+
+<!-- CH 2: TAP -->
+<div class="ch">
+  <div class="ch-label">Chapter II</div>
+  <span class="ch-icon">👞</span>
+  <h2 class="ch-title">タップダンス</h2>
+  <p class="ch-en">Tap Dance — The Soul's Cry Beaten into the Floor</p>
+  <p class="ch-lead">タップダンスは虐げられた黒人奴隷たちの魂の叫びから生まれた。禁じられたドラムの代わりに足で大地を踏み鳴らしたことが始まりである。</p>
+
+  <div class="sec">
+    <h3 class="sec-h">起源と歴史</h3>
+    <p>1739年、サウスカロライナ州で暴動が発生した後、白人は黒人が集まる場でのドラムを禁止しました。ドラムの替わりに足を踏み鳴らして音を出したことがタップダンスの起源です。奴隷として繋がれた人々は運動不足にならないよう足踏みをさせられ、その中でリズムを刻むことが唯一の自己表現となりました。</p>
+    <p>アフリカから連れてこられた人々はリズムにのって仕事をし（ワークソング→ブルース）、キリスト教への強制改宗後も歌いながらお祈りをしていました（スピリチュアル→ラグタイム）。イギリス鉱夫のクロッグダンスがアイルランド人によって米国に伝わりアフリカ系の動きと融合したという説もある。</p>
+  </div>
+
+  <div class="sec">
+    <h3 class="sec-h">伝説のタップダンサーたち</h3>
+    <div class="person">
+      <div class="pname">ビル・ボージャングルス・ロビンソン（Bill "Bojangles" Robinson）1878–1949</div>
+      <div class="pen">The King of Tap — Mayor of Harlem</div>
+      <p class="ptext">黒人タップダンサーとして史上最初のスター。ブロードウェイに単独主演した最初の黒人。非公式ながらニューヨーク市長と呼ばれた。シャーリー・テンプルとの共演でも有名。毎年5月25日の「National Tap Dance Day」は彼の誕生日にちなむ。</p>
+    </div>
+    <div class="person">
+      <div class="pname">ジョン・バブルス（John Bubbles）1902–1986</div>
+      <div class="pen">Father of Rhythm Tap</div>
+      <p class="ptext">「リズムタップの父」。ダウンビートを強調しヒールを使って複雑なリズムを刻む現代タップの基礎を作った。ガーシュウィンのオペラ「ポーギーとベス」でSportin' Lifeを初演。</p>
+    </div>
+    <div class="person">
+      <div class="pname">フレッド・アステア（Fred Astaire）1899–1987 ＆ ジンジャー・ロジャース（Ginger Rogers）1911–1995</div>
+      <div class="pen">The Golden Duo of Hollywood Tap</div>
+      <p class="ptext">1930〜40年代ハリウッド黄金期に10本の映画で共演。「彼女はアステアがやることをすべて後ろ向きで、ハイヒールでやった」という言葉が彼女の凄さを物語る。アステアの完璧主義なリハーサルと革新的撮影技法は映画タップの頂点。</p>
+    </div>
+    <div class="person">
+      <div class="pname">ニコラス・ブラザーズ（Nicholas Brothers）Fayard 1914–2006 / Harold 1921–2000</div>
+      <div class="pen">The Greatest Tap Act of All Time</div>
+      <p class="ptext">ファヤード＆ハロルドの兄弟デュオ。アクロバティックなタップで世界を席巻。映画「Stormy Weather」（1943）の階段パフォーマンスはFred Astaire自らが「見た中で最高のダンスナンバー」と絶賛した。人種差別の時代にハリウッドトップに立った先駆者。</p>
+    </div>
+    <div class="person">
+      <div class="pname">サミー・デイビスJr.（Sammy Davis Jr.）1925–1990</div>
+      <div class="pen">The Greatest Entertainer in the World</div>
+      <p class="ptext">「世界最高のエンターテイナー」。タップ・歌・演技を融合させたトータルパフォーマー。フランク・シナトラ率いる「ラット・パック」の一員。公民権運動にも深くコミットした。</p>
+    </div>
+    <div class="person">
+      <div class="pname">グレゴリー・ハインズ（Gregory Hines）1946–2003</div>
+      <div class="pen">The Last Great Hoofer — Tap's Greatest Ambassador</div>
+      <p class="ptext">ハーレム生まれ。5歳から兄モーリスとThe Hines Kids、後にThe Hines Brothersとして活動。映画「コットンクラブ」「ホワイトナイツ（白夜）」で世界に名を轟かせた。1985年「ホワイトナイツ」ではバレエの神ミハイル・バリシニコフと共演。タップとバレエという二大舞踊の頂点が激突した歴史的映画。ブロードウェイ「Sophisticated Ladies」でトニー賞受賞。</p>
+    </div>
+    <div class="person">
+      <div class="pname">ミハイル・バリシニコフ（Mikhail Baryshnikov）1948–</div>
+      <div class="pen">The Greatest Ballet Dancer of the 20th Century</div>
+      <p class="ptext">ラトビア（当時ソ連）生まれ。1974年にソ連から亡命しアメリカへ。1985年映画「ホワイトナイツ（白夜）」でグレゴリー・ハインズと共演。クラシックバレエの神とタップダンスの王者が同じスクリーンで踊った前代未聞の共演は「ジャンルを超えたダンスの普遍性」を世界に証明した。</p>
+    </div>
+    <div class="person">
+      <div class="pname">ジミー・スライド（Jimmy Slyde）1927–2008</div>
+      <div class="pen">The Slippery One — Master of the Slide</div>
+      <p class="ptext">「スライド」と呼ばれるほど滑らかな技法で知られるタップレジェンド。ボストン出身。グレゴリー・ハインズの師匠の一人。床を氷のように滑る詩人的スタイル。晩年もパリのクラブで踊り続けた。</p>
+    </div>
+    <div class="person">
+      <div class="pname">サンドマン・シムズ（Sandman Sims）1917–2003</div>
+      <div class="pen">Cotton Club Original — Sand Dancing Master</div>
+      <p class="ptext">コットンクラブのサンドダンス（砂の上で踊るタップの原型）の巨匠。アポロシアターで不評なアクトを舞台から引っ込める「フック」を操る役を長年務めたことでも有名。砂を蒔いた舞台で独特の音を生み出した。</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3 class="sec-h">タップのスタイル</h3>
+    <h4 class="sub-h">リズムタップ（フーファーズスタイル）</h4>
+    <p>ビートを重視し、ステップで音楽を作り出すスタイル。足音が楽器になる。</p>
+    <h4 class="sub-h">ブロードウェイスタイル（シアタースタイル）</h4>
+    <p>体全体の動きも重視し曲に合わせて踊るスタイル。フレッド・アステア・ジーン・ケリーが代表。</p>
+    <h4 class="sub-h">基本ステップ</h4>
+    <div class="grid">
+      <div class="gi">ボールタッチ</div><div class="gi">ヒールドロップ</div>
+      <div class="gi">シャッフル</div><div class="gi">フラップ</div>
+      <div class="gi">スタンプ・ストンプ</div><div class="gi">ウィング</div>
+      <div class="gi">タイムステップ</div><div class="gi">プルバック</div>
+      <div class="gi">クランプロール</div><div class="gi">ボールチェンジ</div>
+      <div class="gi">チャグ</div><div class="gi">スカッフル</div>
+    </div>
+  </div>
+  <div class="ch-footer"><span>ダンスの歴史 大百科</span><span>✦ ✦ ✦</span><span>Chapter II — Tap Dance</span></div>
+</div>
+
+<!-- CH 3: SOUL DANCE -->
+<div class="ch">
+  <div class="ch-label">Chapter III</div>
+  <span class="ch-icon">🎙</span>
+  <h2 class="ch-title">ソウルダンス</h2>
+  <p class="ch-en">Soul Dance — The Heartbeat That Birthed All Street Dance</p>
+  <p class="ch-lead">すべてのストリートダンスの原点。1960年代の公民権運動と共に生まれ、SOUL TRAINというテレビ番組を通じて世界に広まった。本場アメリカでは「パーティーダンス」「パーティーグルーヴ」と呼ばれる。「ソウルダンス」は主に日本での呼称。</p>
+
+  <div class="sec">
+    <h3 class="sec-h">主要人物</h3>
+    <div class="person">
+      <div class="pname">ジェームス・ブラウン（James Brown）1933–2006</div>
+      <div class="pen">The Godfather of Soul — Father of All Street Dance</div>
+      <p class="ptext">サウスカロライナ州バーンウェルに極貧家庭に生まれ、1950年代にFamous Flamesと活動開始。スプリットから手を使わず立ち上がり、片足でアイスの上を滑るようにスライドし、ビート直前でフリーズしてポーズを決める。タップダンスの流れを汲む複雑なフットワーク。1965年「Papa's Got a Brand New Bag」でFUNKを発明。1966年「James Brown's Boogaloo」で国営テレビにブーガルーダンスを披露。Breaking・Popping・Locking・Hip Hopすべてに絶大な影響。</p>
+    </div>
+    <div class="person">
+      <div class="pname">ドン・コーネリアス（Don Cornelius）1936–2012</div>
+      <div class="pen">Creator of Soul Train — "Love, Peace and Soul"</div>
+      <p class="ptext">1970年SOUL TRAINをシカゴでスタート。黒人による黒人のための番組として全米に黒人ダンス文化を発信。1971年にLAへ移転し全米ネットへ拡大。番組の締め括りは常に「Love, peace, and soul!」。2006年に番組終了。約35年の歴史に幕。</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3 class="sec-h">ソウルダンス ステップ大辞典</h3>
+
+    <h4 class="sub-h">🎷 James Brownが広めたステップ</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">ポップコーン（Popcorn）</div><div class="step-desc">1969年JBが3曲連続リリースで普及。軽快なステップと弾む動き</div></div>
+      <div class="step-item"><div class="step-name">セックスマシーン（Sex Machine）</div><div class="step-desc">1970年大ヒットから。バスで即興誕生。素早いフットワーク</div></div>
+      <div class="step-item"><div class="step-name">ホットパンツ（Hot Pants）</div><div class="step-desc">1971年同名曲から。強烈なリズムと腰の動き</div></div>
+      <div class="step-item"><div class="step-name">ファンキーブロードウェイ</div><div class="step-desc">1966年Dyke and the Blazersの曲から。ブロードウェイ歩きをファンキーに</div></div>
+      <div class="step-item"><div class="step-name">ブレイクダウン</div><div class="step-desc">曲の「崩れ落ちる」ブレイクセクションに合わせた即興スタイル</div></div>
+    </div>
+
+    <h4 class="sub-h">🐔 動物・キャラクター系</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">ファンキーチキン</div><div class="step-desc">Rufus Thomas 1969年「Do the Funky Chicken」。鶏が羽ばたく肘の動き</div></div>
+      <div class="step-item"><div class="step-name">モンキー（Monkey）</div><div class="step-desc">1960年代「Monkey Time」で流行。膝を曲げ両腕を前に振る</div></div>
+      <div class="step-item"><div class="step-name">ペンギン（Penguin）</div><div class="step-desc">The Temptationsが披露。体を左右に傾けながら歩くスタイル</div></div>
+      <div class="step-item"><div class="step-name">ホース（Horse）</div><div class="step-desc">馬に乗る動作を誇張。膝の屈伸と腕の鞭打ちが特徴</div></div>
+      <div class="step-item"><div class="step-name">グランドファーザー</div><div class="step-desc">老人のゆっくりした歩き方をファンキーに踊るコミカルステップ</div></div>
+      <div class="step-item"><div class="step-name">オールドマン</div><div class="step-desc">グランドファーザーと近い老人歩きスタイル。Poppin Peteも使用</div></div>
+    </div>
+
+    <h4 class="sub-h">🕺 1960〜70年代パーティーステップ</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">ジャーク（The Jerk）</div><div class="step-desc">1964年Larksの「The Jerk」から。腕を様々なポジションへジャーク</div></div>
+      <div class="step-item"><div class="step-name">バスストップ（Bus Stop）</div><div class="step-desc">1974年LAハッスルがNY伝わりBus Stopに改名したラインダンス</div></div>
+      <div class="step-item"><div class="step-name">ハッスル（Hustle）</div><div class="step-desc">Van McCoy 1975年大ヒット。マンボ＋サルサ系パートナーダンス</div></div>
+      <div class="step-item"><div class="step-name">バンプ（Bump）</div><div class="step-desc">1970年代前半。パートナーとヒップをぶつけ合うだけのシンプルダンス</div></div>
+      <div class="step-item"><div class="step-name">ウォーターゲート（Watergate）</div><div class="step-desc">1972年政治スキャンダルにちなんで命名。ロッキングのルーツの一つ</div></div>
+      <div class="step-item"><div class="step-name">スパンク（Spank）</div><div class="step-desc">1970年代後半流行。ハッスル・バンプと並ぶ時代の代表パーティーダンス</div></div>
+      <div class="step-item"><div class="step-name">フリーク（Le Freak）</div><div class="step-desc">Chic 1978年「Le Freak」大ヒット。世界のダンスフロアを席巻</div></div>
+      <div class="step-item"><div class="step-name">ゴーゴー（Go-Go）</div><div class="step-desc">1960年代ゴーゴーダンス。ミニスカートのゴーゴーガールが台上で自由に踊る</div></div>
+      <div class="step-item"><div class="step-name">ソウルCC</div><div class="step-desc">ソウルダンスのCC（サイドステップ）基本形</div></div>
+      <div class="step-item"><div class="step-name">ソウルチャチャ</div><div class="step-desc">チャチャチャをソウル/ファンクのリズムで踊る融合スタイル</div></div>
+      <div class="step-item"><div class="step-name">フットボール</div><div class="step-desc">フットボールのプレー動作をダンス化。タックルや走りのパロディ</div></div>
+      <div class="step-item"><div class="step-name">ロデオ（Rodeo）</div><div class="step-desc">カウボーイが馬に乗る動作を誇張。南部文化をユーモラスに表現</div></div>
+      <div class="step-item"><div class="step-name">スケーター（Skater）</div><div class="step-desc">スケートのグライド動作をダンスに取り込む。ハウスのフローティングにも影響</div></div>
+      <div class="step-item"><div class="step-name">ソウルステップ</div><div class="step-desc">ソウルダンスの基本となる重心移動ステップ。すべての土台</div></div>
+      <div class="step-item"><div class="step-name">ストック（Stock）</div><div class="step-desc">止まる動作を取り入れたステップ。フリーズ系動作の源流</div></div>
+      <div class="step-item"><div class="step-name">ポップコーンセブン</div><div class="step-desc">ポップコーンの7カウントバリエーション</div></div>
+      <div class="step-item"><div class="step-name">フォーコーナー</div><div class="step-desc">4つのコーナーを使うラインダンス</div></div>
+      <div class="step-item"><div class="step-name">ハマちゃちゃ</div><div class="step-desc">日本独自にアレンジされた和製ソウルダンスのステップ</div></div>
+      <div class="step-item"><div class="step-name">チョコレートシェイク</div><div class="step-desc">ミルクシェイクを混ぜる腕の動きを取り入れたコミカルステップ</div></div>
+      <div class="step-item"><div class="step-name">ポイント（Point）</div><div class="step-desc">指でリズムを指し示す動作。ロックダンスのポイントとも連動</div></div>
+      <div class="step-item"><div class="step-name">ロックフリーク</div><div class="step-desc">ロックの動きとフリークを組み合わせたハイブリッド</div></div>
+    </div>
+  </div>
+  <div class="ch-footer"><span>ダンスの歴史 大百科</span><span>✦ ✦ ✦</span><span>Chapter III — Soul Dance</span></div>
+</div>
+
+<div class="pdeco">— ✦ —</div>
+
+<!-- CH 4: BREAKING -->
+<div class="ch">
+  <div class="ch-label">Chapter IV</div>
+  <span class="ch-icon">🏙</span>
+  <h2 class="ch-title">ブレイクダンス（Breaking）</h2>
+  <p class="ch-en">Breaking — Born on the Streets of the South Bronx, 1970s</p>
+  <p class="ch-lead">1970年代、ニューヨークのサウスブロンクスで生まれたストリートダンス。HIPHOPの4大要素の一つ。現在世界でもっともダンス人口が多いジャンルである。</p>
+
+  <div class="sec">
+    <h3 class="sec-h">主要人物</h3>
+    <div class="person">
+      <div class="pname">DJ Kool Herc（クール・ハーク）</div>
+      <div class="pen">Father of Hip Hop — Inventor of Breakbeats</div>
+      <p class="ptext">1973年8月11日にブロンクスの1520 Sedgwick Aveで妹シンディの洋服代調達パーティーを開催。これがHIPHOP誕生の瞬間。ブレイクビーツの手法を発明し、グランドマスター・フラッシュ、アフリカ・バンバータらが発展させた。</p>
+    </div>
+    <div class="person">
+      <div class="pname">アフリカ・バンバータ（Afrika Bambaataa）</div>
+      <div class="pen">The Godfather of HipHop Culture</div>
+      <p class="ptext">ギャングが抗争の代わりにブレイクダンスバトルを用いることを提案。Universal Zulu Nationを設立しHIPHOP文化を平和的なムーブメントとして広めた。</p>
+    </div>
+    <div class="know"><span class="know-label">B-BOYとは</span><p>「B」はBad（悪）でもBlack（黒）でもなく「Break Beats（ブレイクビーツ）で踊る人」を意味する。</p></div>
+  </div>
+
+  <div class="sec">
+    <h3 class="sec-h">4つの構成要素</h3>
+    <div class="box">
+      <p>• <strong>エントリー（トップロック）</strong> ─ 立った状態での踊り。トップロック、アップロック、ブロンクスステップなど</p>
+      <p>• <strong>フットワーク</strong> ─ 屈んだ状態で素早く足を動かす。シックスステップ、ツーステップが基本</p>
+      <p>• <strong>パワームーブ</strong> ─ 全身を使うアクロバティックな動き。ウィンドミル、ヘッドスピンが代表的</p>
+      <p>• <strong>フリーズ</strong> ─ 音に合わせて体の動きを完全に止める。起承転結の「結」</p>
+    </div>
+    <div class="box">
+      <div class="box-t">世界三大大会</div>
+      <p>• BATTLE OF THE YEAR（BOY）</p>
+      <p>• UK B-BOY Championships</p>
+      <p>• Red Bull Bc One</p>
+      <p>三大大会全優勝「三冠」達成：Lilou（仏）/ Hong 10（韓）/ Menno（蘭）/ Mounir（仏）</p>
+    </div>
+  </div>
+  <div class="ch-footer"><span>ダンスの歴史 大百科</span><span>✦ ✦ ✦</span><span>Chapter IV — Breaking</span></div>
+</div>
+
+<!-- CH 5: POPPING -->
+<div class="ch">
+  <div class="ch-label">Chapter V</div>
+  <span class="ch-icon">⚡</span>
+  <h2 class="ch-title">ポッピング（Popping）</h2>
+  <p class="ch-en">Popping — Electric, Mechanical, Alive — Born in Fresno 1977</p>
+  <p class="ch-lead">1977年、カリフォルニア州フレズノで誕生。筋肉を弾く（ポップする）ことを特徴とし、Electric Boogaloosが世界に広めた。マイケル・ジャクソンの師匠も輩出。</p>
+
+  <div class="sec">
+    <h3 class="sec-h">主要クルー：Electric Boogaloos</h3>
+    <div class="crew">
+      <div class="crew-name">⚡ Electric Boogaloos（エレクトリック・ブガルーズ）</div>
+      <div class="crew-sub">1977年 カリフォルニア州フレズノ設立</div>
+      <p>• <strong>Boogaloo Sam</strong>（Sam Solomon）─ 創設者。フレズノでポッピングとEB Boogalooを生み出した。マイケル・ジャクソンの師匠</p>
+      <p>• <strong>Poppin' Pete</strong>（ポッピン・ピート）─ Boogaloo Samの弟。Soul Trainを見ながらロボットムーブを練習し兄からポッピングを学んだ</p>
+      <p>• <strong>Skeeter Rabbit</strong>（スキーター・ラビット）─ James "Skeeter Rabbit" Higgins</p>
+      <p>• <strong>Sugapop</strong>（シュガー・ポップ）─ Soul Trainで演奏を見て加入を決意</p>
+      <p>• <strong>Poppin' Taco</strong>（ポッピン・タコ）─ 正式メンバーではないがファミリー</p>
+      <p>• <strong>Boogaloo Shrimp</strong>（ブガルー・シュリンプ）─ 同上</p>
+      <p>• <strong>Mr. Wiggles</strong>（ミスター・ウィグルス）─ BreakDance有名クルーRock Steady Crewの一員。日本のダンスの神様Seijiの仲介により加入</p>
+    </div>
+    <div class="know"><span class="know-label">ヒット vs ポップ</span><p>Hit＝どこかに当てる意識で筋肉を急激に緊張。Pop＝静止した状態で筋肉を急激に緊張。</p></div>
+  </div>
+  <div class="ch-footer"><span>ダンスの歴史 大百科</span><span>✦ ✦ ✦</span><span>Chapter V — Popping</span></div>
+</div>
+
+<div class="pdeco">— ✦ —</div>
+
+<!-- CH 6: LOCKING -->
+<div class="ch">
+  <div class="ch-label">Chapter VI</div>
+  <span class="ch-icon">🔒</span>
+  <h2 class="ch-title">ロックダンス（Locking）</h2>
+  <p class="ch-en">Locking — Freeze, Point, and Own the Room</p>
+  <p class="ch-lead">1969年、LAで偶然生まれたストリートダンス。激しい動きから突然静止（ロック）するスタイルが特徴。The Lockersが伝説的なチームを結成した。</p>
+
+  <div class="sec">
+    <h3 class="sec-h">The Lockersメンバー</h3>
+    <div class="crew">
+      <div class="crew-name">🔒 The Lockers（ザ・ロッカーズ）</div>
+      <div class="crew-sub">1971年 LA設立。最初の名前は「THE Campbellock Dancers」</div>
+      <p>• <strong>Don "Campbellock" Campbell</strong>（ドン・キャンベル）─ 創設者。Funky Chickenを滑らかにできず偶然ロッキングを発明</p>
+      <p>• <strong>Greg "Campbellock Jr." Pope</strong>（グレッグ・キャンベルロックJr.）─ 「空間を把握してから踊れ」の名言を残した</p>
+      <p>• <strong>Fred "Mr. Penguin" Berry</strong>（フレッド・ミスター・ペンギン・ベリー）─ 1976年頃脱退</p>
+      <p>• <strong>Bill "Slim the Robot" Williams</strong>（ビル・スリムザロボット）</p>
+      <p>• <strong>Leo "Fluky Luke" Williamson</strong>（レオ・フルーキー・ルーク）</p>
+      <p>• <strong>Toni "Mickey" Basil</strong>（トニー・バジル）─ 唯一の女性メンバー。バレリーナ兼コリオグラファー。1982年「Hey Mickey」をヒット。マネージャーとしてThe Lockersを商業的成功に導いた。2018年73歳での動画がバイラルヒット</p>
+      <p>• <strong>Shabba Doo（Adolfo "Shabba Doo" Quinones）</strong>─ シカゴ出身。映画「ブレイクダンス」（1984）のオゾーン役で有名</p>
+      <p>• <strong>Jimmy 'Scoo B Doo' Foster</strong> ─ The Lockersオリジナルメンバー。「スクービードゥー」ステップを開発</p>
+      <p>• <strong>Tony "Go Go" Lewis Foster</strong>（トニー・ゴーゴー・ルイス）─ 1980年代に日本へロッキングを持ち込んだ。世界初のシンクロロッキンググループGoGo Brothersを結成</p>
+    </div>
+    <div class="person">
+      <div class="pname">Damita Jo Freeman（ダミタ・ジョー・フリーマン）</div>
+      <div class="pen">Locking's First Lady</div>
+      <p class="ptext">ロッキングのファーストレディ。Soul Trainの初代ダンサー。Don Campbellの初パートナー。男性ダンサーが前に出る時代に、あえて前に出たことでも有名。James Brownとも共演した。</p>
+    </div>
+    <div class="person">
+      <div class="pname">Charles "Robot" Washington</div>
+      <div class="pen">The Godfather of Party Dance</div>
+      <p class="ptext">1960年代後半、LAサウスセントラルでロボットムーブを考案。Soul Trainに出演し「パーティダンスのゴッドファーザー」と呼ばれた。このロボットムーブがDon Campbellを刺激しロッキング誕生につながった。</p>
+    </div>
+    <h4 class="sub-h">基本動作</h4>
+    <div class="grid">
+      <div class="gi">TWIRL（手首巻き上げ）</div><div class="gi">LOCK（静止）</div>
+      <div class="gi">POINT（指さし）</div><div class="gi">PACING（横パンチ）</div>
+      <div class="gi">FIVE（手叩き）</div><div class="gi">SCOOBIE DO</div>
+      <div class="gi">KICK WALK</div><div class="gi">VOLKS VAGEN</div>
+    </div>
+  </div>
+  <div class="ch-footer"><span>ダンスの歴史 大百科</span><span>✦ ✦ ✦</span><span>Chapter VI — Locking</span></div>
+</div>
+
+<!-- CH 7: WAACKING -->
+<div class="ch">
+  <div class="ch-label">Chapter VII</div>
+  <span class="ch-icon">💜</span>
+  <h2 class="ch-title">ワッキング（Waacking）</h2>
+  <p class="ch-en">Waacking — Born in the Underground Clubs of 1970s LA</p>
+  <p class="ch-lead">70年代初期、LAのゲイクラブで生まれたダンス。当時の女優や女性スターのポーズを真似ることから始まり、腕を巻きつけるような独特の動きへと発展した。</p>
+
+  <div class="sec">
+    <p>初期はポージングダンスで、ゲイダンサーたちがGreta Garbo、Rita Hayworth、Marilyn Monroeなどの女優のイメージを真似て表現していました。ストレートなダンサーは「PUNKING」と差別的に呼んでいたが、自分たちは「WAACKING」と名乗った。動きは似ているがWAACKINGはより感情的、PUNKINGは滑らかで精度重視。</p>
+  </div>
+  <div class="ch-footer"><span>ダンスの歴史 大百科</span><span>✦ ✦ ✦</span><span>Chapter VII — Waacking</span></div>
+</div>
+
+<div class="pdeco">— ✦ —</div>
+
+<!-- CH 8: HIPHOP -->
+<div class="ch">
+  <div class="ch-label">Chapter VIII</div>
+  <span class="ch-icon">🎤</span>
+  <h2 class="ch-title">ヒップホップダンス（New School）</h2>
+  <p class="ch-en">Hip Hop Dance — Born August 11, 1973 in the Bronx</p>
+  <p class="ch-lead">1973年8月11日、DJ Kool Hercがブロンクスで開いた一つのパーティーからすべてが始まった。そのニュースクールHIPHOPダンスは1980〜90年代に世界を席巻した。</p>
+
+  <div class="sec">
+    <h3 class="sec-h">伝説のクルー・チーム</h3>
+
+    <div class="crew">
+      <div class="crew-name">🎤 MOPTOP</div>
+      <div class="crew-sub">1991年設立 — Motivated On Precision Toward Outstanding Performance</div>
+      <p><strong>オリジナル4人：</strong> Link（リンク）/ Caleaf（カリーフ）/ Ejoe（イージョー）/ Buddha Stretch（ブッダ・ストレッチ）</p>
+      <p><strong>拡張メンバー：</strong> Peter Paul（ピーターポール）/ Ramier / Tone / Casper（キャスパー）/ Ade / Loose Joint（ルース・ジョイント）</p>
+    </div>
+
+    <div class="crew">
+      <div class="crew-name">⚡ ELITE FORCE（エリートフォース）</div>
+      <div class="crew-sub">1992年設立 — Michael Jacksonの「Remember the Time」MV撮影のために結成</div>
+      <p><strong>現役6人：</strong> Buddha Stretch / Henry Link / Brooklyn Terry / Bobby Mileage / Twelve Ejoe / Loose Joint</p>
+      <p>その後Mariah Carey、Will Smith、TLCなどのMVやパフォーマンスにも参加。別名義「TEN THIEVES」でも楽曲をリリース。</p>
+    </div>
+
+    <div class="crew">
+      <div class="crew-name">🔥 MYSTIDIOUS MISFITS（ミスフィッツ）</div>
+      <div class="crew-sub">MOPTOPから派生した伝説グループ</div>
+      <p><strong>メンバー：</strong> Marquest（マークエスト）/ Rubberband（ラバーバンド）/ Peekaboo（ピーカーブー）/ Kito（キート）/ Prancer（プランサー）</p>
+      <p>1992年のドキュメンタリー番組「Wreckin' Shop Live from Brooklyn（通称ALIVE TV）」で全世界に多大な影響を与えた。</p>
+    </div>
+
+    <div class="know"><span class="know-label">ELITE FORCE OLD SCHOOL DICTIONARY</span><p>Buddha Stretch・Henry Link・Ejoeらが制作した「OLD SCHOOL DICTIONARY」ビデオは世界中のHIPHOPダンサーの教科書。ランニングマン・キャベッジパッチ・スティーブマーティン・フィラ・ランボーなど多数を網羅した永遠の名作。</p></div>
+  </div>
+
+  <div class="sec">
+    <h3 class="sec-h">ニュースクールHIPHOPステップ大辞典</h3>
+
+    <h4 class="sub-h">🏃 走る・移動系</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">ランニングマン</div><div class="step-desc">MC Hammerが発展（1980年代中頃）。その場で走る。Janet Jacksonの「Rhythm Nation」でも使用</div></div>
+      <div class="step-item"><div class="step-name">バックランニングマン</div><div class="step-desc">ランニングマンを後ろ方向に行うバリエーション</div></div>
+      <div class="step-item"><div class="step-name">ロジャーラビット</div><div class="step-desc">1988年映画から命名。後ろにスキップしながら腕をパタパタ。Bobby Brownが普及</div></div>
+      <div class="step-item"><div class="step-name">ブルックリン（Brooklyn）</div><div class="step-desc">Buddha Stretchら確立。ブルックリンのダンスシーンから生まれた基本ステップ</div></div>
+      <div class="step-item"><div class="step-name">ブルックリンバウンス</div><div class="step-desc">ブルックリンに弾む要素を加えたバリエーション</div></div>
+      <div class="step-item"><div class="step-name">トゥループ（Troop）</div><div class="step-desc">衣料ブランドTROOPから命名</div></div>
+    </div>
+
+    <h4 class="sub-h">🎬 映画・キャラクター名ステップ</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">ロボコップ（Robocop）</div><div class="step-desc">1987年映画から命名。肘ごとこぶしを左右に打ちつけるロボット的な動き。Suga Popが得意</div></div>
+      <div class="step-item"><div class="step-name">バートシンプソン</div><div class="step-desc">アニメから命名。左右スライドと逆方向の腕。アトランタで特に人気。TLCのCreepでも使用</div></div>
+      <div class="step-item"><div class="step-name">ジャネットジャクソン</div><div class="step-desc">「Rhythm Nation」振付スタイルをHIPHOP化</div></div>
+      <div class="step-item"><div class="step-name">ジェームスブラウン</div><div class="step-desc">JBの特徴的な動きをHIPHOPスタイルで再解釈</div></div>
+      <div class="step-item"><div class="step-name">マイクタイソン</div><div class="step-desc">ボクサーにちなみパンチングの動きをダンス化</div></div>
+      <div class="step-item"><div class="step-name">ランボー（Rambo）</div><div class="step-desc">映画から命名。フィラとセットで踊られることが多い</div></div>
+    </div>
+
+    <h4 class="sub-h">👟 スニーカーブランド名ステップ</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">フィラ（Fila）</div><div class="step-desc">スニーカーブランドFila から命名。Buddha Stretchが多用。ランボーとセット</div></div>
+      <div class="step-item"><div class="step-name">リーボック（Reebok）</div><div class="step-desc">スニーカーブランドから命名。キャベッジパッチと同時期のブーム</div></div>
+      <div class="step-item"><div class="step-name">グッチ（Gucci）</div><div class="step-desc">ブランドから命名されたステップ</div></div>
+    </div>
+
+    <h4 class="sub-h">🥬 おもちゃ・キャラクター系</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">キャベッジパッチ</div><div class="step-desc">1980年代の人形「キャベッジパッチキッズ」から。Gucci Crew II 1986年の同名曲で普及</div></div>
+      <div class="step-item"><div class="step-name">パーティマシン</div><div class="step-desc">左右ステップ＋大きな上半身の動き。スポンジボブ・クリスクロスとも関連。Buddha Stretchが得意</div></div>
+      <div class="step-item"><div class="step-name">スポンジボム</div><div class="step-desc">パーティマシンのバリエーション。スポンジのように弾む動き</div></div>
+    </div>
+
+    <h4 class="sub-h">🎵 スタイル系</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">スティーブマーティン</div><div class="step-desc">Stezoが1988年に創作。EPMD「You Gots to Chill」MVでデビュー。左右交互キックとバウンス。NYで人気</div></div>
+      <div class="step-item"><div class="step-name">ニュージャックスイング</div><div class="step-desc">Bobby Brown・BBD・GuyらのNJS音楽に合わせたダンス。日本には1989年頃上陸し一大ブーム</div></div>
+      <div class="step-item"><div class="step-name">ホーシング（Housing）</div><div class="step-desc">ハウスダンスのフットワーク要素をHIPHOPスタイルに取り込む</div></div>
+      <div class="step-item"><div class="step-name">モネストリー</div><div class="step-desc">ELITE FORCEのOld School Dictionaryに収録。Yuljakが得意</div></div>
+      <div class="step-item"><div class="step-name">ハイステップ</div><div class="step-desc">膝を高く上げるマーチングスタイル</div></div>
+      <div class="step-item"><div class="step-name">ロックザボート</div><div class="step-desc">ボートが揺れるように左右に傾けながら踊る</div></div>
+      <div class="step-item"><div class="step-name">チキンヘッド</div><div class="step-desc">鶏のように首と頭を前後にコクコク動かす</div></div>
+      <div class="step-item"><div class="step-name">チキンヌードルスープ</div><div class="step-desc">2006年DJ Webstar feat. Bigg Nicckの曲から。「Let it rain, clear it out」の掛け声</div></div>
+      <div class="step-item"><div class="step-name">ジャーク（Jerk）</div><div class="step-desc">カリフォルニア発「Jerkin'」の基本動作。後ろにスキップするように見えるリジェクトステップ</div></div>
+      <div class="step-item"><div class="step-name">スライド（Slide）</div><div class="step-desc">床を滑るムーンウォーク系のステップ</div></div>
+      <div class="step-item"><div class="step-name">ストンプ（Stomp）</div><div class="step-desc">足を力強く踏み鳴らす。リズムを強調する迫力ある動き</div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3 class="sec-h">日本のHIPHOPダンス</h3>
+    <div class="box">
+      <div class="box-t">日本を動かした伝説チーム</div>
+      <p>• <strong>ZOO</strong>（Taco / Naoya / Mark / Satsuki / ルーク / Hiro / Cap / Hisami / Sae）─ TV朝日「DA DA LMD」発、EXILEのHIROが所属していた</p>
+      <p>• <strong>BABY NAIL</strong>（RYUZY / MATSU / MAKI-D / USA）─ 90年代後半のレジェンドチーム</p>
+      <p>• <strong>MO'PARADISE</strong>（SHINYA / STEZO / TAKUYA / U-GE / CHU / HIGUCHI）─ 同時代のレジェンド</p>
+    </div>
+  </div>
+  <div class="ch-footer"><span>ダンスの歴史 大百科</span><span>✦ ✦ ✦</span><span>Chapter VIII — Hip Hop</span></div>
+</div>
+
+<div class="pdeco">— ✦ —</div>
+
+<!-- CH 9: HOUSE -->
+<div class="ch">
+  <div class="ch-label">Chapter IX</div>
+  <span class="ch-icon">🎛</span>
+  <h2 class="ch-title">ハウスダンス（House Dance）</h2>
+  <p class="ch-en">House Dance — Where the Music Moves the Body</p>
+  <p class="ch-lead">1970年代末、ニューヨーク「パラダイス・ガラージ」とシカゴ「ウェアハウス」から生まれた。多様な文化が混ざり合うクラブの熱気の中から生まれた自由で霊的なダンス。</p>
+
+  <div class="sec">
+    <h3 class="sec-h">伝説のクルー・チーム</h3>
+
+    <div class="crew">
+      <div class="crew-name">🎛 DANCE FUSION（ダンスフュージョン）</div>
+      <div class="crew-sub">1997年設立 — 世界中へハウスダンスの普及を担った伝説チーム</div>
+      <p><strong>創設3人：</strong> Caleaf（カリーフ）/ Justice / Tony Sekou（トニー・セクー）</p>
+      <p><strong>オリジナル7人：</strong> Caleaf / Shan.S / Tony Sekou / MIKEU4RIA / Tony Magregor / Shar / Marjory（7人目：唯一の女性）</p>
+      <p><strong>日本人参加：</strong> HIRO / NORICO（日本人ハウスダンサーも加入）</p>
+    </div>
+
+    <div class="crew">
+      <div class="crew-name">🇯🇵 ROOTS（ルーツ）</div>
+      <div class="crew-sub">1993年頃設立 — 日本初の本格ハウスダンスチーム</div>
+      <p><strong>メンバー：</strong> KOJI（日本第一人者・元ZOO）/ Hyrosshi / Nada / Kango / Shimura / Yan / KAIE / MA</p>
+    </div>
+
+    <div class="crew">
+      <div class="crew-name">💫 ALMA（アルマ）</div>
+      <div class="crew-sub">2001年設立</div>
+      <p><strong>メンバー：</strong> KOJI / HyROSSI / HIRO / PInOSHIGe</p>
+      <p>HIROが創ったとされる「フローティング（Floating）」スタイルを持つ。</p>
+    </div>
+
+    <div class="box">
+      <div class="box-t">ハウスダンスの第一世代ダンサー</div>
+      <p>Ejoe Wilson / Brian "Footwork" Green / Tony McGregor / Marjory Smarth / Caleaf Sellers / "Brooklyn" Terry Wright / Shannon "Shan S" Selby / Voodoo Ray / Peter Paul / Shannon Mabra（Shar）/ Tony Sekou Williams / Kim D. Holmes</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3 class="sec-h">ハウスダンス3大要素</h3>
+    <div class="box">
+      <p>• <strong>フットワーク（Footwork）</strong> ─ 速くて複雑な足の動き。タップダンスからの影響大。音楽の細かなリズムに合わせてステップを刻む</p>
+      <p>• <strong>ジャッキング（Jacking）</strong> ─ 上半身を前後に激しく揺らすシカゴ発祥の動き。「Jack Your Body」「Jack to the Sound」など多くの楽曲タイトルにもなった</p>
+      <p>• <strong>ロフティング（Lofting）</strong> ─ NYのロフトパーティー（David Mancusoの「The Loft」）から生まれた流れるようなスムーズなムーブ</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3 class="sec-h">ハウスダンス フットワーク大辞典</h3>
+
+    <h4 class="sub-h">👣 基本フットワーク系</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">ルースレッグ（Loose Leg）</div><div class="step-desc">NYのハウスダンサーが体系化した最重要基本動作。足を緩くルーズに使い軽く振り出す</div></div>
+      <div class="step-item"><div class="step-name">シャッフル（Shuffle）</div><div class="step-desc">ハウスの最基本ステップ。床を滑るように足をサイドにシャッフルする</div></div>
+      <div class="step-item"><div class="step-name">クロスステップ</div><div class="step-desc">足を前・後ろにクロスさせながら移動。様々なバリエーションの基本技</div></div>
+      <div class="step-item"><div class="step-name">クロスウォーク</div><div class="step-desc">クロスステップを歩くように連続させた動き</div></div>
+      <div class="step-item"><div class="step-name">サイドステップ</div><div class="step-desc">横方向への基本的なステップ。フットワークの基礎中の基礎</div></div>
+    </div>
+
+    <h4 class="sub-h">🩰 バレエ・ダンス技法から</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">パドブレ（Pas de Bourrée）</div><div class="step-desc">バレエ由来の3ステップ動作。ドラッグ・ターン・ヒールドロップなど多彩なバリエーション。最重要ステップ</div></div>
+      <div class="step-item"><div class="step-name">ロンデジャン（Rond de Jambe）/ ウィング</div><div class="step-desc">バレエのロン・ド・ジャンブを応用。足が弧を描く優雅な動き</div></div>
+      <div class="step-item"><div class="step-name">サルサ（Salsa）</div><div class="step-desc">ラテンのサルサをハウスのリズムで。プエルトリコ系が多く踊ったため自然に融合</div></div>
+      <div class="step-item"><div class="step-name">サルサホップ（Salsa Hop）</div><div class="step-desc">サルサのリズムにホップを加えたバリエーション</div></div>
+      <div class="step-item"><div class="step-name">ツイスト（Twist）</div><div class="step-desc">足首や腰をひねりながらのステップ</div></div>
+    </div>
+
+    <h4 class="sub-h">🛼 スケーティング・移動系</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">スケート（Skate）</div><div class="step-desc">アイスのように床を滑るステップ。ALMAのHIROのフローティングにも通じる</div></div>
+      <div class="step-item"><div class="step-name">スウォル（Swirl）</div><div class="step-desc">後ろに回転しながら移動するスケーティング系。螺旋を描く</div></div>
+      <div class="step-item"><div class="step-name">ロータス（Lotus）</div><div class="step-desc">蓮の花のように展開するスケーティングのバリエーション</div></div>
+      <div class="step-item"><div class="step-name">ギャロップ（Gallop）</div><div class="step-desc">馬のギャロップのような移動ステップ。スケートに内向きの動きを加えたもの</div></div>
+    </div>
+
+    <h4 class="sub-h">🎯 かかと・つま先系</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">トレイン（Train）</div><div class="step-desc">ヒール/トウ＋スケーティングを組み合わせたステップ。ジャマイカのスカンキングが影響</div></div>
+      <div class="step-item"><div class="step-name">クロスヒールアンドトゥ</div><div class="step-desc">かかととつま先を交互にクロスさせる。タップダンスの影響が色濃い</div></div>
+      <div class="step-item"><div class="step-name">シャッフルダッチ</div><div class="step-desc">シャッフルのオランダ式バリエーション</div></div>
+    </div>
+
+    <h4 class="sub-h">✂️ 形・軌跡系</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">シザーズ（Scissors）</div><div class="step-desc">ハサミのように足を交差させる動き</div></div>
+      <div class="step-item"><div class="step-name">トライアングル</div><div class="step-desc">三角形の軌跡を描くように足を動かす</div></div>
+      <div class="step-item"><div class="step-name">ダイアモンド</div><div class="step-desc">ひし形を描くように4方向へ足を動かす</div></div>
+      <div class="step-item"><div class="step-name">スクエア</div><div class="step-desc">正方形を描くように4カウントで足を動かす</div></div>
+    </div>
+
+    <h4 class="sub-h">🐴 動物・アクロバット系</h4>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-name">ホース（Horse）</div><div class="step-desc">馬が足踏みするような軽快なフットワーク</div></div>
+      <div class="step-item"><div class="step-name">スネーク（Snake）</div><div class="step-desc">蛇のように体をくねらせながらフットワーク</div></div>
+      <div class="step-item"><div class="step-name">ドルフィン/ダイブ</div><div class="step-desc">床に倒れてイルカのように足を上下させるフロアワーク</div></div>
+      <div class="step-item"><div class="step-name">ドロップ（Drop）</div><div class="step-desc">床にストンと落ちる動作</div></div>
+      <div class="step-item"><div class="step-name">ジャックインザボックス</div><div class="step-desc">しゃがんだ状態からバネのように跳び上がる</div></div>
+      <div class="step-item"><div class="step-name">ピーターポール</div><div class="step-desc">DANCE FUSIONのPeter Paulにちなんで命名。Crystal Waters「Gypsy Woman」MVで有名</div></div>
+      <div class="step-item"><div class="step-name">クリスクロス</div><div class="step-desc">足をクロスさせる動き</div></div>
+    </div>
+  </div>
+  <div class="ch-footer"><span>ダンスの歴史 大百科</span><span>✦ ✦ ✦</span><span>Chapter IX — House Dance</span></div>
+</div>
+
+<!-- CH 10: JAZZ & CONTEMPORARY -->
+<div class="ch">
+  <div class="ch-label">Chapter X</div>
+  <span class="ch-icon">🌀</span>
+  <h2 class="ch-title">ジャズダンス＆コンテンポラリー</h2>
+  <p class="ch-en">Jazz Dance & Contemporary Dance — Freedom Through Movement</p>
+  <p class="ch-lead">ジャズダンスはニューオーリンズで生まれた。コンテンポラリーダンスは1980年代フランス発祥の前衛芸術運動。定義できないことそのものが本質ともいえる。</p>
+
+  <div class="sec">
+    <h3 class="sec-h">ジャズダンス主要人物</h3>
+    <div class="person">
+      <div class="pname">キャサリン・ダンハム（Katherine Dunham）1909–2006</div>
+      <div class="pen">Pioneer of Jazz Dance — Black Ballet Pioneer</div>
+      <p class="ptext">Jazz Danceのパイオニア。黒人で初めてバレエカンパニーを創設し、ブロードウェイの舞台に立った。白人社会にJazz Danceを紹介した歴史的人物。</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3 class="sec-h">日本のコンテンポラリーダンサー</h3>
+    <div class="box">
+      <p>• <strong>安藤洋子</strong> ─ 繊細かつ強靭な身体表現で国際的に活躍</p>
+      <p>• <strong>勅使川原三郎（Saburo Teshigawara）</strong> ─ 光・音・空間を統合した独自の舞台美学</p>
+      <p>• <strong>森山開次</strong> ─ 妖艶でエネルギッシュな身体表現。NHK大河ドラマ振付も担当</p>
+      <p>• <strong>浅井信好（PIERREMIROIR）</strong> ─ 映像とダンスの融合。独自のフィジカルシアター</p>
+      <p>• <strong>矢野英征</strong>（1943–1988）─ フランスで「グループMA」を結成しコンテンポラリーダンスの発展に貢献</p>
+    </div>
+    <div class="know"><span class="know-label">コンテンポラリーダンスの母</span><p>フィンランド系アメリカ人ダンサーCarolyn Carlson（カロリン・カールソン）がパリ・オペラ座に招聘され「コンテンポラリーダンスの母」と呼ばれた。</p></div>
+  </div>
+  <div class="ch-footer"><span>ダンスの歴史 大百科</span><span>✦ ✦ ✦</span><span>Chapter X — Jazz & Contemporary</span></div>
+</div>
+
+<!-- EPILOGUE -->
+<div class="ch" style="text-align:center;padding:72px 40px">
+  <div style="font-size:48px;margin-bottom:24px">🌍</div>
+  <h2 class="ch-title" style="font-size:28px;text-align:center">すべてのダンスに魂がある</h2>
+  <p class="ch-en" style="text-align:center">Every Dance Carries a Soul — Past, Present, Future</p>
+  <div style="width:70px;height:2px;background:var(--gold);margin:28px auto"></div>
+  <p style="max-width:500px;margin:0 auto;color:var(--ink2);font-size:14px;line-height:2.2">
+    バレエの宮廷から路地裏のブレイクダンスへ。ソウルの叫びからシカゴのハウスへ。フレズノのポッピングからパリのコンテンポラリーへ。ダンスは虐げられた者の声であり、王侯貴族の優雅であり、路上の若者の怒りであり、神への祈りだった。すべてのダンスは時代を映す鏡として、人類と共に今も進化し続けている。
+  </p>
+  <div style="margin-top:48px;font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:5px;color:var(--gold)">✦ &nbsp; FIN &nbsp; ✦</div>
+</div>
+
+</div><!-- /book -->
+</body>
+</html>
