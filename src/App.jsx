@@ -5638,7 +5638,7 @@ const ZUKAN_CREWS=[
 ];
 
 /* ── 📚 図鑑タブ ── */
-function ZukanTab({genre}){
+function ZukanTab({genre,char,setChar,pushNotif}){
   const[cat,setCat]=useState("steps");
   const[stepGenre,setStepGenre]=useState("soul");
   const[personGenre,setPersonGenre]=useState("ballet");
@@ -5923,7 +5923,7 @@ function Game({char,setChar,onTitle,user,onLogout,onAuthChange,manualSave,saveSt
       {tab==="battle"&&<BattleTab char={char} setChar={setChar} genre={genre} pushNotif={notif2} addLog={addLog}/>}
       {tab==="map"&&<MapTab char={char} setChar={setChar} genre={genre} pushNotif={notif2} addLog={addLog}/>}
       {tab==="quiz"&&<QuizTab char={char} setChar={setChar} genre={genre} pushNotif={notif2} addLog={addLog}/>}
-      {tab==="zukan"&&<ZukanTab genre={genre}/>}
+      {tab==="zukan"&&<ZukanTab genre={genre} char={char} setChar={setChar} pushNotif={notif2}/>}
       {tab==="shop"&&<ShopTab char={char} setChar={setChar} genre={genre} pushNotif={notif2} onTokushou={onTokushou}/>}
       {tab==="status"&&<StatusTab char={char} lv={lv} rnk={rnk} genre={genre} setChar={setChar} user={user} onAuthChange={u=>{onAuthChange&&onAuthChange(u);}} lightMode={lightMode} toggleLight={toggleLight}/>}
     </div>
