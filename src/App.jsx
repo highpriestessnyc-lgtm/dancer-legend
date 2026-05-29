@@ -221,6 +221,7 @@ const SHOP={
     {id:"michael_glove", n:"マイケルの手袋", lv:50, p:500000, pg:500, e:"🧤", b:{charisma:10,style:8}, desc:"フリースタイルの神が残した伝説の白い手袋。宇宙の扉を開く", require:null},
     {id:"michael_loafer",n:"マイケルのローファー",lv:50,p:500000,pg:500,e:"👞",b:{rhythm:10,technique:8},desc:"ムーンウォークを生んだ伝説の靴。月面を踏んだ者だけが履ける",require:null},
     {id:"michael_hat",   n:"マイケルのハット",   lv:50, p:500000, pg:500, e:"🎩", b:{charisma:8,style:10},desc:"ステージを支配した黒いフェドーラ。これを被る者は伝説となる",require:null},
+    {id:"moon_rover",    n:"月の探索車",         lv:55, p:800000, pg:800, e:"🚗", b:{stamina:5,technique:5},desc:"月面・宇宙探索専用の車両。これなし��は宇宙MAP探索不可能",require:"moon_stone"},
   ],
 };
 
@@ -382,15 +383,24 @@ const QOPPS=[
 
 /* ── SHOWS ── */
 const SHOWS=[
-  {id:"s1",name:"地区センター発表会",venue:"地元",e:"🏫",lv:1, ec:15,rw:{exp:80,coins:300,fame:15},desc:"まずは地元で名を上げろ！"},
-  {id:"s2",name:"渋谷ストリートイベント",venue:"東京",e:"🗼",lv:5, ec:15,rw:{exp:180,coins:800,fame:60},desc:"東京のストリートで輝け"},
-  {id:"s3",name:"全国ダンスコンペティション",venue:"全国",e:"🏆",lv:12,ec:20,rw:{exp:450,coins:2500,fame:250},desc:"全国の猛者と競え！優勝賞金あり"},
-  {id:"s4",name:"アジアダンスフェスティバル",venue:"アジア",e:"🌏",lv:25,ec:20,rw:{exp:900,coins:8000,fame:700},desc:"アジアの頂点を目指せ"},
-  {id:"s5",name:"ワールドダンスショー",venue:"全世界",e:"🌍",lv:42,ec:25,rw:{exp:2200,coins:30000,fame:2500},desc:"全世界が注目する最高峰の舞台"},
-  {id:"s6",name:"宇宙ステーション公演",venue:"宇宙",e:"🚀",lv:62,ec:30,rw:{exp:8000,coins:100000,fame:10000},desc:"人類初の宇宙ダンスショー！"},
+  {id:"s1",name:"地区センター発表会",   venue:"地元",  e:"🏫",lv:1, ec:8, rw:{exp:25, coins:200,  fame:10},  desc:"まずは地元で名を上げろ！",dailyMax:5},
+  {id:"s2",name:"渋谷ストリートイベント",venue:"東京",  e:"🗼",lv:5, ec:10,rw:{exp:60, coins:500,  fame:40},  desc:"東京のストリートで輝け",dailyMax:4},
+  {id:"s3",name:"全国ダンスコンペティション",venue:"全国",e:"🏆",lv:12,ec:15,rw:{exp:130,coins:1500, fame:150}, desc:"全国の猛者と競え！優勝賞金あり",dailyMax:3},
+  {id:"s4",name:"アジアダンスフェスティバル",venue:"アジア",e:"🌏",lv:25,ec:18,rw:{exp:250,coins:4000, fame:400}, desc:"アジアの頂点を目指せ",dailyMax:3},
+  {id:"s5",name:"ワールドダンスショー",   venue:"全世界",e:"🌍",lv:42,ec:22,rw:{exp:500,coins:12000,fame:1200},desc:"全世界が注目する最高峰の舞台",dailyMax:2},
+  {id:"s6",name:"宇宙ステーション公演",   venue:"宇宙",  e:"🚀",lv:62,ec:28,rw:{exp:900,coins:30000,fame:3000},desc:"人類初の宇宙ダンスショー！",dailyMax:1},
 ];
 
-/* ── JAPAN MAP ── */
+/* ── 隠しアイテム（世界7カ所） ── */
+const HIDDEN_ITEMS=[
+  {id:"h1",name:"🗻 古代の勾玉",    mapId:"japan",    x:10,y:35,reward:{gems:15,title:"秘宝探索者"},    desc:"日本の山深くに眠る古代の宝石"},
+  {id:"h2",name:"🏺 シルクロードの壺",mapId:"asia",   x:16,y:32,reward:{coins:80000},                desc:"古代交易路に埋もれた唐の壺"},
+  {id:"h3",name:"🎸 幻のブルースギター",mapId:"usa",  x:21,y:38,reward:{gems:20,title:"ブルースの魂"}, desc:"ミシシッピの地に眠る伝説のギター"},
+  {id:"h4",name:"💎 メディチの秘宝", mapId:"europe",  x:8, y:45,reward:{coins:150000},               desc:"ルネサンスの隠された財宝"},
+  {id:"h5",name:"🐘 ガネーシャの像", mapId:"india",   x:10,y:42,reward:{gems:25,title:"インドの守護神"},desc:"ヒマラヤ奥地に祀られた神の像"},
+  {id:"h6",name:"🌺 アマゾンの秘花", mapId:"samerica",x:10,y:22,reward:{exp:8000,title:"ジャングルの王"},desc:"アマゾン奥地にのみ咲く幻の花"},
+  {id:"h7",name:"💀 サハラの財宝",   mapId:"africa",  x:18,y:14,reward:{coins:300000,gems:30},        desc:"サハラ砂漠に埋もれた失われた文明"},
+];
 const J={
   kagoshima:{id:"kagoshima",name:"鹿児島",x:152,y:408,g:"house",lv:1,cn:["kumamoto","miyazaki"],
     ch:{name:"Minoda",e:"🌋",pw:220},
@@ -782,6 +792,19 @@ const xpL=lv=>{
   return xpL(99)+Math.floor((lv-99)*8000*Math.pow(lv-98,1.2)); // 99以降はめちゃ重い
 };
 function getLv(xp){let lv=1;while(xpL(lv+1)<=xp)lv++;return lv;}
+function getMaxEnergy(lv){if(lv>=150)return 90;if(lv>=99)return 70;return 50;}
+function getRocketParts(char){
+  const bd=char.bossDefeats||{};
+  const si=char.specialItems||[];
+  const cleared=char.clearedCities||{};
+  return{
+    engine: !!(bd["SAM"]||bd["SAKUMA"]||cleared["tokyo"]),    // 東京BOSS撃破
+    fuel:   !!(bd["NAOYA"]||bd["K-SK"]||cleared["sapporo"]),  // 札幌BOSS撃破
+    shield: si.includes("michael_glove")&&si.includes("michael_hat")&&si.includes("michael_loafer"),
+    nav:    getLv(char.exp||0)>=50,                            // Lv.50以上で入手
+  };
+}
+function hasSpaceship(char){const p=getRocketParts(char);return p.engine&&p.fuel&&p.shield&&p.nav;}
 function getLvCapped(xp,artifacts){return Math.min(getLv(xp),getMaxLv(artifacts||[]));}
 
 function calcPow(s){return Object.values(s).reduce((a,b)=>a+b,0)*3;}
@@ -1469,6 +1492,386 @@ function AButton({onPress,label="A",col="#ff4da6",disabled=false,sub=""}){
   </div>);
 }
 
+/* ── 🛸 UFOパーツ（惑星間移動用） ── */
+const UFO_PARTS=[
+  // 月 → 火星UFO
+  {id:"u_m1",name:"🔩 月面鋼鉄",forPlanet:"mars",foundOn:"moon_base",
+   quiz:{q:"Breakingが生まれたニューヨークの区は？",as:["ブロンクス","bronx"],
+         hint:"💡 月の北東の岩礁付近に光るものが..."}},
+  {id:"u_m2",name:"⚡ 月光太陽電池",forPlanet:"mars",foundOn:"moon_base",
+   quiz:{q:"バレエを宮廷で広めた一族は？（ヒント：イタリア）",as:["メディチ","メディチ家","medici"],
+         hint:"💡 月の西側の影の中...クレーターを探せ"}},
+  // 火星 → 木星UFO
+  {id:"u_r1",name:"🔴 火星鉄鉱石",forPlanet:"jupiter",foundOn:"mars",
+   quiz:{q:"POPPINGが生まれたカリフォルニアの都市は？",as:["フレズノ","fresno"],
+         hint:"💡 火星の赤い大地、北部の岩山付近を探せ"}},
+  {id:"u_r2",name:"🌋 火星マグマコア",forPlanet:"jupiter",foundOn:"mars",
+   quiz:{q:"HIPHOPの誕生に貢献したDJの名前は？（DJ ●●●●●）",as:["クール・ハーク","kool herc","クールハーク","kool-herc"],
+         hint:"💡 火星南部の火山帯...溶岩の流れに沿って"}},
+  // 木星 → 土星UFO
+  {id:"u_j1",name:"⚡ 木星雷電コア",forPlanet:"saturn",foundOn:"jupiter",
+   quiz:{q:"WAACKINGが生まれた70年代の都市は？（アメリカ）",as:["LA","ロサンゼルス","los angeles"],
+         hint:"💡 木星の嵐の渦の中心付近...危険だが宝がある"}},
+  {id:"u_j2",name:"🌀 大赤斑クリスタル",forPlanet:"saturn",foundOn:"jupiter",
+   quiz:{q:"HOUSE MUSICが発祥した都市は？",as:["シカゴ","chicago"],
+         hint:"💡 大赤斑の渦の外縁部...光る欠片を探せ"}},
+  // 土星 → 冥王星UFO
+  {id:"u_s1",name:"🪐 土星リング断片",forPlanet:"pluto",foundOn:"saturn",
+   quiz:{q:"ジャズダンスが生まれた港町は？（アメリカ南部）",as:["ニューオーリンズ","new orleans"],
+         hint:"💡 土星の輪の外縁部...氷の中に光るものが"}},
+  {id:"u_s2",name:"💎 タイタンの氷晶",forPlanet:"pluto",foundOn:"saturn",
+   quiz:{q:"Breaking発祥のパーティで使われた手法は？（DJ ●●●●●●）",as:["ブレイク","breakbeat","ブレイクビーツ"],
+         hint:"💡 タイタン衛星の氷の海の底..."}},
+];
+
+function isPlanetUnlocked(planetId,char){
+  const cp=char.clearedPlanets||[];
+  const fp=char.ufoFoundParts||[];
+  const hasUFO=(ids)=>ids.every(id=>fp.includes(id));
+  switch(planetId){
+    case"moon_base":return true;
+    case"mars":     return cp.includes("moon_base")&&hasUFO(["u_m1","u_m2"]);
+    case"jupiter":  return cp.includes("mars")&&hasUFO(["u_r1","u_r2"]);
+    case"saturn":   return cp.includes("jupiter")&&hasUFO(["u_j1","u_j2"]);
+    case"pluto":    return cp.includes("saturn")&&hasUFO(["u_s1","u_s2"]);
+    case"galaxy":   return cp.includes("pluto");
+    default:        return false;
+  }
+}
+
+function getUFOPartsForPlanet(fromPlanet){
+  return UFO_PARTS.filter(p=>p.foundOn===fromPlanet);
+}
+
+/* ── 🚀 SPACE MAP ── */
+const SPACE_CITIES_DATA={
+  moon_base:  {id:"moon_base",  name:"月基地",     e:"🌙",g:"popping",   lv:35,
+    ch:{name:"LUNAR DANCER",e:"🌙",pw:14000},
+    bosses:[{name:"LUNAR DANCER",e:"🌙",pw:14000,style:"popping",intro:"月面に響くPOPPIN！無重力でもリズムは止まらない！"}],
+    rw:{exp:4000,coins:30000,title:"Lunar Popper"},
+    desc:"月面基地。地球を見下ろしながら踊る究極の舞台",
+    food:[{n:"宇宙食カレー",p:2000,e:20,h:40,desc:"JAXAの宇宙食！無重力でも食べられる特製カレー"},{n:"月のクレーター餅",p:1000,e:10,h:25,desc:"月面で発見された謎の餅状物質...うまい"}]},
+  mars:       {id:"mars",       name:"火星",       e:"🔴",g:"breaking",  lv:40,
+    ch:{name:"MARS WARRIOR",e:"🔴",pw:18000},
+    bosses:[
+      {name:"MARS WARRIOR",  e:"🔴",pw:18000,style:"breaking",    intro:"火星の重力でBREAKING！赤い砂塵が舞う！"},
+      {name:"RED PLANET BBOY",e:"💥",pw:19500,style:"hiphop",     intro:"火星のHIPHOPは地球より激しい！"},
+    ],
+    rw:{exp:5500,coins:45000,title:"Mars Warrior"},
+    desc:"赤い惑星。低重力がBREAKINGに革命をもたらす",
+    food:[{n:"火星岩塩ステーキ",p:5000,e:28,h:55,desc:"火星で採れた希少な岩塩で味付けた宇宙の最高峰"},{n:"テラフォームドリンク",p:2000,e:15,h:30,desc:"火星の大気を利用した特殊飲料。エネルギー爆発！"}]},
+  jupiter:    {id:"jupiter",    name:"木星",       e:"⚡",g:"hiphop",    lv:45,
+    ch:{name:"JUPITER THUNDER",e:"⚡",pw:22000},
+    bosses:[
+      {name:"JUPITER THUNDER",e:"⚡",pw:22000,style:"hiphop",      intro:"木星の嵐の中でHIPHOP！大赤斑のリズムで踊れ！"},
+      {name:"GREAT RED SPOT", e:"🌪",pw:24000,style:"waacking",    intro:"大赤斑の暴風がWAACKING！宇宙最強の嵐！"},
+    ],
+    rw:{exp:7000,coins:60000,title:"Jupiter Thunder"},
+    desc:"太陽系最大の惑星。嵐の中でダンスする究極の試練",
+    food:[{n:"ガスジャイアントラーメン",p:8000,e:35,h:60,desc:"木星のガスから生成された謎の液体で作るラーメン"},{n:"嵐のエネルギーゼリー",p:3000,e:20,h:40,desc:"大赤斑の電気エネルギーを凝縮した究極のゼリー"}]},
+  saturn:     {id:"saturn",     name:"土星",       e:"🪐",g:"ballet",    lv:43,
+    ch:{name:"SATURN ELEGANT",e:"🪐",pw:20000},
+    bosses:[{name:"SATURN ELEGANT",e:"🪐",pw:20000,style:"ballet",intro:"土星の輪の上でBALLET！宇宙で最も美しいダンス！"}],
+    rw:{exp:6000,coins:50000,title:"Saturn Ballet Master"},
+    desc:"美しい環を持つ惑星。零重力BALLETの頂点",
+    food:[{n:"リングスープ",p:6000,e:30,h:52,desc:"土星の輪の成分（氷と岩石）から作った宇宙のスープ"},{n:"シルキームーン",p:3000,e:15,h:35,desc:"土星の月タイタンで採れた絹のような食材のデザート"}]},
+  uranus:     {id:"uranus",     name:"天王星",     e:"🌀",g:"waacking",  lv:44,
+    ch:{name:"URANUS ELECTRIC",e:"🌀",pw:21000},
+    bosses:[{name:"URANUS ELECTRIC",e:"🌀",pw:21000,style:"waacking",intro:"横倒しの惑星天王星！異次元WAACKINGが炸裂する！"}],
+    rw:{exp:6500,coins:55000,title:"Uranus Wave King"},
+    desc:"横倒しに自転する不思議な惑星。WAACKINGの極致",
+    food:[{n:"ブルーアイスダイン",p:5000,e:25,h:45,desc:"天王星の青い大気から結晶化した幻のアイス"},{n:"メタンフォンデュ",p:4000,e:18,h:38,desc:"天王星のメタン海から作った宇宙チーズフォンデュ"}]},
+  pluto:      {id:"pluto",      name:"冥王星",     e:"💫",g:"jazz",      lv:42,
+    ch:{name:"PLUTO SHADOW",e:"💫",pw:19000},
+    bosses:[
+      {name:"PLUTO SHADOW", e:"💫",pw:19000,style:"jazz",    intro:"太陽系の果て！孤独な冥王星でJAZZが響く..."},
+      {name:"💀 HADES",     e:"💀",pw:99999,style:"breaking",intro:"冥界の王ハーデス降臨！全惑星を制した者よ...ここが終着点だ！宇宙の覇権を懸けて踊れ！！！",isHades:true},
+    ],
+    rw:{exp:5800,coins:48000,title:"Pluto Jazz King"},
+    desc:"太陽系の端。孤独と静寂の中でJAZZが輝く",
+    food:[{n:"ダークマターシチュー",p:9000,e:32,h:58,desc:"冥王星の暗黒物質から作ったという謎のシチュー"},{n:"ニュートリノスープ",p:4000,e:20,h:40,desc:"冥王星を貫通するニュートリノを凝縮したスープ"}]},
+  galaxy:     {id:"galaxy",     name:"銀河中心",   e:"🌌",g:"hiphop",   lv:70,
+    ch:{name:"GALAXY EMPEROR",e:"🌌",pw:50000},
+    bosses:[{name:"GALAXY EMPEROR",e:"🌌",pw:50000,style:"hiphop",intro:"銀河の中心に君臨する最強のダンサー！全ジャンルを超えた存在！真のラスボス！"}],
+    rw:{exp:20000,coins:200000,title:"🌌 GALAXY CHAMPION"},
+    desc:"銀河の中心。ここを超えた者が真の伝説となる",
+    food:[{n:"ビッグバンバーガー",p:50000,e:50,h:100,desc:"宇宙誕生のエネルギーを凝縮！食べると全能力MAX！"},{n:"クオーサーエリクサー",p:30000,e:40,h:80,desc:"最強の天体クオーサーから抽出した究極の液体"}]},
+};
+
+const SPC_W=32,SPC_H=40;
+const SPC_WALK_CITIES=[
+  {id:"moon_base",x:5, y:5,  name:"月基地",   e:"🌙",g:"popping"},
+  {id:"mars",     x:16,y:8,  name:"火星",     e:"🔴",g:"breaking"},
+  {id:"saturn",   x:25,y:12, name:"土星",     e:"🪐",g:"ballet"},
+  {id:"jupiter",  x:24,y:20, name:"木星",     e:"⚡",g:"hiphop"},
+  {id:"uranus",   x:14,y:22, name:"天王星",   e:"🌀",g:"waacking"},
+  {id:"pluto",    x:6, y:30, name:"冥王星",   e:"💫",g:"jazz"},
+  {id:"galaxy",   x:26,y:34, name:"銀河中心", e:"🌌",g:"hiphop"},
+];
+
+function buildSPCMap(){
+  const G=Array.from({length:SPC_H},()=>new Array(SPC_W).fill('.'));
+  const s=(x,y,t)=>{if(y>=0&&y<SPC_H&&x>=0&&x<SPC_W)G[y][x]=t;};
+  // 小惑星帯（通行不可）
+  for(let x=10;x<20;x++)s(x,15,'^');
+  for(let x=18;x<28;x++)s(x,28,'^');
+  SPC_WALK_CITIES.forEach(c=>s(c.x,c.y,'@'));
+  return G;
+}
+const SPC_MAP=buildSPCMap();
+
+function SpaceWalkMode({char,setChar,genre,onExit,pushNotif,addLog}){
+  const hasRover=(char.specialItems||[]).includes("moon_rover");
+  const[pos,setPos]=useState({x:SPC_WALK_CITIES[0].x,y:SPC_WALK_CITIES[0].y});
+  const[cityAt,setCityAt]=useState(null);
+  const[cityMini,setCityMini]=useState(null);
+  const[battle,setBattle]=useState(null);
+  const[steps,setSteps]=useState(0);
+  const[msg,setMsg]=useState(hasRover?"🚗 探索車を起動... 星々が待っている。":"🌌 探索車がない...動けない...");
+
+  const camX=Math.max(0,Math.min(SPC_W-VW,pos.x-Math.floor(VW/2)));
+  const camY=Math.max(0,Math.min(SPC_H-VH,pos.y-Math.floor(VH/2)));
+  const gt=(x,y)=>{if(x<0||x>=SPC_W||y<0||y>=SPC_H)return'~';return SPC_MAP[y]?.[x]||'.';}
+  const cityAt2=(x,y)=>SPC_WALK_CITIES.find(c=>c.x===x&&c.y===y)||null;
+
+  function move(dir){
+    if(!hasRover){pushNotif("🚗 月の探索車が必要！","#c0c0ff");return;}
+    if(cityAt||cityMini)return;
+    setPos(prev=>{
+      let{x,y}=prev;let nx=x,ny=y;
+      if(dir==="up")ny--;if(dir==="down")ny++;if(dir==="left")nx--;if(dir==="right")nx++;
+      if(nx<0||nx>=SPC_W||ny<0||ny>=SPC_H)return prev;
+      if(gt(nx,ny)==='^')return prev; // 小惑星帯
+      const city=cityAt2(nx,ny);
+      if(city){setCityAt(city);setMsg(`${city.e} ${city.name}に到着！`);return{x:nx,y:ny};}
+      setSteps(s=>s+1);return{x:nx,y:ny};
+    });
+  }
+
+  useEffect(()=>{
+    const h=e=>{const m={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right"};if(m[e.key]){e.preventDefault();move(m[e.key]);}};
+    window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
+  },[pos,cityAt,cityMini,hasRover]);
+
+  if(cityMini){
+    const cd=SPACE_CITIES_DATA[cityMini];
+    const wc=SPC_WALK_CITIES.find(c=>c.id===cityMini);
+    if(!cd){setCityMini(null);return null;}
+    const ufoFoundParts=char.ufoFoundParts||[];
+    const clearedPlanets=char.clearedPlanets||[];
+    const planetCleared=clearedPlanets.includes(cityMini);
+    const myUFOParts=getUFOPartsForPlanet(cityMini);
+    const nextPlanetId={"moon_base":"mars","mars":"jupiter","jupiter":"saturn","saturn":"pluto"}[cityMini];
+    const nextPlanetName=nextPlanetId?SPC_WALK_CITIES.find(c=>c.id===nextPlanetId)?.name:"";
+    const[quizOpen,setQuizOpen]=useState(null);
+    const[quizInput,setQuizInput]=useState("");
+    const[quizResult,setQuizResult]=useState(null);
+    return<div style={{paddingBottom:80}}>
+      {battle&&<BattleOverlay state={battle} gc={genre.c} onClose={()=>setBattle(null)}/>}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"#020210",borderBottom:"1px solid #2a2a5a",marginBottom:12}}>
+        <span style={{color:"#c0c0ff",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{wc?.e} {wc?.name}</span>
+        <button onClick={()=>{setCityMini(null);setCityAt(null);setQuizOpen(null);}} style={{fontSize:10,color:"#6060a0",background:"none",border:"1px solid #2a2a5a",borderRadius:4,padding:"4px 8px",cursor:"pointer"}}>← SPACE</button>
+      </div>
+
+      {(cd.bosses||[]).map((boss,bi)=>{
+        const isHades=boss.isHades;
+        const hadesLocked=isHades&&!planetCleared;
+        return(<div key={bi} style={{background:"#0a0a20",borderRadius:10,margin:"0 4px 12px",border:`1px solid ${isHades?"#ff000066":"#3a3a8a"}`,padding:"18px 16px",textAlign:"center",opacity:hadesLocked?.4:1}}>
+          <div style={{fontSize:isHades?64:52,marginBottom:8}}>{boss.e}</div>
+          {isHades&&<div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:"#ff4444",marginBottom:6,letterSpacing:1}}>⚠️ 冥界の王</div>}
+          <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:isHades?"#ff4444":"#c0c0ff",marginBottom:4}}>{bi===0?"BOSS":"CHALLENGER"}</div>
+          <div style={{fontSize:17,color:isHades?"#ff8888":"#e0e0ff",fontWeight:900,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>{boss.name}</div>
+          <div style={{fontSize:10,color:"#6060a0",marginBottom:6}}>{GENRES[boss.style]?.e}{GENRES[boss.style]?.jp} · POWER {boss.pw===99999?"∞ 99,999":boss.pw.toLocaleString()}</div>
+          {boss.intro&&<div style={{fontSize:11,color:isHades?"#ff9090":"#9090d0",marginBottom:12,fontFamily:"M PLUS Rounded 1c,sans-serif",fontStyle:"italic"}}>「{boss.intro}」</div>}
+          {hadesLocked?<div style={{fontSize:11,color:"#6060a0",fontFamily:"M PLUS Rounded 1c,sans-serif",padding:8,background:"#100010",borderRadius:6}}>
+            🔒 冥王星のBOSSを倒してから挑め
+          </div>:<Btn disabled={char.energy<30} col={isHades?"#200000":"#080820"} tc={isHades?"#ff4444":"#c0c0ff"} onClick={async()=>{
+            if(char.energy<30){pushNotif("⚡30必要！","#ff5555");return;}
+            const btl=buildBattle(char,boss.style||cd.g,boss.pw);
+            setBattle({phase:"seq",...btl,oppName:boss.name,step:0});
+            for(let ii=0;ii<8;ii++){await new Promise(r=>setTimeout(r,_battleSpeed===2?380:1050));setBattle(b=>b?{...b,step:Math.min(b.step+1,7)}:null);}
+            const{won,flags}=btl;
+            const eg=won?cd.rw.exp:Math.floor(cd.rw.exp*.5);
+            const coins=won?cd.rw.coins:Math.floor(cd.rw.coins*.5);
+            const hadesTitle=won&&isHades?"🌌 宇宙の覇者":null;
+            setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-30),
+              mood:won?Math.min(100,c.mood+30):Math.max(0,c.mood-15),
+              battlesWon:won?c.battlesWon+1:c.battlesWon,
+              clearedPlanets:won&&bi===0&&!clearedPlanets.includes(cityMini)?[...(c.clearedPlanets||[]),cityMini]:c.clearedPlanets||[],
+              titles:hadesTitle?[...(c.titles||[]),hadesTitle]:c.titles||[]}));
+            setBattle({phase:"result",won,eg,coins,flags,myP:btl.myP,thP:btl.thP});
+            if(won){Sound.fanfare();if(isHades)pushNotif("🌌 HADES撃破！宇宙の覇者！","#ffd60a");}
+            else Sound.lose();
+            addLog(`${won?"🏆":"💀"} vs ${boss.name} @${wc?.name} +${eg}EXP`);
+          }} full sx={{fontSize:12,padding:"14px",fontWeight:700,border:`1px solid ${isHades?"#440000":"#4a4aaa"}`}}>
+            {isHades?"💀 HADES に挑む！":"⚔️ バトル！"} ⚡30
+          </Btn>}
+        </div>);
+      })}
+
+      {/* 🛸 UFOパーツクイズ */}
+      {myUFOParts.length>0&&<div style={{margin:"0 4px 12px",background:"#08081a",borderRadius:10,padding:14,border:"1px solid #4a4a88"}}>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:"#c0c0ff",marginBottom:4}}>🛸 UFOパーツ</div>
+        <div style={{fontSize:10,color:"#6060a0",marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+          {nextPlanetName}へ行くには謎を解け！
+        </div>
+        {myUFOParts.map(part=>{
+          const found=ufoFoundParts.includes(part.id);
+          const isOpen=quizOpen===part.id;
+          return(<div key={part.id} style={{marginBottom:10,padding:"10px 12px",background:found?"#0a1a0a":"#0a0a18",borderRadius:8,border:`1px solid ${found?"#00ff88":"#2a2a4a"}`}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:found?0:6}}>
+              <span style={{fontSize:12,fontWeight:700,color:found?"#00ff88":"#a0a0ff",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{part.name}</span>
+              <span style={{fontSize:14}}>{found?"✅":"⬜"}</span>
+            </div>
+            {!found&&<div>
+              {isOpen?(
+                <div>
+                  <div style={{fontSize:11,color:"#e0e0ff",marginBottom:8,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:"#080820",padding:8,borderRadius:6}}>
+                    ❓ {part.quiz.q}
+                  </div>
+                  <input value={quizInput} onChange={e=>setQuizInput(e.target.value)}
+                    onKeyDown={e=>{if(e.key==="Enter"){
+                      const ans=quizInput.trim().toLowerCase();
+                      const ok=part.quiz.as.some(a=>ans.includes(a.toLowerCase())||a.toLowerCase().includes(ans));
+                      setQuizResult(ok?"correct":"wrong");
+                      if(ok)setTimeout(()=>{
+                        setChar(c=>({...c,ufoFoundParts:[...(c.ufoFoundParts||[]),part.id]}));
+                        pushNotif(`🛸 ${part.name}発見！`,"#c0c0ff");
+                        addLog(`🛸 UFOパーツ取得：${part.name}`);
+                        setQuizOpen(null);setQuizInput("");setQuizResult(null);
+                      },1200);
+                    }}}
+                    placeholder="答えを入力..."
+                    style={{width:"100%",padding:"8px",background:"#050515",border:`1px solid ${quizResult==="correct"?"#00ff88":quizResult==="wrong"?"#ff5555":"#3a3a6a"}`,borderRadius:6,color:"#e0e0ff",fontSize:12,fontFamily:"M PLUS Rounded 1c,sans-serif",boxSizing:"border-box"}}/>
+                  {quizResult==="wrong"&&<div style={{fontSize:10,color:"#ff5555",marginTop:4,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>❌ 不正解！もう一度...</div>}
+                  {quizResult==="correct"&&<div style={{fontSize:10,color:"#00ff88",marginTop:4,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✅ 正解！パーツを発見！</div>}
+                  <div style={{display:"flex",gap:6,marginTop:8}}>
+                    <Btn col="#080820" tc="#c0c0ff" onClick={()=>{
+                      const ans=quizInput.trim().toLowerCase();
+                      const ok=part.quiz.as.some(a=>ans.includes(a.toLowerCase())||a.toLowerCase().includes(ans));
+                      setQuizResult(ok?"correct":"wrong");
+                      if(ok)setTimeout(()=>{
+                        setChar(c=>({...c,ufoFoundParts:[...(c.ufoFoundParts||[]),part.id]}));
+                        pushNotif(`🛸 ${part.name}発見！`,"#c0c0ff");
+                        setQuizOpen(null);setQuizInput("");setQuizResult(null);
+                      },1200);
+                    }} sx={{flex:2,fontSize:11,border:"1px solid #3a3a8a"}}>決定</Btn>
+                    <Btn col="#050515" tc="#6060a0" onClick={()=>{setQuizOpen(null);setQuizInput("");setQuizResult(null);}} sx={{flex:1,fontSize:10}}>閉じる</Btn>
+                  </div>
+                </div>
+              ):<Btn col="#08081a" tc="#a0a0ff" onClick={()=>{setQuizOpen(part.id);setQuizResult(null);setQuizInput("");}} full sx={{fontSize:11,border:"1px solid #3a3a6a"}}>
+                🧠 クイズに答えてパーツを探す
+              </Btn>}
+            </div>}
+          </div>);
+        })}
+        {myUFOParts.every(p=>ufoFoundParts.includes(p.id))&&(
+          <div style={{textAlign:"center",padding:10,background:"#0a2a0a",borderRadius:8,border:"1px solid #00ff88",marginTop:8}}>
+            <div style={{fontSize:18,marginBottom:4}}>🛸</div>
+            <div style={{fontSize:11,color:"#00ff88",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>UFO完成！{nextPlanetName}へ出発できる！</div>
+          </div>
+        )}
+      </div>}
+
+      {cd.food?.length>0&&<div style={{margin:"0 4px 12px",background:"#080818",borderRadius:10,padding:14,border:"1px solid #2a2a5a"}}>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:"#c0c0ff",marginBottom:10}}>🍽 SPACE FOOD</div>
+        {cd.food.map((f,i)=>(
+          <div key={i} style={{background:BG3,borderRadius:6,padding:"8px 10px",marginBottom:8}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+              <div><div style={{fontWeight:700,fontSize:12,color:TX}}>{f.n}</div><div style={{fontSize:9,color:TX3}}>{f.desc}</div></div>
+              <div style={{fontSize:11,color:char.coins>=f.p?"#b3ff00":"#ff5555",fontWeight:700}}>¥{f.p.toLocaleString()}</div>
+            </div>
+            <Btn disabled={char.coins<f.p} col="#080818" tc="#c0c0ff" onClick={()=>{
+              const MAX=getMaxEnergy(getLvCapped(char.exp,char.artifacts));
+              setChar(c=>({...c,coins:c.coins-f.p,energy:Math.min(MAX,c.energy+f.e),mood:Math.min(100,(c.mood||50)+10)}));
+              pushNotif(`${f.n}食べた！⚡+${f.e}`,"#c0c0ff");
+            }} full sx={{fontSize:11}}>食べる（¥{f.p.toLocaleString()}）</Btn>
+          </div>
+        ))}
+      </div>}
+      <DPad onMove={()=>{}}/>
+      <AButton onPress={()=>{setCityMini(null);setCityAt(null);setQuizOpen(null);}} col="#c0c0ff" sub="EXIT"/>
+    </div>;
+  }
+
+  const gc=genre.c;
+  return(<div style={{background:"#020210",minHeight:"100vh",paddingBottom:180}}>
+    {battle&&<BattleOverlay state={battle} gc={gc} onClose={()=>setBattle(null)}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 14px",background:"#0a0a20",borderBottom:"2px solid #3a3a8a"}}>
+      <div>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:"#c0c0ff",letterSpacing:2}}>🚀 SPACE MAP</div>
+        <div style={{fontSize:10,color:"#6060a0",fontFamily:"M PLUS Rounded 1c,sans-serif",marginTop:2}}>
+          {hasRover?"🚗 探索車：稼働中":"❌ 探索車なし"} · {steps}歩
+        </div>
+      </div>
+      <button onClick={onExit} style={{fontSize:10,color:"#6060a0",background:"none",border:"1px solid #2a2a5a",borderRadius:4,padding:"5px 10px",cursor:"pointer"}}>🗺 WORLD MAP</button>
+    </div>
+    {!hasRover&&<div style={{margin:"8px 4px",padding:14,background:"#080820",border:"2px solid #4a4aff",borderRadius:10,textAlign:"center"}}>
+      <div style={{fontSize:28,marginBottom:8}}>🚗</div>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:"#c0c0ff",marginBottom:8}}>探索車が必要！</div>
+      <div style={{fontSize:11,color:"#6060a0",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>ショップ →「👑伝説」タブ<br/>月の石を持っていると購入できる</div>
+    </div>}
+    <div style={{margin:"8px 4px",border:"1px solid #2a2a5a",borderRadius:8,overflow:"hidden",position:"relative"}}>
+      <svg viewBox={`0 0 ${VW*TS} ${VH*TS}`} width="100%" style={{display:"block"}}>
+        <rect width={VW*TS} height={VH*TS} fill="#020210"/>
+        {/* 星 */}
+        {Array.from({length:40},(_,i)=><circle key={i} cx={Math.sin(i*37)*999%( VW*TS)} cy={Math.cos(i*53)*999%(VH*TS)} r="1" fill="#ffffff" opacity={.3+Math.sin(i)*.2}/>)}
+        {Array.from({length:VH},(_,vy)=>Array.from({length:VW},(_,vx)=>{
+          const mx=camX+vx,my=camY+vy;
+          const t=gt(mx,my);
+          const city=cityAt2(mx,my);
+          const gc2=city?GENRES[city.g]?.c||"#888":null;
+          return(<g key={`${vx}-${vy}`}>
+            <rect x={vx*TS} y={vy*TS} width={TS} height={TS} fill={t==='^'?"#1a1228":"#030315"} stroke="#060618" strokeWidth=".3"/>
+            {t==='^'&&<text x={vx*TS+TS*.5} y={vy*TS+TS*.62} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.5}>🪨</text>}
+            {city&&<g>
+              <circle cx={vx*TS+TS*.5} cy={vy*TS+TS*.5} r={TS*.45} fill={`${gc2}33`} stroke={gc2} strokeWidth="1.5" style={{filter:`drop-shadow(0 0 4px ${gc2})`}}/>
+              <text x={vx*TS+TS*.5} y={vy*TS+TS*.52} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.55}>{city.e}</text>
+              <text x={vx*TS+TS*.5} y={vy*TS+TS*.92} textAnchor="middle" fontSize="3.5" fill={gc2} fontFamily="M PLUS Rounded 1c,sans-serif">{city.name}</text>
+            </g>}
+          </g>);
+        }))}
+        {(()=>{const vx=pos.x-camX,vy=pos.y-camY;if(vx<0||vx>=VW||vy<0||vy>=VH)return null;return(<g>
+          <text x={vx*TS+TS*.5} y={vy*TS+TS*.6} textAnchor="middle" dominantBaseline="middle" fontSize={TS*.65}>{hasRover?"🚗":genre.e}</text>
+        </g>);})()}
+      </svg>
+      <div style={{position:"absolute",top:5,right:5,width:42,height:32,background:"rgba(0,0,0,.85)",borderRadius:4,border:"1px solid #2a2a5a",overflow:"hidden"}}>
+        <svg viewBox={`0 0 ${SPC_W} ${SPC_H}`} width="42" height="32">
+          <rect width={SPC_W} height={SPC_H} fill="#020210"/>
+          {SPC_WALK_CITIES.map(c=><circle key={c.id} cx={c.x} cy={c.y} r="2" fill={GENRES[c.g]?.c||"#888"}/>)}
+          <circle cx={pos.x} cy={pos.y} r="2.5" fill="#fff"/>
+        </svg>
+      </div>
+    </div>
+    {msg&&<div style={{margin:"0 4px 6px",padding:"8px 12px",background:"#0a0a20",borderRadius:6,fontSize:11,color:"#c0c0ff",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{msg}</div>}
+    {cityAt&&<div style={{margin:"0 4px 8px",padding:14,background:"#0a0a20",borderRadius:10,border:`2px solid ${GENRES[cityAt.g]?.c||"#6060ff"}66`}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          <span style={{fontSize:32}}>{cityAt.e}</span>
+          <div><div style={{fontWeight:700,fontSize:16,color:GENRES[cityAt.g]?.c||"#c0c0ff",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{cityAt.name}</div></div>
+        </div>
+        <button onClick={()=>setCityAt(null)} style={{color:"#6060a0",fontSize:22,background:"none",border:"none",cursor:"pointer"}}>✕</button>
+      </div>
+      {isPlanetUnlocked(cityAt.id,char)?(
+        <Btn col="#080820" tc={GENRES[cityAt.g]?.c||"#c0c0ff"} onClick={()=>setCityMini(cityAt.id)} full sx={{fontSize:13,fontWeight:700,padding:"12px",border:"1px solid #3a3a8a"}}>
+          🚀 {cityAt.name}に降り立つ
+        </Btn>
+      ):(
+        <div style={{textAlign:"center",padding:12,background:"#080820",borderRadius:8,border:"1px solid #2a2a5a"}}>
+          <div style={{fontSize:11,color:"#6060a0",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+            🔒 前の惑星をクリア＋UFOを作れ！
+          </div>
+        </div>
+      )}
+    </div>}
+    {!cityAt&&<div style={{textAlign:"center",fontSize:9,color:"#3a3a6a",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+      {hasRover?"🚗 十字キーで宇宙を探索！":"🚗 ショップで探索車を購入すると動ける"}
+    </div>}
+    <DPad onMove={move}/>
+    {cityAt&&<AButton onPress={()=>setCityMini(cityAt.id)} col="#c0c0ff" sub="降り立つ"/>}
+  </div>);
+}
+
 /* ── 🌙 MOON WALK MODE ── */
 const MOON_W=20,MOON_H=15;
 const MOON_TILES=[
@@ -1689,7 +2092,7 @@ function buildAFRMap(){
 }
 const AFR_MAP=buildAFRMap();
 
-function AFRICAWalkMode(p){return<WorldWalkMode {...p} walkCities={AFR_WALK_CITIES} walkMap={AFR_MAP} cityData={AFRICA} mapW={AFR_W} mapH={AFR_H} regionName="AFRICA MAP" flagEmoji="🌍"/>;}
+function AFRICAWalkMode(p){return<WorldWalkMode {...p} walkCities={AFR_WALK_CITIES} walkMap={AFR_MAP} cityData={AFRICA} mapW={AFR_W} mapH={AFR_H} regionName="AFRICA MAP" flagEmoji="🌍" mapId="africa"/>;}
 
 /* ── SOUTH AMERICA CITIES DATA ── */
 const SAMERICA={
@@ -1789,7 +2192,7 @@ function buildSAMMap(){
 }
 const SAM_MAP=buildSAMMap();
 
-function SAMWalkMode(p){return<WorldWalkMode {...p} walkCities={SAM_WALK_CITIES} walkMap={SAM_MAP} cityData={SAMERICA} mapW={SAM_W} mapH={SAM_H} regionName="S.AMERICA MAP" flagEmoji="🌎"/>;}
+function SAMWalkMode(p){return<WorldWalkMode {...p} walkCities={SAM_WALK_CITIES} walkMap={SAM_MAP} cityData={SAMERICA} mapW={SAM_W} mapH={SAM_H} regionName="S.AMERICA MAP" flagEmoji="🌎" mapId="samerica"/>;}
 
 /* ── INDIA CITIES DATA ── */
 const INDIA={
@@ -1871,7 +2274,7 @@ function buildINDMap(){
 }
 const IND_MAP=buildINDMap();
 
-function INDIAWalkMode(p){return<WorldWalkMode {...p} walkCities={IND_WALK_CITIES} walkMap={IND_MAP} cityData={INDIA} mapW={IND_W} mapH={IND_H} regionName="INDIA MAP" flagEmoji="🇮🇳"/>;}
+function INDIAWalkMode(p){return<WorldWalkMode {...p} walkCities={IND_WALK_CITIES} walkMap={IND_MAP} cityData={INDIA} mapW={IND_W} mapH={IND_H} regionName="INDIA MAP" flagEmoji="🇮🇳" mapId="india"/>;}
 
 /* ── EUROPE CITIES DATA ── */
 const EUROPE={
@@ -1964,7 +2367,7 @@ const EUR_MAP=buildEURMap();
 
 /* ── WORLD WALK MODE (汎用) ── */
 function WorldWalkMode({char,setChar,genre,onExit,pushNotif,addLog,
-  walkCities,walkMap,cityData,mapW,mapH,regionName,flagEmoji}){
+  walkCities,walkMap,cityData,mapW,mapH,regionName,flagEmoji,mapId}){
   const startC=walkCities[0];
   const[pos,setPos]=useState({x:startC.x,y:startC.y});
   const[steps,setSteps]=useState(0);
@@ -1973,8 +2376,7 @@ function WorldWalkMode({char,setChar,genre,onExit,pushNotif,addLog,
   const[cityMini,setCityMini]=useState(null);
   const[msg,setMsg]=useState("");
   const[battle,setBattle]=useState(null);
-
-  const camX=Math.max(0,Math.min(mapW-VW,pos.x-Math.floor(VW/2)));
+  const[nearbyHidden,setNearbyHidden]=useState(null);
   const camY=Math.max(0,Math.min(mapH-VH,pos.y-Math.floor(VH/2)));
   const gt=(x,y)=>{if(x<0||x>=mapW||y<0||y>=mapH)return'~';return walkMap[y]?.[x]||'~';};
   const gd=(t)=>WT[t]||WT['~'];
@@ -1992,6 +2394,14 @@ function WorldWalkMode({char,setChar,genre,onExit,pushNotif,addLog,
         const opps=QOPPS.filter(o=>o.lv<=Math.max(18,getLv(char.exp)+2));
         const opp=opps[Math.floor(Math.random()*opps.length)]||QOPPS[5];
         Sound.battle();setEnc(opp);return{x:nx,y:ny};
+      }
+      // 隠しアイテムチェック（自動取得→「おやっ？」システム）
+      if(mapId){
+        const found=char.foundItems||[];
+        const nearby=HIDDEN_ITEMS.find(h=>h.mapId===mapId&&h.x===nx&&h.y===ny&&!found.includes(h.id));
+        setNearbyHidden(nearby||null);
+        if(nearby) setMsg("おやっ？何かあるぞ？");
+        else if(msg==="おやっ？何かあるぞ？") setMsg("");
       }
       setSteps(s=>s+1);return{x:nx,y:ny};
     });
@@ -2112,7 +2522,31 @@ function WorldWalkMode({char,setChar,genre,onExit,pushNotif,addLog,
         </svg>
       </div>
     </div>
-    {msg&&<div style={{margin:"0 4px 6px",padding:"8px 12px",background:BG2,borderRadius:6,fontSize:11,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{msg}</div>}
+    {msg&&<div style={{margin:"0 4px 6px",padding:"8px 12px",background:nearbyHidden?"#1a1a00":BG2,borderRadius:6,fontSize:11,color:nearbyHidden?"#ffd60a":TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:nearbyHidden?700:400}}>{msg}</div>}
+
+    {/* 🔍 調べるボタン */}
+    {nearbyHidden&&!enc&&!cityAt&&<div style={{margin:"0 4px 8px",padding:14,background:"#1a1a00",borderRadius:10,border:"2px solid #ffd60a66",textAlign:"center"}}>
+      <div style={{fontSize:28,marginBottom:6}}>❓</div>
+      <div style={{fontSize:11,color:"#ffd60a",marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+        何かが埋まっているようだ...
+      </div>
+      <Btn col="#1a1a00" tc="#ffd60a" onClick={()=>{
+        setChar(c=>({...c,
+          foundItems:[...(c.foundItems||[]),nearbyHidden.id],
+          coins:c.coins+(nearbyHidden.reward.coins||0),
+          gems:(c.gems||0)+(nearbyHidden.reward.gems||0),
+          exp:c.exp+(nearbyHidden.reward.exp||0),
+          titles:nearbyHidden.reward.title?[...(c.titles||[]),nearbyHidden.reward.title]:c.titles||[],
+        }));
+        setMsg(`✨ ${nearbyHidden.name}を発見！`);
+        pushNotif(`✨ ${nearbyHidden.name}！${nearbyHidden.desc}`,"#ffd60a");
+        addLog(`✨ 隠しアイテム発見：${nearbyHidden.name}`);
+        setNearbyHidden(null);
+      }} full sx={{fontSize:13,fontWeight:700,padding:"12px",border:"1px solid #4a4a00"}}>
+        🔍 調べる
+      </Btn>
+    </div>}
+
     {cityAt&&!enc&&<div style={{margin:"0 4px 8px",padding:14,background:BG2,borderRadius:10,border:`2px solid ${GENRES[cityAt.g]?.c||gc}66`}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
         <div style={{display:"flex",gap:10,alignItems:"center"}}>
@@ -2123,16 +2557,22 @@ function WorldWalkMode({char,setChar,genre,onExit,pushNotif,addLog,
       </div>
       <Btn col={`${GENRES[cityAt.g]?.c||gc}22`} tc={GENRES[cityAt.g]?.c||gc} onClick={()=>setCityMini(cityAt.id)} full sx={{fontSize:13,fontWeight:700,padding:"12px"}}>🏙 {cityAt.name}に入る</Btn>
     </div>}
-    {!cityAt&&!enc&&<div style={{textAlign:"center",fontSize:9,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>十字キーで移動 · 都市でAボタン</div>}
+    {!cityAt&&!enc&&!nearbyHidden&&<div style={{textAlign:"center",fontSize:9,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>十字キーで移動 · 都市でAボタン</div>}
     <DPad onMove={move}/>
     {cityAt&&!enc&&<AButton onPress={()=>setCityMini(cityAt.id)} col={GENRES[cityAt.g]?.c||gc} sub="入る"/>}
+    {nearbyHidden&&!cityAt&&!enc&&<AButton onPress={()=>{
+      setChar(c=>({...c,foundItems:[...(c.foundItems||[]),nearbyHidden.id],coins:c.coins+(nearbyHidden.reward.coins||0),gems:(c.gems||0)+(nearbyHidden.reward.gems||0),exp:c.exp+(nearbyHidden.reward.exp||0),titles:nearbyHidden.reward.title?[...(c.titles||[]),nearbyHidden.reward.title]:c.titles||[]}));
+      setMsg(`✨ ${nearbyHidden.name}を発見！`);
+      pushNotif(`✨ ${nearbyHidden.name}！${nearbyHidden.desc}`,"#ffd60a");
+      setNearbyHidden(null);
+    }} col="#ffd60a" sub="調べる"/>}
     {enc&&<AButton onPress={fightEnc} col="#ff4da6" sub="バトル！" disabled={char.energy<3}/>}
   </div>);
 }
 
 // ASIA・EUROPE・USAはWorldWalkModeを流用
-function ASIAWalkMode(p){return<WorldWalkMode {...p} walkCities={ASIA_WALK_CITIES} walkMap={ASIA_MAP} cityData={ASIA} mapW={ASIA_W} mapH={ASIA_H} regionName="ASIA MAP" flagEmoji="🌏"/>;}
-function EUROPEWalkMode(p){return<WorldWalkMode {...p} walkCities={EUR_WALK_CITIES} walkMap={EUR_MAP} cityData={EUROPE} mapW={EUR_W} mapH={EUR_H} regionName="EUROPE MAP" flagEmoji="🌍"/>;}
+function ASIAWalkMode(p){return<WorldWalkMode {...p} walkCities={ASIA_WALK_CITIES} walkMap={ASIA_MAP} cityData={ASIA} mapW={ASIA_W} mapH={ASIA_H} regionName="ASIA MAP" flagEmoji="🌏" mapId="asia"/>;}
+function EUROPEWalkMode(p){return<WorldWalkMode {...p} walkCities={EUR_WALK_CITIES} walkMap={EUR_MAP} cityData={EUROPE} mapW={EUR_W} mapH={EUR_H} regionName="EUROPE MAP" flagEmoji="🌍" mapId="europe"/>;}
 
 /* ── USA WALK MODE ── */
 function USAWalkMode({char,setChar,genre,onExit,pushNotif,addLog}){
@@ -2897,7 +3337,10 @@ function MapTab({char,setChar,genre,pushNotif,addLog}){
   const[walkSAM,setWalkSAM]=useState(false);
   const[walkAFR,setWalkAFR]=useState(false);
   const[walkMoon,setWalkMoon]=useState(false);
+  const[walkSpace,setWalkSpace]=useState(false);
   const hasMichaelSet=["michael_glove","michael_loafer","michael_hat"].every(id=>(char.specialItems||[]).includes(id));
+  const rocketParts=getRocketParts(char);
+  const shipBuilt=hasSpaceship(char);
   const cleared=char.clearedCities||{};
   const wldOk=!!cleared["tokyo"]||!!W[char.hometown];
   const spaceOk=!!cleared["wf"];
@@ -2912,6 +3355,7 @@ function MapTab({char,setChar,genre,pushNotif,addLog}){
   if(walkSAM)return<SAMWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkSAM(false)} pushNotif={pushNotif} addLog={addLog}/>;
   if(walkAFR)return<AFRICAWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkAFR(false)} pushNotif={pushNotif} addLog={addLog}/>;
   if(walkMoon)return<MoonWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkMoon(false)} pushNotif={pushNotif} addLog={addLog}/>;
+  if(walkSpace)return<SpaceWalkMode char={char} setChar={setChar} genre={genre} onExit={()=>setWalkSpace(false)} pushNotif={pushNotif} addLog={addLog}/>;
 
 
   function travel(city){
@@ -2987,100 +3431,133 @@ function MapTab({char,setChar,genre,pushNotif,addLog}){
         <button key={r} onClick={()=>{if(ok){setRegion(r);setSelected(null);}else pushNotif(r==="space"?"WORLD FINALをクリアで解放！":"まず日本を制覇！","#ff5555");}} style={{flex:1,padding:"8px 4px",fontSize:9,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:region===r?`${genre.c}30`:ok?BG2:"#0c0c1a",color:region===r?genre.c:ok?TX2:"#303060",border:`1px solid ${region===r?genre.c+"88":ok?BD:"#1a1a38"}`,borderRadius:7,transition:"all .15s"}}>{ok?label:`🔒 ${r.toUpperCase()}`}</button>
       ))}
     </div>
-    {/* WALK JAPAN ボタン */}
-    <Btn onClick={()=>setWalkJapan(true)} col={`${genre.c}22`} tc={genre.c} full sx={{fontSize:12,border:`1px solid ${genre.c}66`,fontWeight:700,marginBottom:8,padding:"12px"}}>🚶 WALK JAPAN（鹿児島から札幌まで歩く）</Btn>
+    {/* ── 3セクション：JAPAN / WORLD / SPACE ── */}
 
-    {/* ASIA ボタン */}
-    {hasFerry?(
-      <Btn onClick={()=>setWalkASIA(true)} col="#001a00" tc="#b3ff00" full sx={{fontSize:12,border:"1px solid #b3ff0055",fontWeight:700,marginBottom:8,padding:"12px"}}>🌏 WALK ASIA（ソウル・上海・バンコク...）</Btn>
-    ):(
-      <div style={{background:"#001a00",border:"1px solid #b3ff0033",borderRadius:8,padding:12,marginBottom:8}}>
-        <div style={{fontSize:11,color:"#b3ff00",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:6}}>🌏 ASIA（ソウル・上海・バンコク...）</div>
-        <div style={{fontSize:10,color:TX3,marginBottom:8,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>🚢 フェリーチケットが必要！</div>
-        <div style={{display:"flex",gap:8}}>
-          <Btn disabled={char.coins<500000} col="#001a00" tc="#b3ff00" onClick={()=>{
-            if(char.coins<500000){pushNotif("¥500,000必要！","#ff5555");return;}
-            if(!window.confirm("🚢 フェリーチケット購入？¥500,000消費！"))return;
-            setChar(c=>({...c,coins:c.coins-500000,specialItems:[...(c.specialItems||[]),"ferry"]}));
-            pushNotif("🚢 フェリーチケット購入！ASIAが解放！","#b3ff00");
-          }} sx={{flex:1,fontSize:11}}>💰 ¥500,000</Btn>
-          <Btn disabled={(char.gems||0)<500} col="#001a00" tc="#ce93d8" onClick={()=>{
-            if((char.gems||0)<500){pushNotif("💎500必要！","#ff5555");return;}
-            if(!window.confirm("🚢 フェリーチケット購入？💎500消費！"))return;
-            setChar(c=>({...c,gems:(c.gems||0)-500,specialItems:[...(c.specialItems||[]),"ferry"]}));
-            pushNotif("🚢 フェリーチケット購入！ASIAが解放！","#b3ff00");
-          }} sx={{flex:1,fontSize:11}}>💎 500</Btn>
+    {/* 🗾 JAPAN セクション */}
+    <div style={{marginBottom:14}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:genre.c,marginBottom:8,letterSpacing:1}}>🗾 WALK JAPAN</div>
+      <Btn onClick={()=>setWalkJapan(true)} col={`${genre.c}22`} tc={genre.c} full sx={{fontSize:12,border:`1px solid ${genre.c}66`,fontWeight:700,padding:"12px"}}>
+        🚶 鹿児島 → 札幌（15都市）
+      </Btn>
+    </div>
+
+    {/* 🌍 WORLD セクション */}
+    <div style={{marginBottom:14,background:"#0a0a14",borderRadius:10,padding:12,border:`1px solid ${hasFerry||hasAirplane?"#4a4a28":"#2a2a3a"}`}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:"#ffd60a",marginBottom:10,letterSpacing:1}}>🌍 WORLD MAP</div>
+
+      {/* フェリー購入 */}
+      {!hasFerry&&(()=>{
+        const cleared2=char.clearedCities||{};
+        const jpCount=Object.keys(allC()).filter(id=>cleared2[id]).length;
+        const needJP=5;const ferryPrice=300000;const ferryGems=200;
+        return(<div style={{background:"#001a00",borderRadius:8,padding:10,marginBottom:10,border:"1px solid #b3ff0033"}}>
+          <div style={{fontSize:10,color:"#b3ff00",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>
+            🚢 フェリーチケット → 🌏 ASIA解放
+          </div>
+          <div style={{fontSize:9,color:TX3,marginBottom:6,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+            日本{needJP}都市制覇（現在{jpCount}）+ ¥{ferryPrice.toLocaleString()}
+          </div>
+          {jpCount<needJP&&<div style={{fontSize:9,color:"#ff6b6b",marginBottom:4}}>⚠️ あと{needJP-jpCount}都市制覇が必要</div>}
+          <div style={{display:"flex",gap:6}}>
+            <Btn disabled={char.coins<ferryPrice||jpCount<needJP} col="#001a00" tc="#b3ff00" onClick={()=>{
+              if(jpCount<needJP){pushNotif(`日本${needJP}都市制覇が必要！`,"#ff6b6b");return;}
+              if(char.coins<ferryPrice){pushNotif(`¥${ferryPrice.toLocaleString()}必要！`,"#ff5555");return;}
+              if(!window.confirm(`🚢 フェリーチケット購入？¥${ferryPrice.toLocaleString()}消費！`))return;
+              setChar(c=>({...c,coins:c.coins-ferryPrice,specialItems:[...(c.specialItems||[]),"ferry"]}));
+              pushNotif("🚢 フェリーチケット購入！ASIAが解放！","#b3ff00");
+            }} sx={{flex:1,fontSize:10}}>💰 ¥{(300000).toLocaleString()}</Btn>
+            <Btn disabled={(char.gems||0)<ferryGems||jpCount<needJP} col="#001a00" tc="#ce93d8" onClick={()=>{
+              if(jpCount<needJP){pushNotif(`日本${needJP}都市制覇が必要！`,"#ff6b6b");return;}
+              if((char.gems||0)<ferryGems){pushNotif(`💎${ferryGems}必要！`,"#ff5555");return;}
+              if(!window.confirm(`🚢 フェリー購入？💎${ferryGems}消費！`))return;
+              setChar(c=>({...c,gems:(c.gems||0)-ferryGems,specialItems:[...(c.specialItems||[]),"ferry"]}));
+              pushNotif("🚢 フェリーチケット購入！ASIAが解放！","#b3ff00");
+            }} sx={{flex:1,fontSize:10}}>💎 {500}</Btn>
+          </div>
+        </div>);
+      })()}
+
+      {/* 航空チケット購入 */}
+      {hasFerry&&!hasAirplane&&(()=>{
+        const cleared2=char.clearedCities||{};
+        const jpCount=Object.keys(allC()).filter(id=>cleared2[id]).length;
+        const needJP=10;const airPrice=800000;const airGems=500;
+        return(<div style={{background:"#001428",borderRadius:8,padding:10,marginBottom:10,border:"1px solid #00e5ff33"}}>
+          <div style={{fontSize:10,color:"#00e5ff",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>
+            ✈️ 航空チケット → 世界全域解放！
+          </div>
+          <div style={{fontSize:9,color:TX3,marginBottom:6,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+            日本{needJP}都市制覇（現在{jpCount}）+ ¥{airPrice.toLocaleString()}
+          </div>
+          {jpCount<needJP&&<div style={{fontSize:9,color:"#ff6b6b",marginBottom:4}}>⚠️ あと{needJP-jpCount}都市制覇が必要</div>}
+          <div style={{display:"flex",gap:6}}>
+            <Btn disabled={char.coins<airPrice||jpCount<needJP} col="#001428" tc="#00e5ff" onClick={()=>{
+              if(jpCount<needJP){pushNotif(`日本${needJP}都市制覇が必要！`,"#ff6b6b");return;}
+              if(char.coins<airPrice){pushNotif(`¥${airPrice.toLocaleString()}必要！`,"#ff5555");return;}
+              if(!window.confirm(`✈️ 航空チケット購入？¥${airPrice.toLocaleString()}消費！`))return;
+              setChar(c=>({...c,coins:c.coins-airPrice,specialItems:[...(c.specialItems||[]),"airplane"]}));
+              pushNotif("✈️ 航空チケット購入！世界が解放！","#00e5ff");
+            }} sx={{flex:1,fontSize:10}}>💰 ¥{(3000000).toLocaleString()}</Btn>
+            <Btn disabled={(char.gems||0)<airGems||jpCount<needJP} col="#001428" tc="#ce93d8" onClick={()=>{
+              if(jpCount<needJP){pushNotif(`日本${needJP}都市制覇が必要！`,"#ff6b6b");return;}
+              if((char.gems||0)<airGems){pushNotif(`💎${airGems}必要！`,"#ff5555");return;}
+              if(!window.confirm(`✈️ 航空チケット購入？💎${airGems}消費！`))return;
+              setChar(c=>({...c,gems:(c.gems||0)-airGems,specialItems:[...(c.specialItems||[]),"airplane"]}));
+              pushNotif("✈️ 航空チケット購入！世界が解放！","#00e5ff");
+            }} sx={{flex:1,fontSize:10}}>💎 {1500}</Btn>
+          </div>
+        </div>);
+      })()}
+
+      {/* ワールドMAPグリッド */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+        {hasFerry&&<Btn onClick={()=>setWalkASIA(true)} col="#001a00" tc="#b3ff00" sx={{fontSize:11,fontWeight:700,padding:"10px 6px"}}>🌏 ASIA</Btn>}
+        {hasAirplane&&<Btn onClick={()=>setWalkUSA(true)} col="#001a33" tc="#00e5ff" sx={{fontSize:11,fontWeight:700,padding:"10px 6px"}}>🇺🇸 USA</Btn>}
+        {hasAirplane&&<Btn onClick={()=>setWalkEUR(true)} col="#1a0a00" tc="#ffd60a" sx={{fontSize:11,fontWeight:700,padding:"10px 6px"}}>🌍 EUROPE</Btn>}
+        {hasAirplane&&<Btn onClick={()=>setWalkIND(true)} col="#1a0a1a" tc="#ff9ec4" sx={{fontSize:11,fontWeight:700,padding:"10px 6px"}}>🇮🇳 INDIA</Btn>}
+        {hasAirplane&&<Btn onClick={()=>setWalkSAM(true)} col="#1a1000" tc="#ffd60a" sx={{fontSize:11,fontWeight:700,padding:"10px 6px"}}>🌎 S.AMERICA</Btn>}
+        {hasAirplane&&<Btn onClick={()=>setWalkAFR(true)} col="#1a0800" tc="#ff9900" sx={{fontSize:11,fontWeight:700,padding:"10px 6px"}}>🌍 AFRICA</Btn>}
+        {!hasFerry&&<div style={{gridColumn:"1/-1",textAlign:"center",fontSize:9,color:"#3a3a5a",fontFamily:"M PLUS Rounded 1c,sans-serif",padding:8}}>🔒 フェリーを手に入れると世界へ！</div>}
+      </div>
+
+      {/* 隠しアイテム収集状況 */}
+      {(char.foundItems||[]).length>0&&<div style={{marginTop:10,padding:"6px 10px",background:"#1a1a08",borderRadius:6,border:"1px solid #ffd60a33"}}>
+        <span style={{fontSize:9,color:"#ffd60a",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+          ✨ 隠しアイテム {(char.foundItems||[]).length}/{HIDDEN_ITEMS.length}個発見
+        </span>
+      </div>}
+    </div>
+
+    {/* 🚀 SPACE セクション */}
+    <div style={{marginBottom:14,background:"#020210",borderRadius:10,padding:12,border:`1px solid ${shipBuilt?"#4a4aff":"#2a2a5a"}`}}>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:"#c0c0ff",marginBottom:10,letterSpacing:1}}>🚀 SPACE</div>
+      {[
+        {key:"engine",e:"🔩",label:"エンジン",  hint:"東京BOSS（SAM）撃破"},
+        {key:"fuel",  e:"⛽",label:"燃料",      hint:"札幌BOSS（NAOYA）撃破"},
+        {key:"shield",e:"🛡",label:"シールド", hint:"マイケル3点セット所持"},
+        {key:"nav",   e:"💡",label:"ナビ",     hint:"Lv.50以上で自動入手！"},
+      ].map(p=>(
+        <div key={p.key} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
+          <span style={{fontSize:14}}>{p.e}</span>
+          <div style={{flex:1}}>
+            <span style={{fontSize:10,color:rocketParts[p.key]?"#b3ff00":TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+              {p.label}
+            </span>
+            {!rocketParts[p.key]&&<div style={{fontSize:8,color:"#3a3a6a",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{p.hint}</div>}
+          </div>
+          <span style={{fontSize:14}}>{rocketParts[p.key]?"✅":"⬜"}</span>
         </div>
-      </div>
-    )}
+      ))}
+      {shipBuilt&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginTop:10}}>
+        <Btn onClick={()=>setWalkMoon(true)} col="#050518" tc="#c0c0ff" sx={{fontSize:11,fontWeight:700,padding:"10px 6px",border:"1px solid #4a4aff"}}>🌙 月</Btn>
+        <Btn onClick={()=>setWalkSpace(true)} col="#020210" tc="#8080ff" sx={{fontSize:11,fontWeight:700,padding:"10px 6px",border:"1px solid #3a3aaa"}}>🚀 宇宙</Btn>
+      </div>}
+      {!shipBuilt&&<div style={{textAlign:"center",fontSize:9,color:"#3a3a6a",fontFamily:"M PLUS Rounded 1c,sans-serif",marginTop:6}}>
+        🔒 全パーツを集めると宇宙へ行ける！
+      </div>}
+    </div>
 
-    {/* EUROPE ボタン */}
-    {hasAirplane?(
-      <Btn onClick={()=>setWalkEUR(true)} col="#1a0a00" tc="#ffd60a" full sx={{fontSize:12,border:"1px solid #ffd60a55",fontWeight:700,marginBottom:8,padding:"12px"}}>🌍 WALK EUROPE（パリ・ロンドン・フィレンツェ...）</Btn>
-    ):(
-      <div style={{background:"#1a0a00",border:"1px solid #ffd60a33",borderRadius:8,padding:12,marginBottom:8}}>
-        <div style={{fontSize:11,color:"#ffd60a",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>🌍 EUROPE（バレエ発祥・フィレンツェへ...）</div>
-        <div style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✈️ 飛行機チケットが必要！</div>
-      </div>
-    )}
-
-    {/* INDIA ボタン */}
-    {hasAirplane?(
-      <Btn onClick={()=>setWalkIND(true)} col="#1a0a1a" tc="#ff9ec4" full sx={{fontSize:12,border:"1px solid #ff9ec455",fontWeight:700,marginBottom:8,padding:"12px"}}>🇮🇳 WALK INDIA（ムンバイ・デリー・チェンナイ...）</Btn>
-    ):(
-      <div style={{background:"#1a0a1a",border:"1px solid #ff9ec433",borderRadius:8,padding:12,marginBottom:8}}>
-        <div style={{fontSize:11,color:"#ff9ec4",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>🇮🇳 INDIA（ボリウッド・バラタナティアム...）</div>
-        <div style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✈️ 飛行機チケットが必要！</div>
-      </div>
-    )}
-
-    {/* SOUTH AMERICA ボタン */}
-    {hasAirplane?(
-      <Btn onClick={()=>setWalkSAM(true)} col="#1a1000" tc="#ffd60a" full sx={{fontSize:12,border:"1px solid #ffd60a55",fontWeight:700,marginBottom:8,padding:"12px"}}>🌎 WALK S.AMERICA（リオ・サンパウロ・ブエノスアイレス...）</Btn>
-    ):(
-      <div style={{background:"#1a1000",border:"1px solid #ffd60a33",borderRadius:8,padding:12,marginBottom:8}}>
-        <div style={{fontSize:11,color:"#ffd60a",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>🌎 S.AMERICA（カポエイラ・タンゴ・サルサ...）</div>
-        <div style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✈️ 飛行機チケットが必要！</div>
-      </div>
-    )}
-
-    {/* AFRICA ボタン */}
-    {hasAirplane?(
-      <Btn onClick={()=>setWalkAFR(true)} col="#1a0800" tc="#ff9900" full sx={{fontSize:12,border:"1px solid #ff990055",fontWeight:700,marginBottom:8,padding:"12px"}}>🌍 WALK AFRICA（ラゴス・カイロ・ヨハネスブルグ...）</Btn>
-    ):(
-      <div style={{background:"#1a0800",border:"1px solid #ff990033",borderRadius:8,padding:12,marginBottom:8}}>
-        <div style={{fontSize:11,color:"#ff9900",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>🌍 AFRICA（Afrobeat・サバール・パンツラ...）</div>
-        <div style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✈️ 飛行機チケットが必要！</div>
-      </div>
-    )}
-
-    {/* 月へ（マイケル3点セット所持で出現・ヒントなし） */}
-    {hasMichaelSet&&<Btn onClick={()=>setWalkMoon(true)} col="#050510" tc="#c0c0ff" full sx={{fontSize:12,border:"1px solid #c0c0ff44",fontWeight:700,marginBottom:8,padding:"12px",letterSpacing:2}}>🌙 ...</Btn>}
-
-    {/* USA ボタン */}
-    {hasAirplane?(
-      <Btn onClick={()=>setWalkUSA(true)} col="#001a33" tc="#00e5ff" full sx={{fontSize:12,border:"1px solid #00e5ff55",fontWeight:700,marginBottom:8,padding:"12px"}}>🇺🇸 WALK USA（NY・LA・Atlanta...）</Btn>
-    ):(
-      <div style={{background:"#001a33",border:"1px solid #00e5ff33",borderRadius:8,padding:12,marginBottom:8}}>
-        <div style={{fontSize:11,color:"#00e5ff",fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:6}}>🇺🇸 USA（ブロンクス・LA・Atlanta...）</div>
-        <div style={{fontSize:10,color:TX3,marginBottom:8,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✈️ 飛行機チケットが必要！</div>
-        <div style={{display:"flex",gap:8}}>
-          <Btn disabled={char.coins<1000000} col="#001a33" tc="#00e5ff" onClick={()=>{
-            if(char.coins<1000000){pushNotif("¥1,000,000必要！","#ff5555");return;}
-            if(!window.confirm("✈️ 飛行機チケット購入？¥1,000,000消費！"))return;
-            setChar(c=>({...c,coins:c.coins-1000000,specialItems:[...(c.specialItems||[]),"airplane"]}));
-            pushNotif("✈️ 飛行機チケット購入！USA・欧州が解放！","#00e5ff");
-          }} sx={{flex:1,fontSize:11,border:"1px solid #00e5ff44"}}>💰 ¥1,000,000</Btn>
-          <Btn disabled={(char.gems||0)<1000} col="#001a33" tc="#ce93d8" onClick={()=>{
-            if((char.gems||0)<1000){pushNotif("💎1,000必要！","#ff5555");return;}
-            if(!window.confirm("✈️ 飛行機チケット購入？💎1,000消費！"))return;
-            setChar(c=>({...c,gems:(c.gems||0)-1000,specialItems:[...(c.specialItems||[]),"airplane"]}));
-            pushNotif("✈️ 飛行機チケット購入！USA・欧州が解放！","#00e5ff");
-          }} sx={{flex:1,fontSize:11,border:"1px solid #ce93d844"}}>💎 1,000</Btn>
-        </div>
-      </div>
-    )}
-    <div style={{border:`1px solid ${BD}`,borderRadius:10,overflow:"hidden",marginBottom:10}}>
+        <div style={{border:`1px solid ${BD}`,borderRadius:10,overflow:"hidden",marginBottom:10}}>
       <MapSVG region={region} char={char} selected={selected} onSelect={setSelected} traveling={traveling}/>
     </div>
     {selected&&<CityPanel city={selected} char={char} region={region} cleared={cleared} gc2={genre.c} onClose={()=>setSelected(null)} onTravel={travel} onBattle={startBattle} onEatFood={(f)=>eatFood(f,selected)} pushNotif={pushNotif}/>}
@@ -3571,9 +4048,11 @@ function BattleTab({char,setChar,genre,pushNotif,addLog}){
     const{won,flags}=btl;
     const eg=won?opp.rw.exp:Math.floor(opp.rw.exp*.5),coins=won?opp.rw.coins:Math.floor(opp.rw.coins*.5);
     const nt=won&&opp.rw.title&&!char.titles?.includes(opp.rw.title)?opp.rw.title:null;
-    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,energy:Math.max(0,c.energy-7),mood:won?Math.min(100,c.mood+18):Math.max(0,c.mood-12),battlesWon:won?c.battlesWon+1:c.battlesWon,titles:nt?[...(c.titles||[]),nt]:c.titles||[]}));
+    const gemBonus=won&&Math.random()<0.1?1:0; // 10%でジェム+1
+    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,gems:(c.gems||0)+gemBonus,energy:Math.max(0,c.energy-7),mood:won?Math.min(100,c.mood+18):Math.max(0,c.mood-12),battlesWon:won?c.battlesWon+1:c.battlesWon,titles:nt?[...(c.titles||[]),nt]:c.titles||[]}));
     setBattle({phase:"result",won,eg,coins,title:nt,flags,myP:btl.myP,thP:btl.thP});
     if(won)Sound.fanfare();else Sound.lose();
+    if(gemBonus)pushNotif("💎 ジェム+1！","#ce93d8");
     addLog(`${won?"🏆 勝利":"💀 敗北"} vs ${opp.name} +${eg}EXP ${fc(coins)}`);
   }
 
@@ -3581,10 +4060,26 @@ function BattleTab({char,setChar,genre,pushNotif,addLog}){
     if(lv<show.lv){pushNotif(`Lv.${show.lv}が必要！`,"#ff5555");return;}
     if(char.energy<show.ec){pushNotif(`エネルギー不足！⚡${show.ec}必要`,"#ff5555");return;}
     setShowAI({text:"",loading:true});
-    const eg=show.rw.exp+Math.floor(show.rw.exp*Math.random()*.35);
+    // 1日の回数制限チェック
+    const today=new Date().toDateString();
+    const showLog=char.showLog||{};
+    const todayKey=`${show.id}_${today}`;
+    const todayCount=showLog[todayKey]||0;
+    const dailyMax=show.dailyMax||3;
+    if(todayCount>=dailyMax){
+      pushNotif(`今日の${show.name}は上限（${dailyMax}回）です！`,"#ff9900");
+      return;
+    }
+    const eg=show.rw.exp+Math.floor(show.rw.exp*Math.random()*.2);
     const coins=show.rw.coins+Math.floor(show.rw.coins*Math.random()*.4);
     setShowAI({text:`${char.name}のパフォーマンスに会場が震えた！観客総立ちのスタンディングオベーション！最高の夜だった✨`,loading:false});
-    setChar(c=>({...c,exp:c.exp+eg,coins:c.coins+coins,fame:c.fame+show.rw.fame,energy:Math.max(0,c.energy-show.ec),mood:Math.min(100,c.mood+30),showsDone:c.showsDone+1}));
+    setChar(c=>({...c,
+      exp:c.exp+eg,coins:c.coins+coins,fame:c.fame+show.rw.fame,
+      energy:Math.max(0,c.energy-show.ec),
+      mood:Math.min(100,c.mood+30),
+      showsDone:c.showsDone+1,
+      showLog:{...(c.showLog||{}),[todayKey]:(c.showLog?.[todayKey]||0)+1},
+    }));
     pushNotif(`🎭 ${show.name}完了！ +${eg}EXP ${fc(coins)}`,genre.c);
     addLog(`🎭「${show.name}」+${eg}EXP ${fc(coins)} +${show.rw.fame}FAME`);
   }
@@ -3697,6 +4192,15 @@ function BattleTab({char,setChar,genre,pushNotif,addLog}){
               <span style={{fontSize:11,color:"#ffd60a"}}>+{show.rw.exp}〜EXP</span>
               <span style={{fontSize:11,color:"#b3ff00",fontWeight:700}}>{fc(show.rw.coins)}〜 賞金</span>
               <span style={{fontSize:11,color:"#ff9ec4"}}>+{show.rw.fame} FAME</span>
+              {(()=>{
+                const today=new Date().toDateString();
+                const cnt=(char.showLog||{})[`${show.id}_${today}`]||0;
+                const max=show.dailyMax||3;
+                const remaining=max-cnt;
+                return<span style={{fontSize:10,color:remaining>0?"#80c0ff":"#ff5555",fontWeight:700}}>
+                  {remaining>0?`残り${remaining}回`:`今日は終了`}
+                </span>;
+              })()}
               <span style={{fontSize:10,color:"#00e5ff"}}>⚡{show.ec}</span>
             </div>
             <Btn disabled={!can} col={can?"#0a200a":"#111"} tc={can?"#90e890":"#404060"} onClick={()=>doShow(show)} full sx={{fontSize:12,padding:"11px",border:can?"1px solid #2a5a2a":"1px solid #1a1a30",fontWeight:700}}>
@@ -3789,7 +4293,7 @@ function ShopTab({char,setChar,genre,pushNotif,onTokushou}){
 
   function buyDrink(drink){
     if((char.gems||0)<drink.p){pushNotif(`💎 ジェムが足りない！${drink.p}💎必要`,"#ff5555");return;}
-    const MAX=char.maxEnergy||50;
+    const MAX=getMaxEnergy(lv);
     const ns={...char.stats};
     if(drink.bonus)Object.entries(drink.bonus).forEach(([k,v])=>{ns[k]=(ns[k]||0)+v;});
     setChar(c=>({...c,gems:(c.gems||0)-drink.p,energy:Math.min(MAX,c.energy+drink.energy),stats:ns}));
@@ -3823,10 +4327,65 @@ function ShopTab({char,setChar,genre,pushNotif,onTokushou}){
       <div style={{fontSize:13,color:"#b3ff00",fontWeight:700}}>{fc(char.coins)}</div>
     </div>
     <div style={{display:"flex",background:BG2,borderRadius:8,padding:3,gap:2,marginBottom:14,flexWrap:"wrap"}}>
-      {[["costumes","衣装"],["sneakers","靴"],["accessories","アクセ"],["drinks","ドリンク"],["workshops","WS"],["legend","👑伝説"]].map(([id,label])=>(
-        <button key={id} onClick={()=>setSub(id)} style={{flex:1,minWidth:55,padding:"7px 2px",fontSize:9,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:sub===id?genre.c+"33":"none",color:sub===id?genre.c:TX3,borderRadius:6,border:sub===id?`1px solid ${genre.c}66`:"1px solid transparent",transition:"all .15s"}}>{label}</button>
+      {[["gems","💎 購入"],["costumes","衣装"],["sneakers","靴"],["accessories","アクセ"],["drinks","ドリンク"],["workshops","WS"],["legend","👑伝説"]].map(([id,label])=>(
+        <button key={id} onClick={()=>setSub(id)} style={{flex:1,minWidth:50,padding:"7px 2px",fontSize:9,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:sub===id?genre.c+"33":"none",color:sub===id?genre.c:TX3,borderRadius:6,border:sub===id?`1px solid ${genre.c}66`:"1px solid transparent",transition:"all .15s"}}>{label}</button>
       ))}
     </div>
+    {/* 💎 ジェム購入 */}
+    {sub==="gems"&&(()=>{
+      const GEM_PACKS=[
+        {id:"pack_60",  gems:60,   price:120,  name:"💎 60ジェム",   bonus:"",       popular:false},
+        {id:"pack_350", gems:350,  price:600,  name:"💎 350ジェム",  bonus:"+50お得", popular:true},
+        {id:"pack_1200",gems:1200, price:1800, name:"💎 1,200ジェム",bonus:"+200お得",popular:false},
+        {id:"pack_2500",gems:2500, price:3500, name:"💎 2,500ジェム",bonus:"+500お得",popular:false},
+      ];
+      const[buying,setBuying]=useState(null);
+      async function startCheckout(pack){
+        setBuying(pack.id);
+        try{
+          const res=await fetch("/api/create-checkout",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({packId:pack.id,userId:char.uid||"guest"}),
+          });
+          const data=await res.json();
+          if(data.url){window.location.href=data.url;}
+          else{pushNotif("エラーが発生しました","#ff5555");}
+        }catch(e){pushNotif("通信エラー。再度お試しください","#ff5555");}
+        setBuying(null);
+      }
+      return(<div>
+        <div style={{background:"linear-gradient(135deg,#0a0a20,#120a2a)",borderRadius:10,padding:"14px 16px",marginBottom:16,textAlign:"center",border:"1px solid #4444aa44"}}>
+          <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:"#88eeff",marginBottom:6}}>💎 現在のジェム</div>
+          <div style={{fontSize:32,fontWeight:900,color:"#88eeff",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{char.gems||0}</div>
+          <div style={{fontSize:10,color:TX3,marginTop:4,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>ドリンク・伝説アイテムに使用できる</div>
+        </div>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:12}}>-- CHOOSE YOUR PACK --</div>
+        {GEM_PACKS.map(pack=>(
+          <div key={pack.id} style={{background:pack.popular?"linear-gradient(135deg,#1a1040,#0d0820)":BG2,border:`1px solid ${pack.popular?"#9966ff88":BD}`,borderRadius:10,padding:"14px 16px",marginBottom:10,position:"relative"}}>
+            {pack.popular&&<div style={{position:"absolute",top:-8,right:12,background:"#9966ff",color:"#fff",fontSize:9,padding:"3px 10px",borderRadius:10,fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>人気No.1</div>}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+              <div>
+                <div style={{fontSize:16,fontWeight:900,color:pack.popular?"#bb99ff":TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{pack.name}</div>
+                {pack.bonus&&<div style={{fontSize:10,color:"#88ff88",fontFamily:"M PLUS Rounded 1c,sans-serif",marginTop:2}}>{pack.bonus}</div>}
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontSize:18,fontWeight:900,color:pack.popular?"#bb99ff":"#b3ff00",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>¥{pack.price.toLocaleString()}</div>
+                <div style={{fontSize:9,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>税込</div>
+              </div>
+            </div>
+            <Btn col={pack.popular?"#2d1060":"#0a1e2a"} tc={pack.popular?"#bb99ff":"#88eeff"} onClick={()=>startCheckout(pack)} full disabled={buying===pack.id} sx={{fontSize:12,border:`1px solid ${pack.popular?"#9966ff44":"#1a4870"}`}}>
+              {buying===pack.id?"処理中...":"購入する →"}
+            </Btn>
+          </div>
+        ))}
+        <div style={{fontSize:10,color:TX3,textAlign:"center",marginTop:8,fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1.7,opacity:.7}}>
+          ・購入後すぐにジェムが追加されます<br/>
+          ・決済はStripeによる安全な処理<br/>
+          ・返金についてはお問い合わせください
+        </div>
+      </div>);
+    })()}
     {/* DRINKS */}
     {sub==="drinks"&&(<div>
       <div style={{fontSize:11,color:TX2,marginBottom:14,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>飲み物でエネルギー即回復！現地グルメはMAPの各都市でも食べられるよ。</div>
@@ -3895,6 +4454,8 @@ function ShopTab({char,setChar,genre,pushNotif,onTokushou}){
       </div>
       {SHOP.legend.map(item=>{
         const owned=hasMichael(item.id);
+        // requireアイテムを持ってない場合は非表示
+        if(item.require&&!(char.specialItems||[]).includes(item.require))return null;
         const canBuyCoins=char.coins>=item.p;
         const canBuyGems=(char.gems||0)>=item.pg;
         return(<div key={item.id} style={{background:owned?"#1a1a00":"#0a0a00",border:`1px solid ${owned?"#ffd60a":"#3a3a00"}`,borderRadius:10,padding:"14px 12px",marginBottom:12}}>
@@ -3937,7 +4498,8 @@ function ShopTab({char,setChar,genre,pushNotif,onTokushou}){
   </div>);
 }
 function StatusTab({char,lv,rnk,genre,setChar,user,onAuthChange,lightMode,toggleLight}){
-  const[showAuth,setShowAuth]=useState(false);
+  const mapLabels={"japan":"🗾 日本","asia":"🌏 ASIA","usa":"🇺🇸 USA","europe":"🌍 EUROPE","india":"🇮🇳 INDIA","samerica":"🌎 南米","africa":"🌍 AFRICA"};
+  const foundItems=char.foundItems||[];
   const[authMode,setAuthMode]=useState("register");
   const[email,setEmail]=useState("");
   const[pass,setPass]=useState("");
@@ -4067,6 +4629,27 @@ function StatusTab({char,lv,rnk,genre,setChar,user,onAuthChange,lightMode,toggle
           {nextHint&&<div style={{fontSize:9,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>💡 ヒント: {nextHint.hint}</div>}
         </div>);
       })()}
+
+      {/* 🗺 隠しアイテム大陸情報 */}
+      <div style={{marginTop:16,padding:"12px 14px",background:"#0a0a08",borderRadius:10,border:"1px solid #3a3a0a"}}>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:"#ffd60a",marginBottom:10}}>🗺 隠しアイテム {foundItems.length}/{HIDDEN_ITEMS.length}</div>
+        {HIDDEN_ITEMS.map(h=>{
+          const found=foundItems.includes(h.id);
+          return(<div key={h.id} style={{display:"flex",alignItems:"center",gap:10,marginBottom:6,opacity:found?1:.65}}>
+            <span style={{fontSize:14}}>{found?h.name.split(" ")[0]:"❓"}</span>
+            <div style={{flex:1}}>
+              <span style={{fontSize:10,color:found?"#ffd60a":TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:found?700:400}}>
+                {found?h.name:"???"}
+              </span>
+              <span style={{fontSize:9,color:TX3,marginLeft:6}}>{mapLabels[h.mapId]||h.mapId}</span>
+            </div>
+            <span style={{fontSize:11}}>{found?"✅":"⬜"}</span>
+          </div>);
+        })}
+        <div style={{fontSize:9,color:"#4a4a2a",marginTop:8,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+          各大陸のマップを歩いて探せ！
+        </div>
+      </div>
     </div>
     {/* テーマ切り替え */}
     <div style={{background:BG2,border:`1px solid ${BD}`,borderRadius:8,padding:"14px 16px",marginBottom:12}}>
@@ -4094,11 +4677,23 @@ function StatusTab({char,lv,rnk,genre,setChar,user,onAuthChange,lightMode,toggle
           <div style={{fontSize:9,color:TX3,marginBottom:2}}>サブ1</div>
           <span style={{fontSize:20}}>{GENRES[char.genre2]?.e}</span>
           <div style={{fontSize:9,color:GENRES[char.genre2]?.c,fontWeight:700}}>{GENRES[char.genre2]?.jp}</div>
+          <button onClick={()=>{
+            setChar(c=>({...c,genre:c.genre2,genre2:c.genre}));
+            pushNotif(`🔄 ${GENRES[char.genre2]?.jp}をメインに！`,"#ffd60a");
+          }} style={{fontSize:8,marginTop:4,padding:"3px 8px",background:"#1a1a0a",border:"1px solid #4a4a1a",borderRadius:4,color:"#ffd60a",cursor:"pointer",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+            ↑ メインに
+          </button>
         </div>}
         {char.genre3&&<div style={{textAlign:"center",flex:1,borderLeft:`1px solid ${BD}`,paddingLeft:8}}>
           <div style={{fontSize:9,color:TX3,marginBottom:2}}>サブ2</div>
           <span style={{fontSize:20}}>{GENRES[char.genre3]?.e}</span>
           <div style={{fontSize:9,color:GENRES[char.genre3]?.c,fontWeight:700}}>{GENRES[char.genre3]?.jp}</div>
+          <button onClick={()=>{
+            setChar(c=>({...c,genre:c.genre3,genre3:c.genre}));
+            pushNotif(`🔄 ${GENRES[char.genre3]?.jp}をメインに！`,"#ffd60a");
+          }} style={{fontSize:8,marginTop:4,padding:"3px 8px",background:"#1a1a0a",border:"1px solid #4a4a1a",borderRadius:4,color:"#ffd60a",cursor:"pointer",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+            ↑ メインに
+          </button>
         </div>}
       </div>
       <div style={{fontSize:10,color:TX2,marginBottom:10,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
@@ -4129,6 +4724,1022 @@ function StatusTab({char,lv,rnk,genre,setChar,user,onAuthChange,lightMode,toggle
       {char.genre2&&<Btn onClick={()=>{if(!window.confirm("サブジャンルを削除しますか？"))return;setChar(c=>({...c,genre2:null}));}} col="#200a0a" tc="#ff7070" full sx={{marginTop:8,fontSize:10,border:"1px solid #4a1a1a"}}>サブジャンルを削除</Btn>}
     </div>
     {char.titles?.length>0&&<div style={{background:BG2,border:`1px solid ${BD}`,borderRadius:8,padding:"12px 14px"}}><div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>TITLES</div><div style={{display:"flex",flexWrap:"wrap",gap:7}}>{char.titles.map(t=><span key={t} style={{fontSize:11,padding:"5px 12px",borderRadius:20,background:"#1a0a2a",color:"#ce93d8",border:"1px solid #3a1a5a",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>🎖 {t}</span>)}</div></div>}
+  </div>);
+}
+
+/* ── 🧠 DANCING QUIZ データ（40問） ── */
+const DANCE_QUIZ=[
+  // ── バレエ ──
+  {id:"q01",cat:"🩰 バレエ",diff:1,
+   q:"バレエが生まれた国はどこ？",
+   choices:["イタリア","フランス","ロシア","イギリス"],ans:0,
+   exp:"バレエはルネサンス期のイタリアに起源を発する。宮廷の余興「バロ（Ballo）」が始まり。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q02",cat:"🩰 バレエ",diff:1,
+   q:"バレエをイタリアからフランスに持ち込んだ一族は？",
+   choices:["メディチ家","ボルジア家","エステ家","ヴィスコンティ家"],ans:0,
+   exp:"1533年、フィレンツェのメディチ家からカトリーヌ・ド・メディシスがフランス王室に嫁ぎバレエを伝えた。",
+   rw:{exp:250,coins:600}},
+
+  {id:"q03",cat:"🩰 バレエ",diff:2,
+   q:"1661年に王立舞踏アカデミーを創立したフランス国王は？",
+   choices:["ルイ14世","ルイ13世","ナポレオン","フランソワ1世"],ans:0,
+   exp:"「太陽王」ルイ14世は15歳でバレエデビューし、1661年に王立舞踏アカデミーを創立してバレエを体系化した。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q04",cat:"🩰 バレエ",diff:2,
+   q:"チャイコフスキーの三大バレエに含まれないのは？",
+   choices:["ドン・キホーテ","白鳥の湖","くるみ割り人形","眠れる森の美女"],ans:0,
+   exp:"三大バレエは「眠れる森の美女」「くるみ割り人形」「白鳥の湖」。ドン・キホーテはミンクス作曲。",
+   rw:{exp:350,coins:800}},
+
+  {id:"q05",cat:"🩰 バレエ",diff:3,
+   q:"「ラ・シルフィード」でポワント技法を確立した女性ダンサーは？",
+   choices:["マリー・タリオーニ","アンナ・パブロワ","マリー・カマルゴ","エリアナ・パブロワ"],ans:0,
+   exp:"1832年、マリー・タリオーニが「ラ・シルフィード」でポワントを本格的に披露しロマンティック・バレエを確立した。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  // ── タップ ──
+  {id:"q06",cat:"👞 タップ",diff:1,
+   q:"タップダンスのルーツとなった出来事は？",
+   choices:["ドラムの禁止","バレエの普及","ジャズの誕生","映画の発展"],ans:0,
+   exp:"1739年サウスカロライナ州でドラムが禁止され、代わりに足を踏み鳴らしたことがタップダンスの起源。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q07",cat:"👞 タップ",diff:2,
+   q:"毎年5月25日の「National Tap Dance Day」は誰の誕生日にちなむ？",
+   choices:["ビル・ボージャングルス・ロビンソン","フレッド・アステア","ジーン・ケリー","グレゴリー・ハインズ"],ans:0,
+   exp:"「タップの神様」ビル・ボージャングルス・ロビンソンの誕生日（5月25日）にちなみ制定された。",
+   rw:{exp:300,coins:700}},
+
+  // ── ソウル ──
+  {id:"q08",cat:"🎙 ソウル",diff:1,
+   q:"「ソウルのゴッドファーザー」と呼ばれたアーティストは？",
+   choices:["James Brown","Ray Charles","Aretha Franklin","Sly Stone"],ans:0,
+   exp:"James BrownはすべてのストリートダンスのルーツとなったFUNKの創始者。Breaking、Popping、Lockingすべてに影響を与えた。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q09",cat:"🎙 ソウル",diff:1,
+   q:"ソウルダンスを世界に広めたテレビ番組は？",
+   choices:["SOUL TRAIN","American Bandstand","Soul!","The Ed Sullivan Show"],ans:0,
+   exp:"1970年シカゴ発のSOUL TRAINがソウルダンスを全世界に広めた。プロデューサーはドン・コーネリアス。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q10",cat:"🎙 ソウル",diff:2,
+   q:"SOUL TRAINが開始した年は？",
+   choices:["1970年","1965年","1975年","1980年"],ans:0,
+   exp:"1970年にシカゴのWCIU-TVでスタート。1971年にLAへ移転し全米ネットへ拡大した。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q11",cat:"🎙 ソウル",diff:2,
+   q:"本場アメリカでは「ソウルダンス」を何と呼ぶ？",
+   choices:["パーティーダンス","ストリートダンス","ファンクダンス","ブラックダンス"],ans:0,
+   exp:"アメリカでは「ソウルダンス」という呼称は存在せず「パーティーダンス」「パーティーグルーヴ」と呼ばれる。「ソウルダンス」は日本独自の呼称。",
+   rw:{exp:350,coins:800}},
+
+  {id:"q12",cat:"🎙 ソウル",diff:3,
+   q:"James Brownが1965年に発明したとされる音楽ジャンルは？",
+   choices:["Funk","Soul","R&B","Disco"],ans:0,
+   exp:"1965年「Papa's Got a Brand New Bag」でFunkを発明。リズムを核とした構造がすべてのストリートダンスに影響を与えた。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  // ── ブレイキング ──
+  {id:"q13",cat:"🏙 ブレイク",diff:1,
+   q:"Breakingが生まれたニューヨークの区は？",
+   choices:["ブロンクス","ブルックリン","マンハッタン","クイーンズ"],ans:0,
+   exp:"ブレイクダンスは1970年代にニューヨークのサウスブロンクス地区のアフリカ系・ラテン系の若者によって発展した。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q14",cat:"🏙 ブレイク",diff:1,
+   q:"B-BOYの「B」が意味するものは？",
+   choices:["ブレイクビーツ","バッド","ブロンクス","ブラック"],ans:0,
+   exp:"B-BOYとはBreak Beats（ブレイクビーツ）で踊る人のこと。Bad（不良）やBlack（黒人）の略ではない。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q15",cat:"🏙 ブレイク",diff:2,
+   q:"ブレイクビーツの手法を生み出したDJは？",
+   choices:["DJ Kool Herc","Grandmaster Flash","Afrika Bambaataa","DJ Jazzy Jeff"],ans:0,
+   exp:"DJクール・ハークがブレイクビーツの手法を生み出し、その後グランドマスター・フラッシュ、アフリカ・バンバータが発展させた。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q16",cat:"🏙 ブレイク",diff:2,
+   q:"ブレイクダンスの4要素に含まれないのは？",
+   choices:["ロッキング","エントリー","フットワーク","フリーズ"],ans:0,
+   exp:"ブレイクダンスの4要素はエントリー（トップロック）・フットワーク・パワームーブ・フリーズ。ロッキングは別ジャンル。",
+   rw:{exp:350,coins:800}},
+
+  {id:"q17",cat:"🏙 ブレイク",diff:3,
+   q:"HIPHOPの4大要素に含まれないものは？",
+   choices:["ポッピング","DJing","MCing（ラップ）","グラフィティ"],ans:0,
+   exp:"HIPHOPの4大要素はDJing・MCing・ブレイクダンス・グラフィティ。ポッピングはオールドスクールだが4大要素には含まれない。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  // ── ポッピング ──
+  {id:"q18",cat:"⚡ ポップ",diff:1,
+   q:"ポッピングが生まれたアメリカの都市は？",
+   choices:["フレズノ","ロサンゼルス","サンフランシスコ","オークランド"],ans:0,
+   exp:"ポッピングは1977年にカリフォルニア州フレズノのBoogaloo Samによって創られた。Electric Boogaloosが世界に広めた。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q19",cat:"⚡ ポップ",diff:2,
+   q:"Electric Boogaloosを結成したのは誰？",
+   choices:["Boogaloo Sam","Poppin Pete","Skeeter Rabbit","Mr. Wiggles"],ans:0,
+   exp:"Boogaloo Sam（Sam Solomon）が1977年にカリフォルニア州フレズノでElectric Boogaloosを設立。弟Poppin Peteと共に活動。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q20",cat:"⚡ ポップ",diff:3,
+   q:"マイケル・ジャクソンに直接指導したポッピングのレジェンドは？",
+   choices:["Boogaloo Sam","Toni Basil","Don Campbell","Shabba Doo"],ans:0,
+   exp:"マイケル・ジャクソンの師匠はBoogaloo Sam。ムーンウォーク等のマイケルの動きにはポッピングの技法が取り入れられている。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  // ── ロック ──
+  {id:"q21",cat:"🔒 ロック",diff:1,
+   q:"ロックダンスを考案したダンサーは？",
+   choices:["Don Campbell","Boogaloo Sam","Don Cornelius","James Brown"],ans:0,
+   exp:"ドン・キャンベル（Don Campbell）が1969年にLAでロックダンスを偶然生み出した。滑らかに踊れなかったことが逆に新スタイルになった。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q22",cat:"🔒 ロック",diff:2,
+   q:"ロックダンスの「ポイント（指さし）」が生まれたきっかけは？",
+   choices:["観客に笑われた","音楽に合わせた","テレビを見て","先輩に習った"],ans:0,
+   exp:"ドン・キャンベルが観客から笑われたため、思わず観客に指をさしたのが「ポイント」の始まり。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q23",cat:"🔒 ロック",diff:2,
+   q:"The LockersがSOUL TRAINに起用された年は？",
+   choices:["1972年","1969年","1975年","1980年"],ans:0,
+   exp:"The Lockersは1972年にSoul Trainに起用され一躍全米で有名になった。先にSaturday Night Liveにも出演している。",
+   rw:{exp:300,coins:700}},
+
+  // ── ワッキング ──
+  {id:"q24",cat:"💜 ワック",diff:1,
+   q:"WAACKINGはどこで生まれたダンス？",
+   choices:["LAのゲイクラブ","NYのクラブ","シカゴのバー","ロンドンのクラブ"],ans:0,
+   exp:"WAACKは70年代初期にLAのゲイクラブで生まれたダンス。当時の女優やドラッグクイーンのポーズを真似たことが起源。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q25",cat:"💜 ワック",diff:3,
+   q:"WAACKINGとPUNKINGの違いは？",
+   choices:["WAACKはより感情的でPUNKINGはより滑らか","WAACKは速くPUNKINGは遅い","WAACKは男性用でPUNKINGは女性用","違いはない"],ans:0,
+   exp:"WAACKINGはより感情的。PUNKINGは滑らかで精度を高める方向。もともとストレートなダンサーが差別的に「PUNKING」と呼んでいたことが由来。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  // ── ヒップホップ ──
+  {id:"q26",cat:"🎤 HipHop",diff:1,
+   q:"HIPHOPが誕生した年月日は？",
+   choices:["1973年8月11日","1975年12月25日","1970年1月1日","1979年9月16日"],ans:0,
+   exp:"1973年8月11日、DJ Kool Hercが1520 Sedgwick Aveでプレイしたことからすべてが始まった。妹の洋服代を調達するためのパーティーだった。",
+   rw:{exp:250,coins:600}},
+
+  {id:"q27",cat:"🎤 HipHop",diff:2,
+   q:"HIPHOPダンスのニュースクールの基礎を確立したブルックリン出身のダンサーは？",
+   choices:["Buddha Stretch","DJ Kool Herc","Missy Elliott","MC Hammer"],ans:0,
+   exp:"1980年代後半〜90年代前半、ブルックリン出身のBuddha StretchらMOPTOPメンバーがFreestyle Hip Hop Danceの基礎を確立した。",
+   rw:{exp:350,coins:800}},
+
+  {id:"q28",cat:"🎤 HipHop",diff:2,
+   q:"日本でHIPHOPダンスを広めたTV番組で、TRFのSAMが出演したのは？",
+   choices:["ダンスダンスダンス","DA DA LMD","SOULトレイン","夜のヒットスタジオ"],ans:0,
+   exp:"フジTVの「ダンスダンスダンス」にTRFのSAMとCHIHARUがレギュラーダンサーとして出演し日本にHIPHOPダンスを広めた。",
+   rw:{exp:350,coins:800}},
+
+  // ── ハウス ──
+  {id:"q29",cat:"🎛 ハウス",diff:1,
+   q:"HOUSE MUSICが発祥した都市は？",
+   choices:["シカゴ","ニューヨーク","デトロイト","ロサンゼルス"],ans:0,
+   exp:"ハウスミュージックはシカゴのクラブ「ウェアハウス」から生まれた。フランキー・ナックルズのDJが起源。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q30",cat:"🎛 ハウス",diff:2,
+   q:"ハウスダンスが生まれたニューヨークの伝説的クラブは？",
+   choices:["パラダイス・ガラージ","スタジオ54","コットンクラブ","ウェアハウス"],ans:0,
+   exp:"1970年代末のNY・クラブ「パラダイス・ガラージ」でDJラリー・レヴァンがハウスの基本スタイルを生み出した。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q31",cat:"🎛 ハウス",diff:2,
+   q:"Madonnaが「Vogue」でVOGUINGを教わった人物は？",
+   choices:["Willi Ninja","Vogueing Vino","Kevin JZ Prodigy","Javier Ninja"],ans:0,
+   exp:"Willi Ninja（House of Ninjaの創設者）がMadonnaにヴォーギングを教えた。ドキュメンタリー映画「パリ、夜は眠らない」にも出演。",
+   rw:{exp:350,coins:800}},
+
+  {id:"q32",cat:"🎛 ハウス",diff:3,
+   q:"日本のハウスダンスの第一人者で「ROOTS」を結成したのは？",
+   choices:["KOJI","HIRO","SAM","Nada"],ans:0,
+   exp:"日本のハウスダンス第一人者は元ZOOのKOJI氏。1993年頃に伝説のHouse DanceチームROOTSを結成した。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  // ── ジャズ ──
+  {id:"q33",cat:"🎷 ジャズ",diff:1,
+   q:"ジャズダンスの原型が生まれたアメリカの港町は？",
+   choices:["ニューオーリンズ","ニューヨーク","シカゴ","メンフィス"],ans:0,
+   exp:"ニューオーリンズでジャズミュージック文化が花開き、現代に通じるジャズダンスの原型が作られた。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q34",cat:"🎷 ジャズ",diff:3,
+   q:"黒人で初めてバレエカンパニーを創りブロードウェイに立ったジャズダンスのパイオニアは？",
+   choices:["キャサリン・ダンハム","アイシャ・ダンカン","マーサ・グラハム","アグネス・デミル"],ans:0,
+   exp:"Katherine Dunhamはジャズダンスのパイオニアで、黒人で初めてバレエカンパニーを創設しブロードウェイに立った。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  // ── コンテンポラリー ──
+  {id:"q35",cat:"🌀 コンテンポラリー",diff:2,
+   q:"コンテンポラリー・ダンスの芸術運動が発祥した国は？",
+   choices:["フランス","ドイツ","アメリカ","日本"],ans:0,
+   exp:"コンテンポラリー・ダンスの舞踊芸術運動の発祥地は1980年代前半のフランス。国策として文化の地方化が進められた。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q36",cat:"🌀 コンテンポラリー",diff:3,
+   q:"「コンテンポラリー・ダンスの母」と呼ばれるダンサーは？",
+   choices:["カロリン・カールソン","イサドラ・ダンカン","マーサ・グラハム","ピナ・バウシュ"],ans:0,
+   exp:"フィンランド系アメリカ人ダンサーのCarolyn Carlsonがパリ・オペラ座に招聘されコンテンポラリーダンスの母と呼ばれた。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  // ── ダンスの起源 ──
+  {id:"q37",cat:"🌍 起源",diff:1,
+   q:"旧石器時代の洞窟壁画に踊る人が描かれているのはどこ？",
+   choices:["アルタミラ洞窟","ラスコー洞窟","ショーヴェ洞窟","マルボル洞窟"],ans:0,
+   exp:"スペインのアルタミラ洞窟の壁画に人々が踊る様子が描かれており、ダンスの歴史の古さを示している。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q38",cat:"🌍 起源",diff:2,
+   q:"古代ギリシアでダンスを教育として推奨した哲学者は？",
+   choices:["プラトンとアリストテレス","ソクラテスとプラトン","アリストテレスとソクラテス","ピタゴラスとプラトン"],ans:0,
+   exp:"プラトンとアリストテレスは身体的にも精神的にも健康な人間を育む教育の方法としてダンスを推奨した。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q39",cat:"🌍 起源",diff:3,
+   q:"日本の古事記で、踊って天照大神を天岩戸から引き出した神は？",
+   choices:["天宇受売命（アメノウズメ）","天照大神","須佐之男命","天手力男神"],ans:0,
+   exp:"アメノウズメが力強くエロティックに踊り、八百万の神々を笑わせ、天照大神が気になって戸を開けたところを天手力男神が引き出した。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q40",cat:"🌍 起源",diff:1,
+   q:"ソウルミュージックのルーツとなった宗教音楽は？",
+   choices:["ゴスペル","讃美歌","グレゴリオ聖歌","スピリチュアル"],ans:0,
+   exp:"ソウルダンス・ソウルミュージックはゴスペルにルーツを持つ。奴隷制後の黒人たちが教会でアフリカ系のリズムで歌い踊ったことが始まり。",
+   rw:{exp:200,coins:500}},
+
+  // ── MOPTOP / ELITE FORCE / MISFITS ──
+  {id:"q41",cat:"🎤 HipHop",diff:2,
+   q:"MOPTOPのオリジナルメンバーは何人？",
+   choices:["4人","6人","3人","8人"],ans:0,
+   exp:"MOPTOPのオリジナルメンバーはLink（リンク）、Caleaf（カリーフ）、Ejoe（イージョー）、Buddha Stretch（ブッダ・ストレッチ）の4人。1991年に共同で正式に結成。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q42",cat:"🎤 HipHop",diff:3,
+   q:"MOPTOPのオリジナル4人に含まれないのは？",
+   choices:["Peter Paul","Link","Caleaf","Ejoe"],ans:0,
+   exp:"MOPTOPオリジナルはLink・Caleaf・Ejoe・Buddha Stretch。Peter Paulは拡張メンバー。Loose Joint、Casper、Ade、Ramier、Toneらも後に加入。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q43",cat:"🎤 HipHop",diff:3,
+   q:"ELITE FORCEが1992年に最初に結成されたのは誰のMV撮影のため？",
+   choices:["マイケル・ジャクソン","Mariah Carey","Will Smith","TLC"],ans:0,
+   exp:"ELITE FORCEは1992年にMICHAEL JACKSONのMV「REMEMBER THE TIME」撮影のために結成された。その後Mariah Carey、Will Smith、TLCなどのMVにも参加。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q44",cat:"🎤 HipHop",diff:3,
+   q:"現役ELITE FORCEのメンバーは何人？",
+   choices:["6人","4人","8人","5人"],ans:0,
+   exp:"現役ELITE FORCEはBuddha Stretch・Henry Link・Brooklyn Terry・Bobby Mileage・Twelve Ejoe・Loose Jointの6人。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q45",cat:"🎤 HipHop",diff:3,
+   q:"MYSTIDIOUS MISFITS（ミスフィッツ）のメンバーに含まれないのは？",
+   choices:["Ejoe","Marquest","Rubberband","Kito"],ans:0,
+   exp:"MISTIDIOUSMISFITSのメンバーはMarquest・Rubberband・Peekaboo・Kito・Prancerの5人。Ejoeはモプトップ/エリートフォース側。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q46",cat:"🎤 HipHop",diff:2,
+   q:"MOPTOPの別名（略語）が意味するのは？",
+   choices:["MOTIVATED ON PRECISION TOWARD OUTSTANDING PERFORMANCE","Masters Of Precision Technique Of Performance","Movement Of Popping Technique Of Perfection","Masters Of Party Talent On Performance"],ans:0,
+   exp:"MOPTOPはMotivated On Precision Toward Outstanding Performanceの頭文字。精度への情熱と卓越したパフォーマンスを目指す姿勢を表している。",
+   rw:{exp:350,coins:800}},
+
+  {id:"q47",cat:"🎤 HipHop",diff:2,
+   q:"HIPHOPダンスシーンの革命となったドキュメンタリー番組「Wreckin' Shop Live from Brooklyn」が放送されたのは？",
+   choices:["1992年","1988年","1995年","1985年"],ans:0,
+   exp:"1992年に放送された「Wreckin' Shop Live from Brooklyn（通称ALIVE TV）」はMOPTOP/ELITE FORCEが出演し、日本をはじめ全世界に多大な影響を与えた。",
+   rw:{exp:350,coins:800}},
+
+  // ── DANCE FUSION ──
+  {id:"q48",cat:"🎛 ハウス",diff:2,
+   q:"世界的ハウスダンスチーム「DANCE FUSION」が結成された年は？",
+   choices:["1997年","1993年","2001年","1989年"],ans:0,
+   exp:"DANCE FUSIONは1997年ころにCaleaf・Justice・Tony Sekouの3人で結成。世界中へハウスダンスの普及に努めた伝説的チーム。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q49",cat:"🎛 ハウス",diff:3,
+   q:"DANCE FUSIONのオリジナルメンバーの中で唯一の女性は？",
+   choices:["Marjory","Shan.S","Shar","NORICO"],ans:0,
+   exp:"DANCE FUSIONオリジナルメンバーはCaleaf・Shan.S・Tony Sekou・MIKEU4RIA・Tony Magregor・Shar・Marjoryの7人。Marjoryが唯一の女性メンバー。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q50",cat:"🎛 ハウス",diff:3,
+   q:"DANCE FUSIONに加わった日本人ハウスダンサーは？",
+   choices:["HIROとNORICO","KOJIとHIRO","SAMとNORICO","KOJIとNORICO"],ans:0,
+   exp:"DANCE FUSIONにはHIROとNORICOという日本人ハウスダンサーも加わっている。世界チームに日本人が参加した歴史的な出来事。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  // ── ロック追加 ──
+  {id:"q51",cat:"🔒 ロック",diff:3,
+   q:"The Lockersの唯一の女性メンバーで、バレエとロッキングを組み合わせたスタイルで知られるのは？",
+   choices:["Toni Basil","Damita Jo Freeman","Shabba Doo","Fluky Luke"],ans:0,
+   exp:"Toni Basil（ミッキー）はThe Lockers唯一の女性ダンサーでトップバレリーナ兼コリオグラファー。1982年「Hey Mickey」をヒットさせ、マネージャーとしてThe Lockersを商業的成功に導いた。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q52",cat:"🔒 ロック",diff:3,
+   q:"ロッキングを日本に持ち込んだThe Lockersのオリジネーターは？",
+   choices:["Tony Go-Go Lewis","Don Campbell","Shabba Doo","Greg Campbellock Jr."],ans:0,
+   exp:"Tony 'Go-Go' Lewisは1980年代に日本へロッキングを持ち込み、日本独自のスタイルを開発・発展させた。GoGo Brothersを結成し今も息子たちと活動。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  // ── ソウルダンス ステップ ──
+  {id:"q54",cat:"🎙 ソウル",diff:2,
+   q:"James Brownが1969年に3曲連続リリースして広めたステップは？",
+   choices:["ポップコーン","ハッスル","バスストップ","ファンキーチキン"],ans:0,
+   exp:"JBは1969年「The Popcorn」「Mother Popcorn」「Lowdown Popcorn」と3連続ヒットを出してポップコーンステップを爆発的に普及させた。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q55",cat:"🎙 ソウル",diff:2,
+   q:"「ウォーターゲート（Watergate）」ダンスが名前の由来にしたのは？",
+   choices:["政治スキャンダル","映画","水の動き","ホテルの名前"],ans:0,
+   exp:"1972〜73年のウォーターゲート政治スキャンダルにちなんで命名されたソウルダンスのステップ。ロッキングのルーツの一つとされる。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q56",cat:"🎙 ソウル",diff:1,
+   q:"ハッスル（The Hustle）を世界的ヒットにしたアーティストは？",
+   choices:["Van McCoy","James Brown","Rufus Thomas","Chic"],ans:0,
+   exp:"Van McCoy & The Soul City Symphonyの1975年ヒット「The Hustle」でハッスルダンスが爆発的に普及。映画「サタデー・ナイト・フィーバー」でも有名に。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q57",cat:"🎙 ソウル",diff:2,
+   q:"バスストップ（Bus Stop）の元の名前は？",
+   choices:["LAハッスル","カリフォルニアハッスル","ディスコライン","ウェストコーストステップ"],ans:0,
+   exp:"バスストップは1974年頃LAで生まれた「LAハッスル」（別名カリフォルニアハッスル）がNYに伝わって改名したライン・ダンス。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q58",cat:"🎙 ソウル",diff:1,
+   q:"バンプ（The Bump）の最大の特徴は？",
+   choices:["パートナーとヒップをぶつけ合う","腕をジャークさせる","足でポップコーンを踊る","回転する"],ans:0,
+   exp:"バンプは1970年代前半の超シンプルなダンス。隣のパートナーとビートに合わせてヒップをぶつけ合うだけ。シンプルゆえ誰でも踊れた。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q59",cat:"🎙 ソウル",diff:2,
+   q:"「ファンキーチキン（Funky Chicken）」を「Do the Funky Chicken」という曲で1969年に広めたアーティストは？",
+   choices:["Rufus Thomas","James Brown","The Temptations","Marvin Gaye"],ans:0,
+   exp:"Rufus Thomasの1969年ヒット「Do the Funky Chicken」でファンキーチキンが広まった。鶏が羽ばたくような肘の動きが特徴。The Temptationsも披露した。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q60",cat:"🎙 ソウル",diff:2,
+   q:"「フリーク（Freak）」を大ヒット「Le Freak」で広めたバンドは？",
+   choices:["Chic","Earth Wind & Fire","Kool & the Gang","The Isley Brothers"],ans:0,
+   exp:"Chicの1978年大ヒット「Le Freak」から「フリーク」ダンスが広まった。「Freak out!」の掛け声と共に世界のダンスフロアを席巻した。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q61",cat:"🎙 ソウル",diff:3,
+   q:"「ジャーク（The Jerk）」というダンスを1964年に最初にヒットさせたバンドは？",
+   choices:["The Larks","The Miracles","The Temptations","The Capitols"],ans:0,
+   exp:"1964年にThe Larksの「The Jerk」がヒット。同年にThe MiraclesとSmokey Robinsonが「Come on Do the Jerk」を制作。腕を様々なポジションにジャークさせる動きが特徴。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q62",cat:"🎙 ソウル",diff:1,
+   q:"「セックスマシーン（Sex Machine）」はJames Brownが何年にリリースしたファンクの名曲？",
+   choices:["1970年","1965年","1975年","1968年"],ans:0,
+   exp:"1970年リリースのJB史上最大のファンクヒット。ベーシストBootsy CollinsがバスでJBと即興で生み出した。ファンクダンスの基礎となるフットワークを持つ。",
+   rw:{exp:200,coins:500}},
+
+  // ── HIPHOPステップ ──
+  {id:"q64",cat:"🎤 HipHop",diff:1,
+   q:"ランニングマン（Running Man）を広めたといわれる有名アーティストは？",
+   choices:["MC Hammer","James Brown","Bobby Brown","Janet Jackson"],ans:0,
+   exp:"MC HammerがOaklandで発展させたという説が有力。Janet Jacksonの「Rhythm Nation」（1989）、Bobby Brown、Vanilla Iceも披露した。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q65",cat:"🎤 HipHop",diff:2,
+   q:"キャベッジパッチ（Cabbage Patch）の名前の由来は？",
+   choices:["人形のキャベッジパッチキッズ","野菜のキャベツ畑","学校の名前","ダンサーのニックネーム"],ans:0,
+   exp:"1980年代に大流行した人形「キャベッジパッチキッズ（Cabbage Patch Kids）」から命名。Gucci Crew IIが1986年に「The Cabbage Patch」という同名曲をリリースして普及した。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q66",cat:"🎤 HipHop",diff:2,
+   q:"ロボコップ（Robocop）ダンスの名前の由来は？",
+   choices:["1987年の映画","1970年代のロボットダンス","ロックのロボット動作","テレビゲーム"],ans:0,
+   exp:"1987年公開の映画「RoboCop」にちなんで命名。サイボーグ警官の硬いロボット的な動きをダンス化した。ポッピングのロボットダンス（1950年代映画由来）とは別物。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q67",cat:"🎤 HipHop",diff:2,
+   q:"スティーブマーティン（Steve Martin）ダンスを創作したダンサー/ラッパーは？",
+   choices:["Stezo","MC Hammer","Buddha Stretch","Bobby Brown"],ans:0,
+   exp:"コネチカット出身のラッパー/ダンサーStezoが1980年代後半に創作。EPMDの「You Gots to Chill」（1988）MVで世界にデビューした。",
+   rw:{exp:350,coins:800}},
+
+  {id:"q68",cat:"🎤 HipHop",diff:1,
+   q:"フィラ（Fila）とリーボック（Reebok）のダンス名の共通した由来は？",
+   choices:["スニーカーブランド","映画の主人公","ラッパーのニックネーム","街の名前"],ans:0,
+   exp:"フィラもリーボックも1980年代にHIPHOPシーンで大人気だったスニーカーブランドから命名。他にもグッチ（Gucci）、トゥループ（Troop）など当時流行のブランド名がステップ名になった。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q69",cat:"🎤 HipHop",diff:3,
+   q:"ELITE FORCEが制作し世界のHIPHOPダンサーの教科書となった動画シリーズは？",
+   choices:["OLD SCHOOL DICTIONARY","Hip Hop Bible","Party Dance Guide","New School Moves"],ans:0,
+   exp:"ELITE FORCE（Buddha Stretch・Henry Link・Ejoeら）が制作した「OLD SCHOOL DICTIONARY」ビデオ。ランニングマン・キャベッジパッチ・スティーブマーティン・フィラ・ランボーなど多数のステップを体系的にまとめた永遠の名作。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q70",cat:"🎤 HipHop",diff:2,
+   q:"バートシンプソン（Bart Simpson）ダンスが特に流行した地域は？",
+   choices:["アトランタ","ニューヨーク","ロサンゼルス","シカゴ"],ans:0,
+   exp:"バートシンプソンはアトランタで特に人気。NYではスティーブマーティンやBiz Markieが人気で、地域によって流行ステップが異なった。TLCの「Creep」MVでも使用。",
+   rw:{exp:300,coins:700}},
+
+  // ── ハウスダンス フットワーク ──
+  {id:"q72",cat:"🎛 ハウス",diff:1,
+   q:"ハウスダンスの3大要素に含まれないのは？",
+   choices:["ビートボックス","フットワーク","ジャッキング","ロフティング"],ans:0,
+   exp:"ハウスダンスの3大要素はフットワーク・ジャッキング・ロフティング。ジャッキングはシカゴ発、ロフティングはNYのロフトパーティー（David Mancusoの「The Loft」）から。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q73",cat:"🎛 ハウス",diff:2,
+   q:"ハウスダンスの「パドブレ（Pas de Bourrée）」は何のダンスから取り込んだ技法？",
+   choices:["バレエ","ブレイクダンス","タップダンス","サルサ"],ans:0,
+   exp:"パドブレはバレエ由来の3ステップの足の動き。ハウスダンスはバレエ・タップ・サルサ・アフリカンダンスなど多様なダンス文化を吸収した。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q74",cat:"🎛 ハウス",diff:2,
+   q:"ハウスダンスのヒール/トウステップに影響を与えたジャマイカのダンスは？",
+   choices:["スカンキング（Skanking）","ダンスホール","レゲエステップ","スカダンス"],ans:0,
+   exp:"ジャマイカ系アメリカ人Monteが「ラスタがやっていたスカンキングがハウスの足使いの基礎になった」と証言している。",
+   rw:{exp:350,coins:800}},
+
+  {id:"q75",cat:"🎛 ハウス",diff:1,
+   q:"ハウスダンスの「ルースレッグ（Loose Leg）」を体系化したのはどの都市のダンサーたち？",
+   choices:["ニューヨーク","シカゴ","デトロイト","フィラデルフィア"],ans:0,
+   exp:"ルースレッグ・トレイン・スケートなどはニューヨークのハウスダンサーたちが体系化した。ジャッキングの基礎はシカゴ発だが、フットワークはNYで発展した。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q76",cat:"🎛 ハウス",diff:3,
+   q:"「ドルフィンダイブ（Dolphin Dive）」はどんな動きのハウスダンスフロアワーク？",
+   choices:["床に倒れて足を上下させる","空中で回転する","床を手で叩く","スライドして転がる"],ans:0,
+   exp:"ドルフィンダイブは床に倒れてイルカのように足を上下させるフロアワーク。ハンドスプリングの半回転・全回転などのバリエーションもある。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q77",cat:"🎛 ハウス",diff:2,
+   q:"ハウスダンスの「トレイン（Train）」ステップはどの動きと組み合わせたもの？",
+   choices:["ヒール/トウ＋スケーティング","シャッフル＋ジャンプ","ルースレッグ＋ドロップ","パドブレ＋ターン"],ans:0,
+   exp:"トレインはヒール/トウ（かかと・つま先の動き）とスケーティングを組み合わせたステップ。電車が走るようにリズミカルに動く。",
+   rw:{exp:300,coins:700}},
+
+  // ── タップダンスレジェンド ──
+  {id:"q79",cat:"👞 タップ",diff:2,
+   q:"1985年映画「ホワイトナイツ（白夜）」でグレゴリー・ハインズと共演したバレエダンサーは？",
+   choices:["ミハイル・バリシニコフ","ルドルフ・ヌレエフ","マリウス・プティパ","ニジンスキー"],ans:0,
+   exp:"タップの神グレゴリー・ハインズとバレエの神バリシニコフが共演した「ホワイトナイツ（白夜）」は、ジャンルを超えたダンスの普遍性を証明した歴史的映画。",
+   rw:{exp:350,coins:800}},
+
+  {id:"q80",cat:"👞 タップ",diff:2,
+   q:"「リズムタップの父」と呼ばれ、ガーシュウィンの「ポーギーとベス」に出演したタップレジェンドは？",
+   choices:["ジョン・バブルス","ビル・ロビンソン","グレゴリー・ハインズ","サンドマン・シムズ"],ans:0,
+   exp:"John Bubbles（ジョン・バブルス）がリズムタップの父。ヒールを使った複雑なリズムで現代タップの基礎を作り、ガーシュウィンの「ポーギーとベス」初演でSportin' Lifeを演じた。",
+   rw:{exp:350,coins:800}},
+
+  {id:"q81",cat:"👞 タップ",diff:2,
+   q:"「Jumping Jive」での階段を使った伝説パフォーマンスをフレッド・アステアが「世界最高」と称賛したデュオは？",
+   choices:["ニコラス・ブラザーズ","リベラシ","コンドス・ブラザーズ","チャック・グリーン"],ans:0,
+   exp:"ファヤード＆ハロルドのニコラス・ブラザーズ。1943年映画「Stormy Weather」での階段タップはFred Astaire自らが「見た中で最高のダンスナンバー」と絶賛した。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q82",cat:"👞 タップ",diff:2,
+   q:"「スライド」の名人として知られ、ジミーという名で知られるタップレジェンドは？",
+   choices:["ジミー・スライド","ジミー・ケリー","ジミー・タップ","ジミー・ブラウン"],ans:0,
+   exp:"Jimmy Slyde（ジミー・スライド）。床を氷のように滑るスライド技法の達人。グレゴリー・ハインズの師匠でもある。晩年もパリのクラブで踊り続けた。",
+   rw:{exp:300,coins:700}},
+
+  {id:"q83",cat:"👞 タップ",diff:3,
+   q:"アポロシアターで「フック（不評なアクトを引っ込める役）」を長年務め、砂の上で踊るサンドダンスで知られるのは？",
+   choices:["サンドマン・シムズ","ジョン・バブルス","サミー・デイビスJr.","ビル・ロビンソン"],ans:0,
+   exp:"Sandman Sims（サンドマン・シムズ）。コットンクラブ出身、砂を蒔いた舞台でのサンドダンスと、アポロシアターの「フック」係として有名な伝説のタップダンサー。",
+   rw:{exp:400,coins:1000,gems:1}},
+
+  {id:"q84",cat:"👞 タップ",diff:1,
+   q:"「彼女はアステアがやることをすべて後ろ向きで、ハイヒールでやった」と言われた女性ダンサーは？",
+   choices:["ジンジャー・ロジャース","シャーリー・テンプル","エレノア・パウエル","アン・ミラー"],ans:0,
+   exp:"Ginger Rogersについての有名な言葉。Fred Astaire & Ginger Rogersは1930〜40年代に10本の映画で共演した黄金コンビ。",
+   rw:{exp:200,coins:500}},
+
+  {id:"q85",cat:"👞 タップ",diff:1,
+   q:"「世界最高のエンターテイナー」と称され、タップ・歌・演技を融合させたラット・パックの一員は？",
+   choices:["サミー・デイビスJr.","グレゴリー・ハインズ","ビル・ロビンソン","ジョン・バブルス"],ans:0,
+   exp:"Sammy Davis Jr.はフランク・シナトラ率いるラット・パックの一員。タップ・歌・演技・物まねすべてをこなすトータルエンターテイナーとして世界的な人気を誇った。",
+   rw:{exp:200,coins:500}},
+];
+
+/* ── 🧠 DANCING QUIZ TAB ── */
+function QuizTab({char,setChar,genre,pushNotif,addLog}){
+  const[phase,setPhase]=useState("menu"); // menu|playing|result
+  const[qs,setQs]=useState([]); // current quiz set (10問)
+  const[idx,setIdx]=useState(0);
+  const[selected,setSelected]=useState(null);
+  const[answered,setAnswered]=useState(false);
+  const[score,setScore]=useState(0);
+  const[streak,setStreak]=useState(0);
+  const[results,setResults]=useState([]); // {correct,q}
+  const[totalCorrect,setTotalCorrect]=useState(char.quizTotalCorrect||0);
+  const[filter,setFilter]=useState("all"); // all|easy|hard|genre
+
+  const gc=genre.c;
+
+  const DIFF_LABEL={1:"⭐ かんたん",2:"⭐⭐ ふつう",3:"⭐⭐⭐ むずかしい"};
+  const DIFF_COL={1:"#b3ff00",2:"#ffd60a",3:"#ff4da6"};
+
+  function startQuiz(mode){
+    let pool=[...DANCE_QUIZ];
+    if(mode==="easy") pool=pool.filter(q=>q.diff===1);
+    else if(mode==="hard") pool=pool.filter(q=>q.diff===3);
+    else if(mode==="genre"){
+      const CAT_MAP={hiphop:"HipHop",ballet:"バレエ",jazz:"ジャズ",house:"ハウス",
+        breaking:"ブレイク",popping:"ポップ",locking:"ロック",waacking:"ワック",
+        contemporary:"コンテンポラリー",soul:"ソウル"};
+      const key=CAT_MAP[char.genre]||GENRES[char.genre]?.jp||"";
+      pool=pool.filter(q=>q.cat.includes(key));
+      if(pool.length<3) pool=[...DANCE_QUIZ].sort(()=>Math.random()-.5);
+    }
+    // shuffle & take 10, then shuffle each question's choices
+    pool=pool.sort(()=>Math.random()-.5).slice(0,Math.min(10,pool.length));
+    pool=pool.map(q=>{
+      const correct=q.choices[q.ans]; // 正解を保存
+      const shuffled=[...q.choices].sort(()=>Math.random()-.5); // 選択肢をシャッフル
+      return{...q,choices:shuffled,ans:shuffled.indexOf(correct)}; // 正解の新しいインデックスを設定
+    });
+    setQs(pool);setIdx(0);setSelected(null);setAnswered(false);
+    setScore(0);setStreak(0);setResults([]);setPhase("playing");
+  }
+
+  function answer(choiceIdx){
+    if(answered)return;
+    setSelected(choiceIdx);setAnswered(true);
+    const q=qs[idx];
+    const correct=choiceIdx===q.ans;
+    const newStreak=correct?streak+1:0;
+    setStreak(newStreak);
+    if(correct){
+      setScore(s=>s+1);
+      const bonus=newStreak>=3?2:1;
+      const expGain=(q.rw.exp||200)*bonus;
+      const coinGain=(q.rw.coins||500)*bonus;
+      const gemGain=q.rw.gems||0;
+      setChar(c=>({...c,
+        exp:c.exp+expGain,
+        coins:c.coins+coinGain,
+        gems:(c.gems||0)+gemGain,
+        quizTotalCorrect:(c.quizTotalCorrect||0)+1,
+      }));
+      setTotalCorrect(t=>t+1);
+      pushNotif(`✅ 正解！${newStreak>=3?`🔥×${newStreak}コンボ！`:""} +${expGain}EXP +${coinGain}コイン${gemGain?` +${gemGain}💎`:""}`,newStreak>=3?"#ffd60a":"#b3ff00");
+      addLog(`🧠 クイズ正解「${q.q.slice(0,20)}...」+${expGain}EXP`);
+    }else{
+      pushNotif("❌ 不正解...","#ff5555");
+    }
+    setResults(r=>[...r,{correct,q}]);
+  }
+
+  function next(){
+    if(idx+1>=qs.length){setPhase("result");return;}
+    setIdx(i=>i+1);setSelected(null);setAnswered(false);
+  }
+
+  // ── MENU ──
+  if(phase==="menu") return(
+    <div style={{padding:"0 4px 100px"}}>
+      {/* ヘッダー */}
+      <div style={{background:`linear-gradient(135deg,${gc}22,${gc}11)`,borderRadius:12,padding:"20px 18px",marginBottom:16,border:`1px solid ${gc}44`,textAlign:"center"}}>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:10,color:gc,marginBottom:8,letterSpacing:2}}>🧠 DANCING QUIZ</div>
+        <div style={{fontSize:12,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:12}}>
+          ダンスの歴史を学びながら報酬ゲット！
+        </div>
+        <div style={{display:"flex",justifyContent:"center",gap:16}}>
+          <div style={{textAlign:"center"}}>
+            <div style={{fontSize:22,fontWeight:900,color:gc,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{char.quizTotalCorrect||0}</div>
+            <div style={{fontSize:9,color:TX3}}>累計正解</div>
+          </div>
+          <div style={{textAlign:"center"}}>
+            <div style={{fontSize:22,fontWeight:900,color:"#ffd60a",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{DANCE_QUIZ.length}</div>
+            <div style={{fontSize:9,color:TX3}}>総問題数</div>
+          </div>
+        </div>
+      </div>
+
+      {/* モード選択 */}
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:12}}>-- QUIZ MODE --</div>
+
+      {[
+        {mode:"all",    label:"🎲 ランダム10問",  sub:"全ジャンルMIX！",            col:gc},
+        {mode:"easy",   label:"⭐ かんたん",       sub:"1年生でも解ける基礎問題",     col:"#b3ff00"},
+        {mode:"hard",   label:"⭐⭐⭐ むずかしい",   sub:"ダンス通だけが解ける難問",    col:"#ff4da6"},
+        {mode:"genre",  label:`${GENRES[char.genre]?.e} ${GENRES[char.genre]?.jp}専門`, sub:`メインジャンル特化クイズ（${(()=>{const CAT_MAP={hiphop:"HipHop",ballet:"バレエ",jazz:"ジャズ",house:"ハウス",breaking:"ブレイク",popping:"ポップ",locking:"ロック",waacking:"ワック",contemporary:"コンテンポラリー",soul:"ソウル"};const k=CAT_MAP[char.genre]||"";return DANCE_QUIZ.filter(q=>q.cat.includes(k)).length;})()}問）`, col:gc},
+      ].map(m=>(
+        <div key={m.mode} onClick={()=>startQuiz(m.mode)}
+          style={{background:BG2,border:`1px solid ${m.col}44`,borderRadius:10,padding:"14px 16px",marginBottom:10,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}
+        >
+          <div>
+            <div style={{fontSize:13,fontWeight:700,color:m.col,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:3}}>{m.label}</div>
+            <div style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{m.sub}</div>
+          </div>
+          <span style={{fontSize:20,color:m.col}}>▶</span>
+        </div>
+      ))}
+
+      {/* 報酬説明 */}
+      <div style={{background:BG2,borderRadius:10,padding:"12px 14px",marginTop:16,border:`1px solid ${BD}`}}>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:10}}>💰 正解で報酬！</div>
+        <div style={{fontSize:11,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1.8}}>
+          ⭐ かんたん → EXP+200 / コイン+500<br/>
+          ⭐⭐ ふつう → EXP+300 / コイン+700<br/>
+          ⭐⭐⭐ むずかしい → EXP+400 / コイン+1000 / 💎+1<br/>
+          🔥 3連続正解 → 報酬2倍ボーナス！
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── PLAYING ──
+  if(phase==="playing"){
+    const q=qs[idx];
+    if(!q)return null;
+    return(
+      <div style={{padding:"0 4px 100px"}}>
+        {/* プログレス */}
+        <div style={{marginBottom:14}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+            <span style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{idx+1}/{qs.length}問目 {q.cat}</span>
+            <div style={{display:"flex",gap:8}}>
+              <span style={{fontSize:10,color:"#b3ff00",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>✅ {score}正解</span>
+              {streak>=2&&<span style={{fontSize:10,color:"#ffd60a",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>🔥×{streak}</span>}
+            </div>
+          </div>
+          <div style={{height:6,background:BD,borderRadius:3,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${((idx)/qs.length)*100}%`,background:gc,borderRadius:3,transition:"width .4s"}}/>
+          </div>
+        </div>
+
+        {/* 難易度 */}
+        <div style={{textAlign:"center",marginBottom:8}}>
+          <span style={{fontSize:10,color:DIFF_COL[q.diff],fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{DIFF_LABEL[q.diff]}</span>
+        </div>
+
+        {/* 問題 */}
+        <div style={{background:BG2,borderRadius:12,padding:"24px 18px",marginBottom:16,border:`1px solid ${BD}`,textAlign:"center",minHeight:100,display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <p style={{fontSize:15,fontWeight:700,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1.7,margin:0}}>
+            ❓ {q.q}
+          </p>
+        </div>
+
+        {/* 選択肢 */}
+        <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:16}}>
+          {q.choices.map((c,i)=>{
+            let bg=BG2,border=`1px solid ${BD}`,col=TX;
+            if(answered){
+              if(i===q.ans){bg="#0a2a0a";border="2px solid #b3ff00";col="#b3ff00";}
+              else if(i===selected&&i!==q.ans){bg="#2a0a0a";border="2px solid #ff5555";col="#ff5555";}
+            }else if(selected===i){bg=`${gc}22`;border=`2px solid ${gc}`;}
+            return(
+              <div key={i} onClick={()=>!answered&&answer(i)}
+                style={{background:bg,border,borderRadius:10,padding:"14px 16px",cursor:answered?"default":"pointer",
+                  display:"flex",alignItems:"center",gap:12,transition:"all .2s"}}
+              >
+                <span style={{fontSize:14,fontWeight:700,color:answered&&i===q.ans?"#b3ff00":answered&&i===selected&&i!==q.ans?"#ff5555":TX3,fontFamily:"M PLUS Rounded 1c,sans-serif",width:24,flexShrink:0}}>
+                  {["A","B","C","D"][i]}
+                </span>
+                <span style={{fontSize:13,fontWeight:700,color:col,fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1.5}}>{c}</span>
+                {answered&&i===q.ans&&<span style={{marginLeft:"auto",fontSize:18}}>✅</span>}
+                {answered&&i===selected&&i!==q.ans&&<span style={{marginLeft:"auto",fontSize:18}}>❌</span>}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 解説 */}
+        {answered&&(
+          <div style={{background:selected===q.ans?"#0a1a0a":"#1a0a0a",borderRadius:10,padding:"14px 16px",marginBottom:14,border:`1px solid ${selected===q.ans?"#b3ff0044":"#ff555544"}`}}>
+            <div style={{fontSize:10,color:selected===q.ans?"#b3ff00":"#ff5555",fontFamily:"'Press Start 2P',monospace",marginBottom:6}}>
+              {selected===q.ans?"✅ CORRECT!":"❌ WRONG..."}
+            </div>
+            <p style={{fontSize:12,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1.7,margin:0}}>{q.exp}</p>
+          </div>
+        )}
+
+        {/* NEXTボタン */}
+        {answered&&(
+          <div onClick={next} style={{background:gc,borderRadius:10,padding:"14px",textAlign:"center",cursor:"pointer",fontWeight:700,fontSize:14,color:"#000",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+            {idx+1>=qs.length?"🏆 結果を見る":"次の問題 ▶"}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── RESULT ──
+  if(phase==="result"){
+    const pct=Math.round((score/qs.length)*100);
+    const rank=pct>=90?"S":pct>=70?"A":pct>=50?"B":pct>=30?"C":"D";
+    const rankCol={"S":"#ffd60a","A":"#b3ff00","B":"#00e5ff","C":"#ff9900","D":"#ff5555"}[rank];
+    return(
+      <div style={{padding:"0 4px 100px"}}>
+        <div style={{background:BG2,borderRadius:14,padding:"28px 18px",marginBottom:16,textAlign:"center",border:`1px solid ${rankCol}66`}}>
+          <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:9,color:rankCol,marginBottom:16,letterSpacing:2}}>QUIZ RESULT</div>
+          <div style={{fontSize:72,fontWeight:900,color:rankCol,fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1,marginBottom:8}}>{rank}</div>
+          <div style={{fontSize:18,color:TX,fontWeight:700,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:4}}>{score}/{qs.length}問正解</div>
+          <div style={{fontSize:13,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{pct}%正解率</div>
+        </div>
+
+        {/* 各問題の結果 */}
+        <div style={{marginBottom:14}}>
+          {results.map((r,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",background:BG2,borderRadius:6,marginBottom:6,border:`1px solid ${r.correct?"#b3ff0022":"#ff555522"}`}}>
+              <span style={{fontSize:14}}>{r.correct?"✅":"❌"}</span>
+              <span style={{fontSize:11,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",flex:1,lineHeight:1.4}}>{r.q.q.slice(0,30)}...</span>
+              <span style={{fontSize:9,color:DIFF_COL[r.q.diff]}}>{DIFF_LABEL[r.q.diff]}</span>
+            </div>
+          ))}
+        </div>
+
+        <div onClick={()=>setPhase("menu")} style={{background:gc,borderRadius:10,padding:"14px",textAlign:"center",cursor:"pointer",fontWeight:700,fontSize:14,color:"#000",fontFamily:"M PLUS Rounded 1c,sans-serif"}}>
+          🧠 もう一度チャレンジ
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
+
+/* ── 📚 図鑑データ ── */
+const ZUKAN_STEPS={
+  soul:{label:"🎙 ソウルダンス",color:"#ff9900",steps:[
+    {n:"ポップコーン",d:"JBが1969年に3連続リリースで普及。軽快なステップと弾む動き"},
+    {n:"セックスマシーン",d:"1970年JBの名曲。バスで即興誕生。素早いフットワーク"},
+    {n:"ホットパンツ",d:"1971年JBの同名曲から。強烈なリズムと腰の動き"},
+    {n:"ファンキーチキン",d:"Rufus Thomas 1969年。鶏が羽ばたく肘の動き"},
+    {n:"モンキー",d:"1960年代「Monkey Time」から。膝を曲げ両腕を前に振る"},
+    {n:"ペンギン",d:"The Temptationsが披露。体を左右に傾けて歩く"},
+    {n:"ハッスル",d:"Van McCoy 1975年大ヒット。マンボ＋サルサ系パートナーダンス"},
+    {n:"バンプ",d:"1970年代前半。パートナーとヒップをぶつけ合うシンプルダンス"},
+    {n:"ウォーターゲート",d:"1972年政治スキャンダルにちなんで命名"},
+    {n:"フリーク",d:"Chic「Le Freak」1978年。世界のフロアを席巻"},
+    {n:"バスストップ",d:"1974年LAハッスルがNYでBus Stopに改名したラインダンス"},
+    {n:"ジャーク",d:"The Larks 1964年。腕を様々なポジションへジャーク"},
+    {n:"ゴーゴー",d:"1960年代ゴーゴーダンス。台上で自由に踊る"},
+    {n:"ファンキーブロードウェイ",d:"1966年Dyke and the Blazersの曲から"},
+    {n:"グランドファーザー",d:"老人の歩き方をファンキーに踊るコミカルステップ"},
+    {n:"ブレイクダウン",d:"曲のブレイクセクションに合わせた即興スタイル"},
+    {n:"ポップコーンセブン",d:"ポップコーンの7カウントバリエーション"},
+    {n:"ソウルステップ",d:"ソウルダンスの基本重心移動ステップ"},
+    {n:"フォーコーナー",d:"4つのコーナーを使うラインダンス"},
+    {n:"チョコレートシェイク",d:"ミルクシェイクを混ぜる腕の動きを取り込む"},
+  ]},
+  hiphop:{label:"🎤 ヒップホップ",color:"#00e5ff",steps:[
+    {n:"ランニングマン",d:"MC Hammerが発展（1980年代中頃）。その場で走る動き"},
+    {n:"ロジャーラビット",d:"1988年映画から命名。後ろにスキップしながら腕をパタパタ"},
+    {n:"キャベッジパッチ",d:"1980年代の人形から命名。Gucci Crew II 1986年の曲で普及"},
+    {n:"ロボコップ",d:"1987年映画から命名。肘ごとこぶしを左右に打ちつける"},
+    {n:"バートシンプソン",d:"アニメから命名。左右スライドと逆方向の腕。アトランタで人気"},
+    {n:"スティーブマーティン",d:"Stezoが1988年に創作。EPMD「You Gots to Chill」MVでデビュー"},
+    {n:"フィラ（Fila）",d:"スニーカーブランドから命名。Buddha Stretchが多用"},
+    {n:"リーボック",d:"スニーカーブランドから命名。キャベッジパッチと同時期のブーム"},
+    {n:"ランボー",d:"映画から命名。フィラとセットで踊られることが多い"},
+    {n:"ブルックリン",d:"Buddha Stretchら確立。ブルックリンのダンスシーンから生まれた基本ステップ"},
+    {n:"パーティマシン",d:"左右ステップ＋大きな上半身の動き。Buddha Stretchが得意"},
+    {n:"チキンヘッド",d:"鶏のように首と頭を前後にコクコク動かす"},
+    {n:"ジャーク（Jerkin'）",d:"カリフォルニア発「Jerkin'」の基本。後ろにスキップするように見える"},
+    {n:"ニュージャックスイング",d:"Bobby Brown・BBD・Guyらの音楽に合わせたダンス。日本に1989年上陸"},
+    {n:"ストンプ",d:"足を力強く踏み鳴らす。リズムを強調する迫力ある動き"},
+    {n:"マイクタイソン",d:"ボクサーにちなみパンチングの動きをダンス化"},
+    {n:"チキンヌードルスープ",d:"2006年DJ Webstar feat. Bigg Nicckの曲から"},
+    {n:"スポンジボム",d:"パーティマシンのバリエーション。スポンジのように弾む"},
+    {n:"モネストリー",d:"ELITE FORCEのOld School Dictionaryに収録"},
+    {n:"ブルックリンバウンス",d:"ブルックリンスタイルに弾む要素を加えたバリエーション"},
+  ]},
+  house:{label:"🎛 ハウスダンス",color:"#ce93d8",steps:[
+    {n:"ルースレッグ",d:"NYのハウスダンサーが体系化した最重要基本動作。足を緩く振り出す"},
+    {n:"パドブレ",d:"バレエ由来の3ステップ動作。ドラッグ・ターン・ヒールドロップなど多彩なバリエーション"},
+    {n:"トレイン",d:"ヒール/トウ＋スケーティングを組み合わせ。ジャマイカのスカンキングが影響"},
+    {n:"シャッフル",d:"ハウスの最基本ステップ。床を滑るように左右にシャッフル"},
+    {n:"クロスヒールアンドトゥ",d:"かかととつま先を交互にクロスさせる。タップダンスの影響大"},
+    {n:"スネーク",d:"蛇のように体をくねらせながらフットワーク"},
+    {n:"シザーズ",d:"ハサミのように足を交差させる素早い動き"},
+    {n:"トライアングル",d:"三角形の軌跡を描くように足を動かす"},
+    {n:"スウォル（Swirl）",d:"後ろに回転しながら移動するスケーティング系"},
+    {n:"スケート",d:"アイスのように床を滑るステップ。グライドする動き"},
+    {n:"ロータス",d:"蓮の花のように展開するスケーティングのバリエーション"},
+    {n:"クリスクロス",d:"足をクロスさせる動き"},
+    {n:"ドロップ",d:"床にストンと落ちる動作"},
+    {n:"ジャックインザボックス",d:"しゃがんだ状態からバネのように跳び上がる"},
+    {n:"ギャロップ",d:"馬のギャロップのような軽快な移動ステップ"},
+    {n:"サルサ",d:"ラテンのサルサをハウスのリズムで。プエルトリコ系が多く踊ったため融合"},
+    {n:"ダイアモンド",d:"ひし形を描くように4方向へ足を動かす"},
+    {n:"ロンデジャン（ウィング）",d:"バレエのロン・ド・ジャンブを応用。足が弧を描く"},
+    {n:"ドルフィン/ダイブ",d:"床に倒れてイルカのように足を上下させるフロアワーク"},
+    {n:"ピーターポール",d:"DANCE FUSIONのPeter Paulから命名。Crystal Waters MVで有名"},
+  ]},
+  tap:{label:"👞 タップダンス",color:"#ffd60a",steps:[
+    {n:"ボールタッチ",d:"つま先の球（ボール）部分で床をタッチする基本動作"},
+    {n:"ヒールドロップ",d:"かかとを落としてリズムを刻む"},
+    {n:"シャッフル",d:"前→後ろとつま先を素早く2回床に当てる動き"},
+    {n:"フラップ",d:"シャッフルに体重移動を加えた動き"},
+    {n:"スタンプ",d:"足全体を強く床に踏み下ろす（音あり）"},
+    {n:"ストンプ",d:"スタンプの強化版。力強く踏み鳴らす"},
+    {n:"ウィング",d:"片足を上げて外に開きながら床をタップ"},
+    {n:"タイムステップ",d:"タップダンスの代表的な練習ステップ。リズムパターンを刻む"},
+    {n:"プルバック",d:"後ろに引きながら床をタップするステップ"},
+    {n:"クランプロール",d:"かかとを使った連続音を出すステップ"},
+    {n:"チャグ",d:"前進しながらリズムを刻むステップ"},
+  ]},
+};
+
+const ZUKAN_PERSONS={
+  ballet:{label:"🩰 バレエ",color:"#ff9ec4",persons:[
+    {n:"マリー・タリオーニ",e:"Marie Taglioni (1804-1884)",d:"ロマンティック・バレエを確立。「ラ・シルフィード」でポワントを本格確立した女神"},
+    {n:"アンナ・パブロワ",e:"Anna Pavlova (1881-1931)",d:"「瀕死の白鳥」の代名詞。1922年の日本公演で西洋舞踏を広めた。50歳で手術を拒否して逝去"},
+    {n:"エリアナ・パブロワ",e:"Eliana Pavlova (1897-1941)",d:"日本バレエの母。1927年鎌倉に日本初のバレエ稽古場を設立。南京で戦病死"},
+    {n:"オリガ・サファイア",e:"Olga Saffire (1907-1981)",d:"日本名・清水みどり。ロシア=ソビエトバレエを日本に伝えた最初の人物"},
+    {n:"ミハイル・バリシニコフ",e:"Mikhail Baryshnikov (1948-)",d:"20世紀最大のバレエダンサー。1974年ソ連から亡命。映画「ホワイトナイツ」でハインズと共演"},
+  ]},
+  tap:{label:"👞 タップ",color:"#ffd60a",persons:[
+    {n:"ビル・ボージャングルス・ロビンソン",e:"Bill Robinson (1878-1949)",d:"タップの王。黒人初のブロードウェイ単独主演スター。5月25日はNational Tap Dance Day"},
+    {n:"ジョン・バブルス",e:"John Bubbles (1902-1986)",d:"リズムタップの父。ヒールを使う複雑なリズムで現代タップの基礎を作った"},
+    {n:"ニコラス・ブラザーズ",e:"Nicholas Brothers Fayard&Harold",d:"階段パフォーマンスをFred Astaire自らが「世界最高のダンスナンバー」と絶賛"},
+    {n:"サミー・デイビスJr.",e:"Sammy Davis Jr. (1925-1990)",d:"世界最高のエンターテイナー。タップ・歌・演技を融合。ラット・パックの一員"},
+    {n:"グレゴリー・ハインズ",e:"Gregory Hines (1946-2003)",d:"タップ界最後の偉人。映画「ホワイトナイツ」でバリシニコフと共演。トニー賞受賞"},
+    {n:"ジミー・スライド",e:"Jimmy Slyde (1927-2008)",d:"スライドの名人。グレゴリー・ハインズの師匠。晩年もパリのクラブで踊り続けた"},
+    {n:"サンドマン・シムズ",e:"Sandman Sims (1917-2003)",d:"コットンクラブのサンドダンスの巨匠。アポロシアターの「フック」係としても有名"},
+  ]},
+  soul:{label:"🎙 ソウル",color:"#ff9900",persons:[
+    {n:"ジェームス・ブラウン",e:"James Brown (1933-2006)",d:"ソウルのゴッドファーザー。1965年にFUNKを発明。すべてのストリートダンスの源流"},
+    {n:"ドン・コーネリアス",e:"Don Cornelius (1936-2012)",d:"SOUL TRAINの創設者。「Love, peace, and soul!」1970〜2006年、約35年の歴史"},
+  ]},
+  breaking:{label:"🏙 ブレイク",color:"#4fc3f7",persons:[
+    {n:"DJ クール・ハーク",e:"DJ Kool Herc",d:"1973年8月11日にブロンクスでブレイクビーツを発明。HIPHOPの誕生日を作った人"},
+    {n:"アフリカ・バンバータ",e:"Afrika Bambaataa",d:"ギャングの抗争をダンスバトルへ。Universal Zulu Nation設立でHIPHOPを平和的文化に"},
+  ]},
+  popping:{label:"⚡ ポッピング",color:"#ffd60a",persons:[
+    {n:"ブガルー・サム",e:"Boogaloo Sam (Sam Solomon)",d:"Electric Boogaloos創設者。1977年フレズノでポッピングを発明。マイケル・ジャクソンの師匠"},
+    {n:"ポッピン・ピート",e:"Poppin' Pete",d:"ブガルー・サムの弟。Soul Trainを見ながらロボットムーブを練習し兄からポッピングを学んだ"},
+  ]},
+  locking:{label:"🔒 ロック",color:"#b3ff00",persons:[
+    {n:"ドン・キャンベル",e:"Don Campbell",d:"1969年LAでロックダンスを偶然発明。Funky Chickenを滑らかにできなかったことが逆にスタイルになった"},
+    {n:"グレッグ・キャンベルロックJr.",e:"Greg Campbellock Jr.",d:"「踊る場所に着いたら環境を把握してから踊れ」の名言を残したThe Lockersの要"},
+    {n:"トニー・バジル",e:"Toni Basil",d:"The Lockers唯一の女性。バレリーナ兼コリオグラファー。1982年「Hey Mickey」をヒット"},
+    {n:"シャバドゥ",e:"Shabba Doo",d:"映画「ブレイクダンス」(1984)のオゾーン役で有名。スムーズ＆スピーディなスタイル"},
+    {n:"トニー・ゴーゴー・ルイス",e:"Tony Go-Go Lewis",d:"1980年代に日本へロッキングを持ち込んだ。世界初のシンクロロッキンググループGoGo Brothersを結成"},
+  ]},
+  hiphop:{label:"🎤 ヒップホップ",color:"#00e5ff",persons:[
+    {n:"ブッダ・ストレッチ",e:"Buddha Stretch",d:"MOPTOP・ELITE FORCE創設者。ニュースクールHIPHOPダンスの父。OLD SCHOOL DICTIONARYを制作"},
+    {n:"ヘンリー・リンク",e:"Henry Link",d:"ELITE FORCE現役メンバー。ブルックリン育ち"},
+    {n:"Stezo",e:"Stezo",d:"スティーブマーティンダンスの創作者。EPMD「You Gots to Chill」(1988)MVでデビュー"},
+  ]},
+  house:{label:"🎛 ハウス",color:"#ce93d8",persons:[
+    {n:"フランキー・ナックルズ",e:"Frankie Knuckles",d:"シカゴ「ウェアハウス」の主力DJ。ハウスミュージックの生みの親の一人"},
+    {n:"ラリー・レヴァン",e:"Larry Levan",d:"NY「パラダイス・ガラージ」の伝説的DJ。ニューヨークガラージュスタイルの生みの親"},
+    {n:"カリーフ",e:"Caleaf Sellers",d:"DANCE FUSION創設者の一人。日本人に大きな影響を与えた伝説的ハウスダンサー"},
+    {n:"KOJI",e:"KOJI",d:"日本ハウスダンスの第一人者。元ZOOのメンバー。1993年頃にROOTSを結成"},
+  ]},
+};
+
+const ZUKAN_CREWS=[
+  {n:"Electric Boogaloos",e:"⚡",g:"ポッピング",y:"1977年 フレズノ",
+   m:["Boogaloo Sam（創設者）","Poppin' Pete（弟）","Skeeter Rabbit","Sugapop","Poppin' Taco","Boogaloo Shrimp","Mr. Wiggles"],
+   d:"ポッピングを世界に広めた伝説のクルー。マイケル・ジャクソンの師匠も輩出"},
+  {n:"The Lockers",e:"🔒",g:"ロック",y:"1971年 LA",
+   m:["Don Campbell（創設者）","Greg Campbellock Jr.","Fred Mr. Penguin Berry","Bill Slim the Robot Williams","Leo Fluky Luke Williamson","Toni Mickey Basil（唯一の女性）","Shabba Doo","Jimmy Scoo B Doo Foster","Tony Go-Go Lewis Foster"],
+   d:"ロックダンスを確立した伝説的チーム。Soul Trainで全米を席巻。1972年出演"},
+  {n:"MOPTOP",e:"🎤",g:"ヒップホップ",y:"1991年",
+   m:["Link","Caleaf","Ejoe","Buddha Stretch（オリジナル4人）","Peter Paul","Ramier","Tone","Casper","Ade","Loose Joint"],
+   d:"Motivated On Precision Toward Outstanding Performance。ニュースクールHIPHOPの礎"},
+  {n:"ELITE FORCE",e:"⚡",g:"ヒップホップ",y:"1992年",
+   m:["Buddha Stretch","Henry Link","Brooklyn Terry","Bobby Mileage","Twelve Ejoe","Loose Joint（現役6人）"],
+   d:"マイケル・ジャクソン「Remember the Time」MV撮影のために結成。OLD SCHOOL DICTIONARYを制作"},
+  {n:"MYSTIDIOUS MISFITS",e:"🔥",g:"ヒップホップ",y:"1990年代初頭",
+   m:["Marquest","Rubberband","Peekaboo","Kito","Prancer"],
+   d:"1992年「Wreckin' Shop Live from Brooklyn（ALIVE TV）」で全世界に多大な影響を与えた"},
+  {n:"DANCE FUSION",e:"🎛",g:"ハウス",y:"1997年",
+   m:["Caleaf","Justice","Tony Sekou（創設3人）","Shan.S","MIKEU4RIA","Tony Magregor","Shar","Marjory（唯一の女性）","HIRO（日本）","NORICO（日本）"],
+   d:"世界中へハウスダンスの普及を担った伝説チーム"},
+  {n:"ROOTS",e:"🇯🇵",g:"ハウス",y:"1993年頃 日本",
+   m:["KOJI","Hyrosshi","Nada","Kango","Shimura","Yan","KAIE","MA"],
+   d:"日本初の本格ハウスダンスチーム。第一人者KOJIが元ZOOのメンバー"},
+  {n:"ALMA",e:"💫",g:"ハウス",y:"2001年 日本",
+   m:["KOJI","HyROSSI","HIRO","PInOSHIGe"],
+   d:"HIROが創ったとされる「フローティング（Floating）」スタイルを持つハウスダンスチーム"},
+  {n:"ZOO",e:"🦁",g:"ヒップホップ（日本）",y:"1989年頃 日本",
+   m:["Taco","Naoya","Mark","Satsuki","ルーク","Hiro（後のEXILE HIRO）","Cap","Hisami","Sae"],
+   d:"TV朝日「DA DA LMD」から誕生。日本HIPHOPダンスシーンの先駆者"},
+];
+
+/* ── 📚 図鑑タブ ── */
+function ZukanTab({genre}){
+  const[cat,setCat]=useState("steps");
+  const[stepGenre,setStepGenre]=useState("soul");
+  const[personGenre,setPersonGenre]=useState("ballet");
+  const gc=genre.c;
+
+  return(<div style={{padding:"0 4px 100px"}}>
+    {/* カテゴリ選択 */}
+    <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:8,color:gc,marginBottom:10,textAlign:"center"}}>📚 ダンス大図鑑</div>
+    <div style={{fontSize:10,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",textAlign:"center",marginBottom:14}}>
+      ダンスの歴史・ステップ・人物・クルーを学ぼう！
+    </div>
+
+    {/* 歴史の本ボタン */}
+    <div onClick={()=>window.open('/dance_history_encyclopedia.html','_blank')}
+      style={{background:"linear-gradient(135deg,#2a1500,#1a0c00)",
+        border:"1px solid #c49a3c88",borderRadius:12,padding:"14px 16px",
+        marginBottom:16,cursor:"pointer",display:"flex",alignItems:"center",gap:14}}>
+      <span style={{fontSize:34}}>📖</span>
+      <div style={{flex:1}}>
+        <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:"#c49a3c",marginBottom:5}}>DANCE HISTORY BOOK</div>
+        <div style={{fontSize:11,color:"#e8c97e",fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1.6}}>
+          ダンスの歴史 大百科を読む<br/>
+          <span style={{fontSize:10,color:"#8a7050"}}>バレエ・タップ・ソウル・HipHop・House 全ジャンル収録</span>
+        </div>
+      </div>
+      <span style={{fontSize:18,color:"#c49a3c"}}>↗</span>
+    </div>
+    <div style={{display:"flex",background:BG2,borderRadius:8,padding:3,gap:3,marginBottom:16}}>
+      {[["steps","🦶 ステップ"],["persons","👤 人物"],["crews","👥 クルー"]].map(([id,label])=>(
+        <button key={id} onClick={()=>setCat(id)} style={{flex:1,padding:"8px 2px",fontSize:10,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,background:cat===id?gc+"33":"none",color:cat===id?gc:TX3,borderRadius:6,border:cat===id?`1px solid ${gc}66`:"1px solid transparent"}}>
+          {label}
+        </button>
+      ))}
+    </div>
+
+    {/* ステップ図鑑 */}
+    {cat==="steps"&&<div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14}}>
+        {Object.entries(ZUKAN_STEPS).map(([k,v])=>(
+          <button key={k} onClick={()=>setStepGenre(k)} style={{fontSize:10,padding:"5px 10px",borderRadius:20,background:stepGenre===k?v.color+"33":BG2,color:stepGenre===k?v.color:TX3,border:`1px solid ${stepGenre===k?v.color+"66":BD}`,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,cursor:"pointer"}}>
+            {v.label}
+          </button>
+        ))}
+      </div>
+      {(()=>{
+        const g=ZUKAN_STEPS[stepGenre];
+        return(<div>
+          <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:g.color,marginBottom:12}}>{g.label} ステップ一覧</div>
+          {g.steps.map((s,i)=>(
+            <div key={i} style={{background:BG2,borderRadius:8,padding:"10px 14px",marginBottom:8,border:`1px solid ${g.color}22`}}>
+              <div style={{fontSize:13,fontWeight:700,color:g.color,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:3}}>{s.n}</div>
+              <div style={{fontSize:11,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1.6}}>{s.d}</div>
+            </div>
+          ))}
+        </div>);
+      })()}
+    </div>}
+
+    {/* 人物図鑑 */}
+    {cat==="persons"&&<div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14}}>
+        {Object.entries(ZUKAN_PERSONS).map(([k,v])=>(
+          <button key={k} onClick={()=>setPersonGenre(k)} style={{fontSize:10,padding:"5px 10px",borderRadius:20,background:personGenre===k?v.color+"33":BG2,color:personGenre===k?v.color:TX3,border:`1px solid ${personGenre===k?v.color+"66":BD}`,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,cursor:"pointer"}}>
+            {v.label}
+          </button>
+        ))}
+      </div>
+      {(()=>{
+        const g=ZUKAN_PERSONS[personGenre];
+        return(<div>
+          <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:g.color,marginBottom:12}}>{g.label} 人物図鑑</div>
+          {g.persons.map((p,i)=>(
+            <div key={i} style={{background:BG2,borderRadius:10,padding:"14px 16px",marginBottom:10,borderLeft:`4px solid ${g.color}`}}>
+              <div style={{fontSize:13,fontWeight:700,color:g.color,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:2}}>{p.n}</div>
+              <div style={{fontSize:10,color:TX3,marginBottom:6,fontFamily:"M PLUS Rounded 1c,sans-serif",fontStyle:"italic"}}>{p.e}</div>
+              <div style={{fontSize:11.5,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",lineHeight:1.7}}>{p.d}</div>
+            </div>
+          ))}
+        </div>);
+      })()}
+    </div>}
+
+    {/* クルー図鑑 */}
+    {cat==="crews"&&<div>
+      <div style={{fontFamily:"'Press Start 2P',monospace",fontSize:7,color:TX3,marginBottom:12}}>伝説のクルー・チーム一覧</div>
+      {ZUKAN_CREWS.map((c,i)=>(
+        <div key={i} style={{background:BG2,borderRadius:10,padding:"16px 14px",marginBottom:12,border:`1px solid ${BD}`}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+            <div>
+              <div style={{fontSize:14,fontWeight:900,color:TX,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{c.e} {c.n}</div>
+              <div style={{fontSize:10,color:gc,fontFamily:"M PLUS Rounded 1c,sans-serif"}}>{c.g} | {c.y}</div>
+            </div>
+          </div>
+          <div style={{fontSize:11,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",marginBottom:8,lineHeight:1.65}}>{c.d}</div>
+          <div style={{fontSize:10,color:TX3,fontFamily:"M PLUS Rounded 1c,sans-serif",fontWeight:700,marginBottom:4}}>メンバー：</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+            {c.m.map((m,j)=>(
+              <span key={j} style={{fontSize:10,background:BG3,padding:"3px 8px",borderRadius:12,color:TX2,fontFamily:"M PLUS Rounded 1c,sans-serif",border:`1px solid ${BD}`}}>{m}</span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>}
   </div>);
 }
 
@@ -4163,10 +5774,24 @@ function Game({char,setChar,onTitle,user,onLogout,onAuthChange,manualSave,saveSt
   },[tab,char.currentCity]);
 
   useEffect(()=>{Sound.playRegion(char.currentCity);return()=>Sound.stop();},[]);
+  // 💎 購入完了通知
+  useEffect(()=>{
+    const pending=localStorage.getItem("pending_gem_notify");
+    if(pending){
+      localStorage.removeItem("pending_gem_notify");
+      const gems=parseInt(pending||"0");
+      if(gems>0){
+        setTimeout(()=>notif2(`🎉 💎${gems}ジェム購入完了！ありがとう！`,"#bb99ff"),800);
+      }
+    }
+  },[]);
   useEffect(()=>{
     const REGEN_MS=5*60*1000;
     const check=()=>setChar(c=>{
-      if(!c)return c;const MAX=c.maxEnergy||50;if(c.energy>=MAX)return c;
+      if(!c)return c;
+      const lv=getLvCapped(c.exp,c.artifacts);
+      const MAX=getMaxEnergy(lv);
+      if(c.energy>=MAX)return c;
       const now=Date.now();const last=c.lastEnergyTime||now;const gained=Math.floor((now-last)/REGEN_MS);
       if(gained===0)return c;
       return{...c,energy:Math.min(MAX,c.energy+gained),lastEnergyTime:last+(gained*REGEN_MS)};
@@ -4220,7 +5845,7 @@ function Game({char,setChar,onTitle,user,onLogout,onAuthChange,manualSave,saveSt
   function doRest(){setChar(c=>({...c,mood:Math.min(100,c.mood+20)}));notif2("休息した。気分回復！","#00e5ff");addLog("休息した。");}
   function doEat(){setChar(c=>({...c,hunger:Math.min(100,c.hunger+55),mood:Math.min(100,c.mood+10)}));notif2("おいしかった！🍱","#ff9ec4");addLog("食事した。");}
 
-  const TABS=[{id:"home",l:"ホーム",e:"🏠"},{id:"battle",l:"バトル",e:"⚔️"},{id:"map",l:"MAP",e:"🗺"},{id:"shop",l:"ショップ",e:"🛍"},{id:"status",l:"ステータス",e:"📊"}];
+  const TABS=[{id:"home",l:"ホーム",e:"🏠"},{id:"battle",l:"バトル",e:"⚔️"},{id:"map",l:"MAP",e:"🗺"},{id:"quiz",l:"クイズ",e:"🧠"},{id:"zukan",l:"図鑑",e:"📚"},{id:"shop",l:"ショップ",e:"🛍"},{id:"status",l:"ステータス",e:"📊"}];
   return(<div style={{minHeight:"100vh",background:BG,fontFamily:"M PLUS Rounded 1c,sans-serif",paddingBottom:80}}>
     {showInbox&&<MessageInbox myName={char.name} onClose={()=>{setShowInbox(false);countUnread(char.name).then(n=>setUnread(n));}}/>}
     {notif&&<div style={{position:"fixed",top:14,left:"50%",transform:"translateX(-50%)",zIndex:999,background:"#0e0e22",border:`2px solid ${notif.col}`,color:notif.col,padding:"9px 18px",borderRadius:6,fontSize:12,fontWeight:700,animation:"su .25s ease",whiteSpace:"nowrap",maxWidth:"90vw",pointerEvents:"none"}}>{notif.msg}</div>}
@@ -4237,7 +5862,7 @@ function Game({char,setChar,onTitle,user,onLogout,onAuthChange,manualSave,saveSt
           </div>
           <div style={{display:"flex",gap:8}}>
             <span style={{fontSize:10,color:"#b3ff00",fontWeight:700}}>{fc(char.coins)}</span>
-            <span style={{fontSize:10,color:"#88eeff",fontWeight:700}}>💎{char.gems||0}</span>
+            <span title="💎入手方法：ログイン毎日+1 / 都市初クリア+3 / バトル10%で+1 / 隠しアイテム" style={{fontSize:10,color:"#88eeff",fontWeight:700,cursor:"pointer"}} onClick={()=>pushNotif("💎入手：ログイン+1/都市クリア+3/バトル10%/隠しアイテム","#88eeff")}>💎{char.gems||0}</span>
           </div>
           <div style={{width:90,height:5,background:BG3,borderRadius:3,marginTop:3}}><div style={{height:"100%",width:`${xpP}%`,background:genre.c,borderRadius:3,transition:"width .5s"}}/></div>
           <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
@@ -4262,6 +5887,8 @@ function Game({char,setChar,onTitle,user,onLogout,onAuthChange,manualSave,saveSt
       {tab==="home"&&<HomeTab char={char} genre={genre} log={log} onRest={doRest} onEat={doEat} onTrain={doTrain} onUseHeart={useHeart}/>}
       {tab==="battle"&&<BattleTab char={char} setChar={setChar} genre={genre} pushNotif={notif2} addLog={addLog}/>}
       {tab==="map"&&<MapTab char={char} setChar={setChar} genre={genre} pushNotif={notif2} addLog={addLog}/>}
+      {tab==="quiz"&&<QuizTab char={char} setChar={setChar} genre={genre} pushNotif={notif2} addLog={addLog}/>}
+      {tab==="zukan"&&<ZukanTab genre={genre}/>}
       {tab==="shop"&&<ShopTab char={char} setChar={setChar} genre={genre} pushNotif={notif2} onTokushou={onTokushou}/>}
       {tab==="status"&&<StatusTab char={char} lv={lv} rnk={rnk} genre={genre} setChar={setChar} user={user} onAuthChange={u=>{onAuthChange&&onAuthChange(u);}} lightMode={lightMode} toggleLight={toggleLight}/>}
     </div>
@@ -4490,6 +6117,30 @@ export default function DancingQuest(){
     setTimeout(()=>setSaveStatus(""),4000);
   }
 
+  // 💎 Stripe支払い完了後の処理（URLパラメータ）
+  useEffect(()=>{
+    const params=new URLSearchParams(window.location.search);
+    const payment=params.get("payment");
+    const gems=parseInt(params.get("gems")||"0");
+    if(payment==="success"&&gems>0){
+      // URLパラメータをクリア
+      window.history.replaceState({},"",window.location.pathname);
+      // ジェムを付与（少し遅延させてゲーム画面に入ってから）
+      setTimeout(()=>{
+        setChar(c=>{
+          if(!c)return c;
+          const updated={...c,gems:(c.gems||0)+gems};
+          localStorage.setItem("dancer_save",JSON.stringify(updated));
+          return updated;
+        });
+        // 成功通知は別途ゲーム画面で表示
+        localStorage.setItem("pending_gem_notify",String(gems));
+      },1500);
+    }else if(payment==="cancel"){
+      window.history.replaceState({},"",window.location.pathname);
+    }
+  },[]);
+
   // 起動時にログイン状態確認
   useEffect(()=>{
     const fallback=()=>setScreen(char?"title":"login");
@@ -4607,6 +6258,10 @@ function migrateChar(raw){
     artifacts:[],
     bossDefeats:{},
     specialItems:[],
+    showLog:{},
+    foundItems:[],
+    ufoFoundParts:[],
+    clearedPlanets:[],
   };
   return{
     ...defaults,
